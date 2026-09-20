@@ -39,6 +39,20 @@ namespace ERPDemo.Models
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
+        [StringLength(15)]
+public string? GSTIN { get; set; }
+
+[StringLength(200)]
+public string? LegalName { get; set; }   // Auto-filled from GST API
+
+[StringLength(200)]
+public string? TradeName { get; set; }   // Auto-filled
+
+[StringLength(50)]
+public string? GSTStatus { get; set; }   // Active / Cancelled / Suspended
+
+public DateTime? GSTLastVerifiedAt { get; set; }
+
         // Navigation
         public ICollection<User> Users { get; set; } = new List<User>();
     }

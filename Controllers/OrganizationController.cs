@@ -1,6 +1,7 @@
 using ERPDemo.Data;
 using ERPDemo.Filters;
 using ERPDemo.Models;
+using ERPDemo.Services;
 using ERPDemo.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +14,12 @@ namespace ERPDemo.Controllers
     public class OrganizationController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly GstLookupService _gstService;
 
-        public OrganizationController(AppDbContext context)
+        public OrganizationController(AppDbContext context,GstLookupService gstService)
         {
             _context = context;
+            _gstService = gstService; 
         }
 
         // ---------- LIST ----------
@@ -199,6 +202,34 @@ namespace ERPDemo.Controllers
             if (org == null) return NotFound();
             return View(org);
         }
+
+     [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> LookupGst([FromBody] GstLookupRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request?.Gstin))
+        return Json(new { success = false, error = "GSTIN required hai." });
+
+    var result = await _gstService.LookupAsync(request.Gstin.Trim().ToUpper());
+
+    return Json(new
+    {
+        success = result.Success,
+        error = result.Error,
+        legalName = result.LegalName,
+        tradeName = result.TradeName,
+        status = result.Status,
+        address = result.Address,
+        city = result.City,
+        state = result.State,
+        pincode = result.Pincode
+    });
+}
+
+public class GstLookupRequest
+{
+    public string? Gstin { get; set; }
+}
 
        // ---------- DELETE ----------
         [HttpPost]

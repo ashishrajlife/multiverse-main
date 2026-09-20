@@ -16,6 +16,7 @@ namespace ERPDemo.ViewModels
     public class OrganizationRow
     {
         public int OrganizationId { get; set; }
+        public string? GSTIN { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Code { get; set; } = string.Empty;
         public string? Email { get; set; }
@@ -51,6 +52,11 @@ namespace ERPDemo.ViewModels
 
         [StringLength(100)]
         public string? Country { get; set; }
+        [StringLength(15)]
+[Display(Name = "GSTIN")]
+[RegularExpression(@"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$",
+    ErrorMessage = "Invalid GSTIN format")]
+public string? GSTIN { get; set; }
 
         [Required, StringLength(50)]
         public string Plan { get; set; } = "Basic";
