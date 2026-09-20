@@ -1,0 +1,80 @@
+@model ERPDemo.ViewModels.CreateOrganizationViewModel
+@{
+    ViewData["Title"] = "New Organization";
+    Layout = "_DashboardLayout";
+}
+
+<div class="page-header">
+    <div>
+        <h1>New Organization</h1>
+        <p>Register a new company on the platform</p>
+        <div class="page-accent"></div>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width: 800px;">
+    <div class="card-body p-4">
+        <form asp-action="Create" method="post" asp-antiforgery="true">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    <label asp-for="Name" class="form-label fw-semibold">Organization Name</label>
+                    <input asp-for="Name" class="form-control" placeholder="Acme Pvt Ltd" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Code" class="form-label fw-semibold">Code</label>
+                    <input asp-for="Code" class="form-control" placeholder="ACME-001" style="text-transform:uppercase;" />
+                    <span asp-validation-for="Code" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="contact@acme.com" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Phone" class="form-label fw-semibold">Phone</label>
+                    <input asp-for="Phone" class="form-control" placeholder="+91 98xxxxxx" />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Address" class="form-label fw-semibold">Address</label>
+                    <input asp-for="Address" class="form-control" placeholder="Street, area..." />
+                </div>
+
+                <div class="col-md-4">
+                    <label asp-for="City" class="form-label fw-semibold">City</label>
+                    <input asp-for="City" class="form-control" placeholder="Mumbai" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Country" class="form-label fw-semibold">Country</label>
+                    <input asp-for="Country" class="form-control" placeholder="India" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Plan" class="form-label fw-semibold">Plan</label>
+                    <select asp-for="Plan" class="form-select">
+                        <option value="Basic">Basic</option>
+                        <option value="Pro">Pro</option>
+                        <option value="Enterprise">Enterprise</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2 me-1"></i> Create Organization
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,125 @@
+@model ERPDemo.Models.Organization
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "_DashboardLayout";
+}
+
+<div class="page-header">
+    <div>
+        <h1>@Model.Name</h1>
+        <p>@Model.Code • @Model.Plan plan</p>
+        <div class="page-accent"></div>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.OrganizationId" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i> Edit
+        </a>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+<div class="row g-3 g-lg-4">
+    <div class="col-lg-4">
+        <section class="panel">
+            <div class="panel-header">
+                <span class="icon-tile tone-violet"><i class="bi bi-info-circle"></i></span>
+                <h2>Details</h2>
+            </div>
+            <div class="panel-body">
+                <div class="system-grid">
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-hash"></i> Code</span>
+                        <strong>@Model.Code</strong>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-envelope"></i> Email</span>
+                        <span>@(Model.Email ?? "—")</span>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-telephone"></i> Phone</span>
+                        <span>@(Model.Phone ?? "—")</span>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-geo-alt"></i> Location</span>
+                        <span>@(Model.City ?? "—")@(Model.Country != null ? ", " + Model.Country : "")</span>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-card-list"></i> Plan</span>
+                        <span class="pill tone-amber">@Model.Plan</span>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-calendar"></i> Created</span>
+                        <span>@Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="system-row">
+                        <span class="system-label"><i class="bi bi-toggles"></i> Status</span>
+                        @if (Model.IsActive)
+                        {
+                            <span class="pill pill-dot tone-green">Active</span>
+                        }
+                        else
+                        {
+                            <span class="pill pill-dot tone-coral">Inactive</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-8">
+        <section class="panel">
+            <div class="panel-header">
+                <span class="icon-tile tone-sky"><i class="bi bi-people"></i></span>
+                <h2>Users (@Model.Users.Count)</h2>
+            </div>
+            <div class="panel-body">
+                @if (!Model.Users.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-person-dash"></i>
+                        <strong>No users yet</strong>
+                        <span>Assign users to this organization from User Management.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>User</th><th>Role</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var u in Model.Users)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="user-cell">
+                                                <span class="avatar tone-sky">@(u.FullName?.Substring(0,1).ToUpper() ?? u.Username.Substring(0,1).ToUpper())</span>
+                                                <div class="meta">
+                                                    <span class="user-name-text">@(u.FullName ?? u.Username)</span>
+                                                    <span class="user-email">@u.Email</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="pill tone-violet">@u.Role?.RoleName</span></td>
+                                        <td>
+                                            @if (u.IsActive)
+                                            {
+                                                <span class="pill pill-dot tone-green">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="pill pill-dot tone-coral">Inactive</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+</div>

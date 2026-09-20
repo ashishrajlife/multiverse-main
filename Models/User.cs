@@ -27,6 +27,11 @@ namespace ERPDemo.Models
         [StringLength(20)]
         public string? PhoneNumber { get; set; }
 
+        public int? OrganizationId { get; set; }
+
+        [ForeignKey("OrganizationId")]
+        public Organization? Organization { get; set; } 
+
         public int RoleId { get; set; }
 
         [ForeignKey("RoleId")]

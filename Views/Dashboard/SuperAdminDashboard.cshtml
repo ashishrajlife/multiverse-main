@@ -1,43 +1,37 @@
 @{
     ViewData["Title"] = "Super Admin Dashboard";
     Layout = "_DashboardLayout";
-
-    var recentUsers = (ViewBag.RecentUsers as System.Collections.IEnumerable)?.Cast<object>().ToList()
-                      ?? new List<object>();
-    var avatarTones = new[] { "violet", "sky", "coral", "amber", "pink", "green" };
-}
-
-@functions {
-    static string Initials(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return "?";
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var text = parts.Length == 1
-            ? parts[0].Substring(0, 1)
-            : parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1);
-        return text.ToUpper();
-    }
 }
 
 <div class="page-header">
     <div>
-        <h1>Super Admin Dashboard</h1>
-        <p>Full system overview and control</p>
+        <h1>Super Admin Control Center</h1>
+        <p>Complete authority over organizations, users, roles, and the platform</p>
         <div class="page-accent"></div>
     </div>
     <span class="pill pill-lg tone-coral"><i class="bi bi-shield-check"></i>Super Admin</span>
 </div>
 
-<!-- ================= KPI CARDS ================= -->
+<!--
 <div class="row g-3 g-lg-4 mb-4">
     <div class="col-xl-3 col-sm-6">
         <div class="stat-card tone-violet">
             <div>
                 <span class="stat-label">Total Users</span>
                 <span class="stat-value">@ViewBag.TotalUsers</span>
-                <span class="stat-note">All registered accounts</span>
+                <span class="stat-note">Across all organizations</span>
             </div>
             <span class="icon-tile"><i class="bi bi-people"></i></span>
+        </div>
+    </div>
+    <div class="col-xl-3 col-sm-6">
+        <div class="stat-card tone-sky">
+            <div>
+                <span class="stat-label">Organizations</span>
+                <span class="stat-value">@ViewBag.TotalOrganizations</span>
+                <span class="stat-note">Registered companies</span>
+            </div>
+            <span class="icon-tile"><i class="bi bi-buildings"></i></span>
         </div>
     </div>
     <div class="col-xl-3 col-sm-6">
@@ -51,132 +45,74 @@
         </div>
     </div>
     <div class="col-xl-3 col-sm-6">
-        <div class="stat-card tone-sky">
-            <div>
-                <span class="stat-label">Super Admins</span>
-                <span class="stat-value">@ViewBag.TotalSuperAdmins</span>
-                <span class="stat-note">Full system control</span>
-            </div>
-            <span class="icon-tile"><i class="bi bi-shield-lock"></i></span>
-        </div>
-    </div>
-    <div class="col-xl-3 col-sm-6">
         <div class="stat-card tone-green">
             <div>
                 <span class="stat-label">System Health</span>
                 <span class="stat-value">100%</span>
-                <span class="stat-note">All services running</span>
+                <span class="stat-note">All services online</span>
             </div>
             <span class="icon-tile"><i class="bi bi-activity"></i></span>
         </div>
     </div>
+</div>   ====================== KPI STRIP ====================== -->
+
+<!-- ====================== AUTHORITY MODULES ====================== -->
+<div class="section-label mb-3">
+    <i class="bi bi-grid-1x2"></i>
+    <span>SuperAdmin Authority</span>
 </div>
 
-<div class="row g-3 g-lg-4">
-    <!-- ================= RECENT USERS ================= -->
-    <div class="col-lg-8">
-        <section class="panel">
-            <div class="panel-header">
-                <span class="icon-tile tone-violet"><i class="bi bi-clock-history"></i></span>
-                <h2>Recent Users</h2>
-            </div>
+<div class="row g-3 g-lg-4 mb-4">
+    <!-- 1. Organizations -->
+   <div class="col-lg-4 col-md-6">
+    <a asp-controller="Organization" asp-action="Index" class="authority-card tone-violet">
+        <div class="authority-top">
+            <span class="icon-tile"><i class="bi bi-buildings"></i></span>
+            <span class="badge-count">@ViewBag.TotalOrganizations</span>
+        </div>
 
-            @if (recentUsers.Count == 0)
-            {
-                <div class="empty-state">
-                    <i class="bi bi-people"></i>
-                    <strong>No users yet</strong>
-                    <span>New accounts will appear here as soon as they are created.</span>
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (var i = 0; i < recentUsers.Count; i++)
-                            {
-                                dynamic user = recentUsers[i];
-                                string userName = (string)(user.FullName ?? "");
-                                string userEmail = (string)(user.Email ?? "");
-                                object roleObj = user.Role;
-                                string roleName = roleObj != null ? (string)user.Role.RoleName : "User";
-                                var roleTone = roleName.Contains("Super", StringComparison.OrdinalIgnoreCase) ? "coral"
-                                             : roleName.Contains("Admin", StringComparison.OrdinalIgnoreCase) ? "amber"
-                                             : "sky";
-                                var avatarTone = avatarTones[i % avatarTones.Length];
+        <h3>Organizations</h3>
+        <p>Create, manage and activate companies across the platform</p>
 
-                                <tr>
-                                    <td class="cell-user">
-                                        <div class="user-cell">
-                                            <span class="avatar tone-@avatarTone">@Initials(userName)</span>
-                                            <div class="meta">
-                                                <span class="user-name-text">@userName</span>
-                                                <span class="user-email">@userEmail</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="cell-role"><span class="pill tone-@roleTone">@roleName</span></td>
-                                    <td class="cell-status"><span class="pill pill-dot tone-green">Active</span></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            }
-        </section>
-    </div>
+        <span class="authority-cta">
+            Manage Organizations <i class="bi bi-arrow-right"></i>
+        </span>
+    </a>
+</div>
 
-    <!-- ================= QUICK ACTIONS ================= -->
-    <div class="col-lg-4">
-        <section class="panel">
-            <div class="panel-header">
-                <span class="icon-tile tone-amber"><i class="bi bi-lightning"></i></span>
-                <h2>Quick Actions</h2>
+    <!-- 5. Audit Logs 
+    <div class="col-lg-4 col-md-6">
+        <a asp-controller="AuditLog" asp-action="Index" class="authority-card tone-pink">
+            <div class="authority-top">
+                <span class="icon-tile"><i class="bi bi-journal-text"></i></span>
+                <span class="badge-count">Live</span>
             </div>
-            <div class="panel-body">
-                <div class="action-list">
-                    <a href="#" class="action-row tone-violet">
-                        <span class="icon-tile"><i class="bi bi-person-plus"></i></span>
-                        <span class="action-text">
-                            <strong>Create New User</strong>
-                            <small>Add an account and assign a role</small>
-                        </span>
-                        <i class="bi bi-chevron-right chevron"></i>
-                    </a>
-                    <a href="#" class="action-row tone-amber">
-                        <span class="icon-tile"><i class="bi bi-gear"></i></span>
-                        <span class="action-text">
-                            <strong>System Settings</strong>
-                            <small>Configure the platform</small>
-                        </span>
-                        <i class="bi bi-chevron-right chevron"></i>
-                    </a>
-                    <a href="#" class="action-row tone-sky">
-                        <span class="icon-tile"><i class="bi bi-file-earmark-text"></i></span>
-                        <span class="action-text">
-                            <strong>View Audit Logs</strong>
-                            <small>Review recent activity</small>
-                        </span>
-                        <i class="bi bi-chevron-right chevron"></i>
-                    </a>
-                    <a href="#" class="action-row tone-green">
-                        <span class="icon-tile"><i class="bi bi-download"></i></span>
-                        <span class="action-text">
-                            <strong>Export Data</strong>
-                            <small>Download records as a file</small>
-                        </span>
-                        <i class="bi bi-chevron-right chevron"></i>
-                    </a>
-                </div>
+            <h3>Audit Logs</h3>
+            <p>Every important action, tracked and searchable</p>
+            <ul class="authority-list">
+                <li><i class="bi bi-check2"></i>Create / update / delete trail</li>
+                <li><i class="bi bi-check2"></i>Login / logout history</li>
+                <li><i class="bi bi-check2"></i>Permission changes</li>
+            </ul>
+            <span class="authority-cta">View Logs <i class="bi bi-arrow-right"></i></span>
+        </a>
+    </div> -->
+
+    <!-- 6. Backup & System 
+    <div class="col-lg-4 col-md-6">
+        <a asp-controller="System" asp-action="Index" class="authority-card tone-green">
+            <div class="authority-top">
+                <span class="icon-tile"><i class="bi bi-hdd-stack"></i></span>
+                <span class="badge-count">Safe</span>
             </div>
-        </section>
-    </div>
+            <h3>Backup & System</h3>
+            <p>Backup, restore, export data, and maintenance mode</p>
+            <ul class="authority-list">
+                <li><i class="bi bi-check2"></i>Backup / restore</li>
+                <li><i class="bi bi-check2"></i>Data export</li>
+                <li><i class="bi bi-check2"></i>Maintenance mode</li>
+            </ul>
+            <span class="authority-cta">Open System Panel <i class="bi bi-arrow-right"></i></span>
+        </a>
+    </div>-->
 </div>

@@ -1,0 +1,164 @@
+@model ERPDemo.ViewModels.OrganizationViewModel
+@{
+    ViewData["Title"] = "Organizations";
+    Layout = "_DashboardLayout";
+}
+
+<div class="page-header">
+    <div>
+        <h1>Organizations</h1>
+        <p>Manage companies onboarded to the platform</p>
+        <div class="page-accent"></div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a asp-controller="Dashboard" asp-action="SuperAdminDashboard" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> New Organization
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Filters -->
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@Model.SearchTerm" class="form-control"
+                       placeholder="Search by name, code or email..." />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option value="active"   selected="@(Model.StatusFilter == "active")">Active only</option>
+                <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive only</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-primary flex-fill" type="submit">Apply</button>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.StatusFilter))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+            }
+        </div>
+    </div>
+</form>
+
+<!-- Table -->
+<section class="panel">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Organization</th>
+                    <th>Plan</th>
+                    <th>Users</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model.Organizations)
+                {
+                    var planTone = o.Plan switch
+                    {
+                        "Enterprise" => "coral",
+                        "Pro" => "amber",
+                        _ => "sky"
+                    };
+
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <span class="avatar tone-violet">@o.Name.Substring(0, 1).ToUpper()</span>
+                                <div class="meta">
+                                    <span class="user-name-text">@o.Name</span>
+                                    <span class="user-email">@o.Code @(o.Email != null ? "• " + o.Email : "")</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="pill tone-@planTone">@o.Plan</span></td>
+                        <td>
+                            <span class="badge-count">@o.UserCount</span>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(o.City) || !string.IsNullOrEmpty(o.Country))
+                            {
+                                <span>@o.City@(o.Country != null ? ", " + o.Country : "")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">—</span>
+                            }
+                        </td>
+                        <td>
+                            @if (o.IsActive)
+                            {
+                                <span class="pill pill-dot tone-green">Active</span>
+                            }
+                            else
+                            {
+                                <span class="pill pill-dot tone-coral">Inactive</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-action="Details" asp-route-id="@o.OrganizationId" class="btn btn-outline-secondary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@o.OrganizationId" class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ToggleActive" asp-route-id="@o.OrganizationId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-outline-warning" title="@(o.IsActive ? "Deactivate" : "Activate")">
+                                        <i class="bi bi-@(o.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-route-id="@o.OrganizationId" method="post" class="d-inline"
+                                     onsubmit="return confirm('Delete @o.Name? Users assigned to this org will become unassigned.');">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Organizations.Any())
+                {
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="bi bi-buildings"></i>
+                                <strong>No organizations found</strong>
+                                <span>Create your first organization to get started.</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

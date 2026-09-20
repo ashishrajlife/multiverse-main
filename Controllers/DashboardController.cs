@@ -33,8 +33,14 @@ namespace ERPDemo.Controllers
         public async Task<IActionResult> SuperAdminDashboard()
         {
             ViewBag.TotalUsers = await _context.Users.CountAsync();
-            ViewBag.TotalAdmins = await _context.Users.Where(u => u.RoleId == 2).CountAsync();
-            ViewBag.TotalSuperAdmins = await _context.Users.Where(u => u.RoleId == 3).CountAsync();
+            ViewBag.TotalAdmins = await _context.Users.Where(u => u.RoleId == 3).CountAsync();
+            ViewBag.TotalSuperAdmins = await _context.Users.Where(u => u.RoleId == 4).CountAsync();
+
+            // These will populate once we build the modules
+            ViewBag.TotalOrganizations = 0;
+            ViewBag.TotalRoles = await _context.Roles.CountAsync();
+
+            // Optional: pass recent users still (if you want to keep it for later)
             ViewBag.RecentUsers = await _context.Users
                 .Include(u => u.Role)
                 .OrderByDescending(u => u.CreatedAt)
