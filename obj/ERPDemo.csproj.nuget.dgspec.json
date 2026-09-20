@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj": {}
+    "E:\\git-mv\\multiverse-main\\ERPDemo.csproj": {}
   },
   "projects": {
-    "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj": {
+    "E:\\git-mv\\multiverse-main\\ERPDemo.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj",
+        "projectUniqueName": "E:\\git-mv\\multiverse-main\\ERPDemo.csproj",
         "projectName": "ERPDemo",
-        "projectPath": "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj",
+        "projectPath": "E:\\git-mv\\multiverse-main\\ERPDemo.csproj",
         "packagesPath": "C:\\Users\\ashis\\.nuget\\packages\\",
-        "outputPath": "E:\\ERP-Demo\\ERPDemo\\obj\\",
+        "outputPath": "E:\\git-mv\\multiverse-main\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\ashis\\AppData\\Roaming\\NuGet\\NuGet.Config"

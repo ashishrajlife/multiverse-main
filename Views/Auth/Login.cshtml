@@ -9,124 +9,123 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ERP Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Multiverse | Sign in</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
+        :root {
+            /* Brand multicolor (unchanged) */
+            --c-coral: #ff6b6b;
+            --c-amber: #feca57;
+            --c-sky: #48dbfb;
+            --c-violet: #a29bfe;
+            --c-pink: #ff9ff3;
+
+            /* Surfaces */
+            --navy-900: #080d1c;
+            --navy-800: #0d1530;
+            --navy-700: #14203f;
+            --page: #f4f6fb;
+            --card: #ffffff;
+
+            /* Text */
+            --ink: #0f172a;
+            --ink-soft: #475569;
+            --ink-mute: #8492a6;
+            --line: #e3e8f0;
+
+            /* Action */
+            --primary: #4A90E2;
+            --primary-deep: #3b6fe0;
+            --primary-glow: rgba(74, 144, 226, 0.35);
+            --danger: #d64545;
+
+            --font: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
         * { box-sizing: border-box; }
 
         html, body {
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100%;
+            font-family: var(--font);
+            color: var(--ink);
+            background: var(--page);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* ---------- GREENER MAP BACKGROUND ---------- */
-        .login-wrapper {
+        /* =====================================================
+           SHELL
+        ===================================================== */
+        .auth-shell {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(440px, 1fr);
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* =====================================================
+           LEFT: BRAND PANEL
+        ===================================================== */
+        .auth-hero {
             position: relative;
-            min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 16px;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 44px 56px;
+            color: #fff;
             overflow: hidden;
-            background: #e8f3e2;
+            background:
+                radial-gradient(900px 500px at 15% -10%, rgba(162, 155, 254, 0.22), transparent 60%),
+                radial-gradient(700px 500px at 100% 100%, rgba(72, 219, 251, 0.16), transparent 60%),
+                radial-gradient(600px 400px at 0% 100%, rgba(255, 107, 107, 0.12), transparent 60%),
+                linear-gradient(160deg, var(--navy-800) 0%, var(--navy-900) 100%);
         }
 
-        .map-bg {
+        /* fine grid, fades out toward the edges */
+        .auth-hero::before {
+            content: "";
             position: absolute;
             inset: 0;
-            z-index: 0;
-            background:
-                radial-gradient(circle at 15% 20%, #cfe8c2 0%, transparent 45%),
-                radial-gradient(circle at 85% 25%, #d3ecc6 0%, transparent 50%),
-                radial-gradient(circle at 25% 80%, #d5ebc9 0%, transparent 45%),
-                radial-gradient(circle at 80% 85%, #c9e6bd 0%, transparent 50%),
-                linear-gradient(135deg, #eaf5e2 0%, #d9ead1 100%);
-        }
-
-        .map-bg svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* ---------- FLOATING ICONS ---------- */
-        .map-icon {
-            position: absolute;
-            z-index: 2;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+            background-size: 44px 44px;
+            -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 25%, transparent 75%);
+            mask-image: radial-gradient(ellipse at 50% 50%, #000 25%, transparent 75%);
             pointer-events: none;
-            filter: drop-shadow(0 4px 8px rgba(30, 60, 30, 0.18));
-            animation: floatY 6s ease-in-out infinite;
         }
 
-        @@keyframes floatY {
-            0%, 100% { transform: translateY(0); }
-            50%      { transform: translateY(-4px); }
-        }
+        .auth-hero > * { position: relative; z-index: 1; }
 
-        /* Icon variants */
-        .ic-pin     { color: #4A90E2; font-size: 26px; }
-        .ic-truck   { color: #6b7c8a; font-size: 30px; }
-        .ic-package { color: #d99e2b; font-size: 24px; }
-        .ic-person  { color: #3f7fb0; font-size: 26px; }
-        .ic-work    { color: #55697c; font-size: 26px; }
-        .ic-laptop  { color: #4c5f73; font-size: 28px; }
-        .ic-phone   { color: #55697c; font-size: 22px; }
-
-        /* Positions */
-        .ic-1  { top: 10%; left: 8%; }
-        .ic-2  { top: 20%; left: 18%; animation-delay: 1s; }
-        .ic-3  { bottom: 16%; left: 10%; animation-delay: 2s; }
-        .ic-4  { bottom: 28%; left: 22%; animation-delay: 0.5s; }
-        .ic-5  { top: 14%; right: 12%; animation-delay: 1.5s; }
-        .ic-6  { top: 26%; right: 22%; animation-delay: 2.5s; }
-        .ic-7  { bottom: 20%; right: 14%; animation-delay: 0.8s; }
-        .ic-8  { bottom: 30%; right: 24%; animation-delay: 1.8s; }
-        .ic-9  { top: 40%; left: 5%; }
-        .ic-10 { top: 55%; right: 6%; animation-delay: 1.2s; }
-        .ic-11 { top: 70%; left: 18%; animation-delay: 0.4s; }
-        .ic-12 { top: 8%;  right: 32%; animation-delay: 2.2s; }
-
-        /* ---------- LOGIN CARD ---------- */
-
-        /* ---------- BRAND HEADER ---------- */
-        .brand-header {
-            text-align: center;
-            margin-bottom: 28px;
-        }
+        /* ---------- BRAND (multicolor, kept) ---------- */
+        .brand-header { display: block; }
 
         .brand-title {
             font-size: 34px;
             font-weight: 800;
             letter-spacing: -0.5px;
             margin: 0;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
             line-height: 1.1;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: var(--font);
         }
 
-        /* Multicolor gradient text */
         .brand-text {
-            background: linear-gradient(
-                90deg,
-                #ff6b6b 0%,
-                #feca57 25%,
-                #48dbfb 50%,
-                #a29bfe 75%,
-                #ff9ff3 100%
-            );
+            background: linear-gradient(90deg, #ff6b6b 0%, #feca57 25%, #48dbfb 50%, #a29bfe 75%, #ff9ff3 100%);
             background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             color: transparent;
             animation: shimmer 4s linear infinite;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.06);
         }
 
         @@keyframes shimmer {
@@ -134,18 +133,12 @@
             100% { background-position: 200% center; }
         }
 
-        /* Infinity sign — bigger, glowing, cycled gradient */
         .brand-infinity {
             font-size: 44px;
             font-weight: 700;
             line-height: 1;
             display: inline-block;
-            background: linear-gradient(
-                120deg,
-                #48dbfb 0%,
-                #a29bfe 50%,
-                #ff9ff3 100%
-            );
+            background: linear-gradient(120deg, #48dbfb 0%, #a29bfe 50%, #ff9ff3 100%);
             background-size: 200% auto;
             -webkit-background-clip: text;
             background-clip: text;
@@ -161,378 +154,722 @@
             50%      { transform: translateY(-2px) scale(1.08); }
         }
 
-        /* Divider under brand */
         .brand-divider {
             width: 60px;
             height: 3px;
-            margin: 14px auto 0;
+            margin: 14px 0 0;
             border-radius: 3px;
-            background: linear-gradient(
-                90deg,
-                #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff9ff3
-            );
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff9ff3);
             opacity: 0.85;
             box-shadow: 0 0 12px rgba(162, 155, 254, 0.35);
         }
 
-        .login-card {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            max-width: 480px;
-            background: #2c3e50;
-            border-radius: 18px;
-            padding: 48px 40px;
-            box-shadow:
-                0 25px 60px rgba(15, 40, 25, 0.35),
-                0 8px 20px rgba(15, 40, 25, 0.22);
-            color: #ffffff;
-            animation: cardIn 0.5s ease;
+        /* ---------- HERO CENTER: modules on the infinity loop ---------- */
+        .hero-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 24px 0;
         }
 
-        @@keyframes cardIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to   { opacity: 1; transform: translateY(0); }
+        .lemniscate {
+            position: relative;
+            width: min(100%, 540px);
+            aspect-ratio: 2 / 1;
+            margin-bottom: 40px;
+        }
+
+        .lemniscate svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .loop-base {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.14);
+            stroke-width: 2;
+        }
+
+        .loop-flow {
+            fill: none;
+            stroke: url(#loopGradient);
+            stroke-width: 3.5;
+            stroke-linecap: round;
+            stroke-dasharray: 190 810;
+            animation: flow 10s linear infinite;
+            filter: drop-shadow(0 0 6px rgba(162, 155, 254, 0.7));
+        }
+
+        @@keyframes flow {
+            from { stroke-dashoffset: 0; }
+            to   { stroke-dashoffset: -1000; }
+        }
+
+        .node {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px 8px 10px;
+            border-radius: 999px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #e9edf7;
+            white-space: nowrap;
+            background: rgba(13, 21, 48, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .node i {
+            display: grid;
+            place-items: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            color: #0d1530;
+            background: var(--tone);
+        }
+
+        .hero-title {
+            margin: 0 0 12px;
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+            max-width: 460px;
+        }
+
+        .hero-sub {
+            margin: 0;
+            font-size: 14.5px;
+            line-height: 1.65;
+            color: #9fb0cc;
+            max-width: 420px;
+        }
+
+        .hero-foot {
+            font-size: 12.5px;
+            color: #6f7f9c;
+        }
+
+        /* =====================================================
+           RIGHT: SIGN-IN PANEL
+        ===================================================== */
+        .auth-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+            background:
+                radial-gradient(600px 400px at 100% 0%, rgba(162, 155, 254, 0.10), transparent 60%),
+                radial-gradient(500px 400px at 0% 100%, rgba(72, 219, 251, 0.09), transparent 60%),
+                var(--page);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            background: lightgray;
+            border: 1px solid black;
+            border-radius: 20px;
+            padding: 40px 36px 32px;
+            box-shadow:
+                0 1px 2px rgba(15, 23, 42, 0.04),
+                0 24px 48px -12px rgba(15, 23, 42, 0.14);
         }
 
         .login-card h1 {
-            font-size: 22px;
-            font-weight: 600;
-            margin: 0 0 6px 0;
-            letter-spacing: 0.3px;
+            margin: 0 0 6px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--ink);
         }
 
         .login-card .subtitle {
-            font-size: 13px;
-            color: #b0bccb;
-            margin-bottom: 32px;
+            margin: 0 0 28px;
+            font-size: 14px;
+            color: black;
         }
 
-        .form-label {
-            font-size: 13.5px;
-            font-weight: 500;
-            color: #d5dde6;
+        .field { margin-bottom: 18px; }
+
+        .field label {
+            display: block;
             margin-bottom: 8px;
-            letter-spacing: 0.2px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ink);
         }
 
-        .form-control {
-            background: #ffffff;
-            border: 1px solid #e4e9ef;
-            border-radius: 8px;
-            padding: 12px 14px;
+        .input-wrap { position: relative; }
+
+        .input-wrap > i.lead-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: var(--ink-mute);
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .input {
+            width: 100%;
+            height: 48px;
+            padding: 0 44px 0 42px;
+            font-family: var(--font);
             font-size: 14.5px;
-            color: #2c3e50;
-            transition: all 0.2s ease;
-            height: auto;
+            color: var(--ink);
+            background: #f8fafd;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
-        .form-control::placeholder { color: #a7b3c0; font-size: 13.5px; }
+        .input::placeholder { color: #a3aec0; }
 
-        .form-control:focus {
-            border-color: #4A90E2;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+        .input:hover { border-color: #cfd8e6; }
+
+        .input:focus {
             outline: none;
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.16);
+        }
+
+        .input-wrap:focus-within > i.lead-icon { color: var(--primary); }
+
+        .toggle-pass {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--ink-mute);
+            font-size: 16px;
+            cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        .toggle-pass:hover { color: var(--ink); background: #eef2f8; }
+
+        .toggle-pass:focus-visible,
+        .btn-proceed:focus-visible {
+            outline: 3px solid rgba(74, 144, 226, 0.5);
+            outline-offset: 2px;
         }
 
         .btn-proceed {
+            position: relative;
             width: 100%;
-            background: #4A90E2;
-            border: none;
-            border-radius: 8px;
-            padding: 13px;
-            font-size: 14.5px;
+            height: 50px;
+            margin-top: 10px;
+            border: 0;
+            border-radius: 12px;
+            font-family: var(--font);
+            font-size: 15px;
             font-weight: 600;
-            letter-spacing: 0.3px;
-            color: #ffffff;
-            margin-top: 16px;
-            transition: all 0.2s ease;
+            letter-spacing: 0.2px;
+            color: #fff;
             cursor: pointer;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 100%);
+            box-shadow: 0 10px 22px -8px var(--primary-glow);
+            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
 
         .btn-proceed:hover {
-            background: #3a7bc8;
             transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.35);
+            box-shadow: 0 14px 28px -8px var(--primary-glow);
+            filter: brightness(1.04);
         }
 
         .btn-proceed:active { transform: translateY(0); }
 
-        .validation-summary {
-            background: rgba(255, 107, 107, 0.12);
-            border: 1px solid rgba(255, 107, 107, 0.35);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: #ffb3b3;
-            font-size: 13px;
-            margin-bottom: 18px;
-            list-style: none;
+        .btn-proceed[disabled] {
+            cursor: progress;
+            filter: saturate(0.8) brightness(0.98);
+            transform: none;
         }
 
-        .validation-summary ul { margin: 0; padding-left: 18px; }
-
-
-        .demo-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+        .btn-proceed .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            vertical-align: -3px;
+            border: 2px solid rgba(255, 255, 255, 0.45);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
         }
 
-        .demo-item {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
-            padding: 8px 10px;
+        .btn-proceed.is-loading .spinner { display: inline-block; }
+
+        @@keyframes spin { to { transform: rotate(360deg); } }
+
+        /* multicolor accent line at the foot of the card */
+        .card-accent {
+            height: 3px;
+            width: 100%;
+            margin: 28px 0 18px;
+            border-radius: 3px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #a29bfe, #ff9ff3);
+            opacity: 0.75;
+        }
+
+        .help-note {
+            margin: 0;
             text-align: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 12.5px;
+            color: black;
         }
 
-        .demo-item:hover {
-            background: rgba(74, 144, 226, 0.15);
-            border-color: rgba(74, 144, 226, 0.4);
+        .validation-summary {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding: 12px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #a12f2f;
+            background: #fdf1f1;
+            border: 1px solid #f6d3d3;
+            border-radius: 12px;
         }
 
-        .demo-item .role {
-            font-size: 11px;
+        .validation-summary > i { margin-top: 1px; color: var(--danger); }
+
+        .validation-summary ul { margin: 0; padding: 0; list-style: none; }
+
+        /* =====================================================
+           SUCCESS TOAST (top right)
+        ===================================================== */
+        .toast {
+            position: fixed;
+            top: calc(20px + env(safe-area-inset-top, 0px));
+            right: calc(20px + env(safe-area-inset-right, 0px));
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: min(360px, calc(100vw - 32px));
+            padding: 14px 18px 17px 14px;
+            color: #0f3d1f;
+            background: #cdffcd;
+            border: 1px solid #a6e6a6;
+            border-radius: 14px;
+            box-shadow:
+                0 14px 34px -10px rgba(21, 101, 52, 0.40),
+                0 2px 6px rgba(21, 101, 52, 0.12);
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(32px);
+            transition:
+                opacity 0.3s ease,
+                transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+                visibility 0s linear 0.4s;
+        }
+
+        .toast.is-visible {
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+            transition-delay: 0s;
+        }
+
+        .toast-icon {
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 18px;
+            color: #fff;
+            background: #1f9d55;
+            box-shadow: 0 4px 10px -2px rgba(31, 157, 85, 0.55);
+        }
+
+        .toast.is-visible .toast-icon {
+            animation: pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) 0.12s both;
+        }
+
+        @@keyframes pop {
+            from { transform: scale(0.4); }
+            to   { transform: scale(1); }
+        }
+
+        .toast-text { min-width: 0; line-height: 1.35; }
+
+        .toast-text strong {
+            display: block;
+            font-size: 14.5px;
             font-weight: 700;
-            letter-spacing: 0.4px;
-            display: block;
-            margin-bottom: 2px;
+            color: #0f3d1f;
         }
 
-        .demo-item .creds {
-            font-size: 10.5px;
-            color: #8d9bab;
+        .toast-text span {
             display: block;
+            margin-top: 1px;
+            font-size: 12.5px;
+            color: #256b3c;
         }
 
-        .role-super { color: #ff7676; }
-        .role-admin { color: #ffb85c; }
-        .role-user  { color: #6ec1ff; }
+        .toast-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            width: 100%;
+            background: #1f9d55;
+            transform-origin: left center;
+            transform: scaleX(1);
+        }
 
-        /* ---------- RESPONSIVE ---------- */
-        @@media (max-width: 768px) {
-            .login-card {
-                padding: 36px 28px;
-                border-radius: 16px;
-                max-width: 420px;
+        .toast.is-visible .toast-progress {
+            animation: toastProgress var(--toast-ms, 1600ms) linear forwards;
+        }
+
+        @@keyframes toastProgress {
+            from { transform: scaleX(1); }
+            to   { transform: scaleX(0); }
+        }
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        /* Large desktops */
+        @@media (min-width: 1440px) {
+            .auth-hero { padding: 56px 72px; }
+            .lemniscate { width: min(100%, 620px); }
+            .hero-title { font-size: 34px; max-width: 520px; }
+            .hero-sub { font-size: 15.5px; max-width: 460px; }
+            .login-card { max-width: 440px; }
+        }
+
+        /* Small desktops / large tablets in landscape */
+        @@media (min-width: 992px) and (max-width: 1199.98px) {
+            .auth-hero { padding: 40px 36px; }
+            .node { font-size: 11.5px; padding: 6px 10px 6px 7px; gap: 6px; }
+            .node i { width: 20px; height: 20px; font-size: 11px; }
+            .hero-title { font-size: 26px; }
+            .hero-sub { font-size: 14px; }
+        }
+
+        /* Short desktop windows */
+        @@media (min-width: 992px) and (max-height: 700px) {
+            .auth-hero { padding: 28px 44px; }
+            .lemniscate { margin-bottom: 24px; width: min(100%, 440px); }
+            .hero-title { font-size: 26px; }
+        }
+
+        /* Tablets and phones: brand becomes a slim centered banner */
+        @@media (max-width: 991.98px) {
+            .auth-shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+
+            .auth-hero {
+                padding: 26px 24px 30px;
+                align-items: center;
+                text-align: center;
             }
-            .login-card h1 { font-size: 20px; }
-            .login-card .subtitle { margin-bottom: 26px; }
+            .hero-body, .hero-foot { display: none; }
+            .brand-title { font-size: 28px; }
+            .brand-infinity { font-size: 36px; }
+            .brand-divider { margin: 10px auto 0; }
 
-            /* Hide extra icons on tablet */
-            .ic-9, .ic-10, .ic-11, .ic-12 { display: none; }
+            .auth-panel { padding: 28px 16px 40px; align-items: center; }
+            .login-card { max-width: 460px; }
         }
 
+        /* Phones */
         @@media (max-width: 480px) {
-            .login-wrapper { padding: 16px 12px; align-items: center; }
-            .login-card { padding: 32px 22px; border-radius: 14px; }
-            .login-card h1 { font-size: 19px; }
-            .login-card .subtitle { font-size: 12.5px; }
-            .form-control { padding: 11px 12px; font-size: 14px; }
-            .btn-proceed { padding: 12px; font-size: 14px; }
+            .login-card { padding: 30px 22px 24px; border-radius: 18px; }
+            .login-card h1 { font-size: 22px; }
+            .login-card .subtitle { font-size: 13.5px; margin-bottom: 22px; }
+            .input { font-size: 16px; } /* prevents iOS zoom on focus */
 
-            /* Only 2 icons on mobile */
-            .map-icon { display: none; }
-            .ic-3 { display: block; top: 8%; left: 8%; font-size: 22px; }
-            .ic-7 { display: block; bottom: 10%; right: 8%; font-size: 22px; }
-
-            .demo-grid { grid-template-columns: 1fr; gap: 6px; }
+            /* toast spans the top of the screen */
+            .toast {
+                top: calc(12px + env(safe-area-inset-top, 0px));
+                right: calc(12px + env(safe-area-inset-right, 0px));
+                left: calc(12px + env(safe-area-inset-left, 0px));
+                width: auto;
+                transform: translateY(-28px);
+            }
         }
 
-        @@media (max-height: 600px) {
-            .login-card { padding: 24px 22px; }
-            .login-card h1 { font-size: 18px; margin-bottom: 4px; }
+        /* Very small phones */
+        @@media (max-width: 360px) {
+            .auth-hero { padding: 20px 16px 24px; }
+            .brand-title { font-size: 24px; }
+            .brand-infinity { font-size: 30px; }
+            .auth-panel { padding: 20px 12px 32px; }
+            .login-card { padding: 26px 18px 22px; }
+            .toast-text strong { font-size: 13.5px; }
+            .toast-text span { font-size: 12px; }
+        }
+
+        /* Phones in landscape / very short screens */
+        @@media (max-width: 991.98px) and (max-height: 520px) {
+            .auth-hero { padding: 14px 24px 16px; }
+            .brand-title { font-size: 22px; }
+            .brand-infinity { font-size: 28px; }
+            .brand-divider { margin-top: 6px; }
+            .auth-panel { padding: 16px; }
+            .login-card { padding: 22px 24px 18px; }
             .login-card .subtitle { margin-bottom: 16px; }
+            .field { margin-bottom: 12px; }
+            .card-accent { margin: 18px 0 12px; }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .brand-text, .brand-infinity, .loop-flow { animation: none; }
+            .loop-flow { stroke-dasharray: none; }
+            .btn-proceed, .input, .toggle-pass { transition: none; }
+            .toast, .toast.is-visible { transform: none; transition: opacity 0.2s ease; }
+            .toast.is-visible .toast-icon { animation: none; }
         }
     </style>
 </head>
 <body>
-    <div class="login-wrapper">
+    <div class="auth-shell">
 
-        <!-- ============ MAP BACKGROUND SVG ============ -->
-        <div class="map-bg">
-            <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                <!-- Green park zones -->
-                <ellipse cx="300" cy="200" rx="380" ry="240" fill="#c9e6bd" opacity="0.55"/>
-                <ellipse cx="1650" cy="220" rx="360" ry="230" fill="#c9e6bd" opacity="0.5"/>
-                <ellipse cx="220" cy="880" rx="400" ry="260" fill="#c9e6bd" opacity="0.5"/>
-                <ellipse cx="1700" cy="900" rx="380" ry="250" fill="#c9e6bd" opacity="0.55"/>
-                <ellipse cx="960" cy="120" rx="500" ry="180" fill="#c9e6bd" opacity="0.35"/>
-                <ellipse cx="960" cy="1000" rx="560" ry="200" fill="#c9e6bd" opacity="0.35"/>
+        <!-- ================= BRAND PANEL ================= -->
+        <aside class="auth-hero">
+            <div class="brand-header">
+                <h1 class="brand-title">
+                    <span class="brand-text">Multiverse</span>
+                    <span class="brand-infinity">∞</span>
+                </h1>
+                <div class="brand-divider"></div>
+            </div>
 
-                <!-- Subtle terrain patches -->
-                <path d="M 0,400 Q 300,360 600,420 T 1200,400 T 1920,440 L 1920,520 Q 1500,560 1200,520 T 600,540 T 0,500 Z"
-                      fill="#bcddaa" opacity="0.35"/>
-                <path d="M 0,650 Q 400,620 800,680 T 1920,640 L 1920,720 Q 1500,760 1100,720 T 400,750 T 0,730 Z"
-                      fill="#bcddaa" opacity="0.35"/>
+            <div class="hero-body" aria-hidden="true">
+                <div class="lemniscate">
+                    <svg viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+                        <defs>
+                            <linearGradient id="loopGradient" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="540" y2="0">
+                                <stop offset="0%"   stop-color="#ff6b6b" />
+                                <stop offset="25%"  stop-color="#feca57" />
+                                <stop offset="50%"  stop-color="#48dbfb" />
+                                <stop offset="75%"  stop-color="#a29bfe" />
+                                <stop offset="100%" stop-color="#ff9ff3" />
+                            </linearGradient>
+                        </defs>
+                        <path class="loop-base" pathLength="1000"
+                              d="M300,150 C300,90 240,50 180,50 C110,50 60,100 60,150 C60,200 110,250 180,250 C240,250 300,210 300,150 C300,90 360,50 420,50 C490,50 540,100 540,150 C540,200 490,250 420,250 C360,250 300,210 300,150 Z" />
+                        <path class="loop-flow" pathLength="1000"
+                              d="M300,150 C300,90 240,50 180,50 C110,50 60,100 60,150 C60,200 110,250 180,250 C240,250 300,210 300,150 C300,90 360,50 420,50 C490,50 540,100 540,150 C540,200 490,250 420,250 C360,250 300,210 300,150 Z" />
+                    </svg>
 
-               <!-- MAIN ROADS -->
-                <g stroke="#b8bec4" stroke-linecap="round" fill="none" opacity="0.9">
-                    <path d="M -100,300 L 2000,120" stroke-width="70"/>
-                    <path d="M -100,720 L 2000,900" stroke-width="60"/>
-                    <path d="M 300,-100 L 700,1200"  stroke-width="55"/>
-                    <path d="M 1200,-100 L 900,1200" stroke-width="55"/>
-                    <path d="M 1700,-100 L 1500,1200" stroke-width="50"/>
-                    <path d="M -100,520 L 2000,440"  stroke-width="40"/>
-                    <path d="M 500,-100 L 1400,1200" stroke-width="35"/>
-                </g>
+                    <span class="node" style="left:30%; top:16.7%; --tone:#feca57;"><i class="bi bi-cart3"></i>Sales</span>
+                    <span class="node" style="left:70%; top:16.7%; --tone:#48dbfb;"><i class="bi bi-boxes"></i>Inventory</span>
+                    <span class="node" style="left:10%; top:50%;   --tone:#ff6b6b;"><i class="bi bi-people"></i>People</span>
+                    <span class="node" style="left:90%; top:50%;   --tone:#ff9ff3;"><i class="bi bi-truck"></i>Logistics</span>
+                    <span class="node" style="left:30%; top:83.3%; --tone:#a29bfe;"><i class="bi bi-wallet2"></i>Finance</span>
+                    <span class="node" style="left:70%; top:83.3%; --tone:#7ee0a5;"><i class="bi bi-bar-chart-line"></i>Reports</span>
+                </div>
 
-                <!-- Secondary roads -->
-                <g stroke="#ffffff" stroke-linecap="round" fill="none" opacity="0.75">
-                    <path d="M -100,150 L 2000,50"   stroke-width="18"/>
-                    <path d="M -100,880 L 2000,1000" stroke-width="18"/>
-                    <path d="M 150,-100 L 350,1200"  stroke-width="16"/>
-                    <path d="M 900,-100 L 1000,1200" stroke-width="16"/>
-                    <path d="M 1550,-100 L 1600,1200" stroke-width="16"/>
-                </g>
+                <h2 class="hero-title">Every module. One connected system.</h2>
+                <p class="hero-sub">Sales, stock, finance and people all work from the same live data, so your whole team stays in step.</p>
+            </div>
 
-                <!-- Intersection circles -->
-                <g fill="#c2dfb1" opacity="0.55">
-                    <circle cx="700" cy="500" r="60"/>
-                    <circle cx="1300" cy="620" r="55"/>
-                    <circle cx="450" cy="850" r="50"/>
-                    <circle cx="1500" cy="300" r="50"/>
-                </g>
+            <div class="hero-foot">&copy; @DateTime.Now.Year Multiverse. All rights reserved.</div>
+        </aside>
 
-                <!-- ============ TREES ALONG ROADS ============ -->
-                <!-- Each tree = brown trunk (rect) + 2 green circles -->
-                <defs>
-                    <g id="tree">
-                        <rect x="-2" y="0" width="4" height="8" fill="#7a5a3a" rx="1"/>
-                        <circle cx="0" cy="-3" r="9" fill="#5fa34a"/>
-                        <circle cx="-4" cy="1" r="7" fill="#6cb457"/>
-                        <circle cx="4"  cy="1" r="7" fill="#6cb457"/>
-                        <circle cx="0"  cy="-7" r="6" fill="#78c163" opacity="0.9"/>
-                    </g>
-                    <g id="bush">
-                        <circle cx="0" cy="0" r="5" fill="#77bd60"/>
-                        <circle cx="-3" cy="1" r="4" fill="#68ab52"/>
-                        <circle cx="3"  cy="1" r="4" fill="#68ab52"/>
-                    </g>
-                </defs>
+        <!-- ================= SIGN-IN PANEL ================= -->
+        <main class="auth-panel">
+            <div class="login-card">
+                <h1>Welcome back</h1>
+                <p class="subtitle">Sign in to your workspace to continue.</p>
 
-                
-                <use href="#tree" x="120" y="270" transform="scale(1.1)"/>
-                <use href="#tree" x="280" y="245"/>
-                <use href="#tree" x="440" y="220" transform="scale(0.9)"/>
-                <use href="#tree" x="600" y="195"/>
-            
-                <use href="#tree" x="1240" y="108"/>
-                <use href="#tree" x="1400" y="90" transform="scale(1.1)"/>
-                <use href="#tree" x="1560" y="70"/>
-                <use href="#tree" x="1720" y="50" transform="scale(0.9)"/>
+                <form asp-action="Login" asp-antiforgery="true" method="post" id="loginForm" novalidate>
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                    {
+                        <div class="validation-summary" role="alert">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            <ul>
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
 
-                <!-- Trees along bottom road -->
-                <use href="#tree" x="180" y="680" transform="scale(1.05)"/>
-                <use href="#tree" x="380" y="715"/>
-            
-                <use href="#tree" x="1460" y="880" transform="scale(1.1)"/>
-                <use href="#tree" x="1680" y="910"/>
-                <use href="#tree" x="1860" y="940" transform="scale(0.9)"/>
-
-                
-
-                <!-- Trees along vertical road 2 -->
-                <use href="#tree" x="1180" y="120" transform="scale(0.9)"/>
-                <use href="#tree" x="1120" y="320"/>
-                <use href="#tree" x="1050" y="520" transform="scale(1.1)"/>
-                <use href="#tree" x="990" y="700"/>
-                <use href="#tree" x="940" y="900" transform="scale(0.9)"/>
-
-                <!-- Bushes scattered in green areas -->
-                <use href="#bush" x="200" y="150"/>
-                <use href="#bush" x="340" y="200"/>
-                <use href="#bush" x="180" y="240"/>
-                <use href="#bush" x="1560" y="180"/>
-                <use href="#bush" x="1700" y="240"/>
-                <use href="#bush" x="1620" y="120"/>
-                <use href="#bush" x="240" y="820"/>
-                <use href="#bush" x="380" y="900"/>
-                <use href="#bush" x="1600" y="880"/>
-                <use href="#bush" x="1740" y="950"/>
-                <use href="#bush" x="800" y="60"/>
-                <use href="#bush" x="1100" y="80"/>
-            </svg>
-        </div>
-
-        <!-- ============ FLOATING ICONS ============ -->
-
-        <!-- Top-left: truck + person walking -->
-        <i class="bi bi-truck map-icon ic-truck ic-1"></i>
-        <i class="bi bi-person-walking map-icon ic-person ic-2"></i>
-
-        <!-- Bottom-left: person working at desk + laptop -->
-        <i class="bi bi-person-workspace map-icon ic-work ic-3"></i>
-        <i class="bi bi-laptop map-icon ic-laptop ic-4"></i>
-
-        <!-- Top-right: geo pin + person with badge -->
-        <i class="bi bi-geo-alt-fill map-icon ic-pin ic-5"></i>
-        <i class="bi bi-person-badge map-icon ic-person ic-6"></i>
-
-        <!-- Bottom-right: delivery truck + package -->
-        <i class="bi bi-truck map-icon ic-truck ic-7"></i>
-        <i class="bi bi-box-seam map-icon ic-package ic-8"></i>
-
-        <!-- Mid-left/right extra elements -->
-        <i class="bi bi-pc-display map-icon ic-laptop ic-9"></i>
-        <i class="bi bi-phone map-icon ic-phone ic-10"></i>
-        <i class="bi bi-person-walking map-icon ic-person ic-11"></i>
-        <i class="bi bi-geo-alt-fill map-icon ic-pin ic-12"></i>
-
-        <!-- ============ LOGIN CARD ============ -->
-        <div class="login-card">
-           <div class="brand-header">
-    <h1 class="brand-title">
-        <span class="brand-text">Multiverse</span>
-        <span class="brand-infinity">∞</span>
-    </h1>
-    <div class="brand-divider"></div>
-</div>
-            <form asp-action="Login" asp-antiforgery="true" method="post" id="loginForm">
-                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
-                {
-                    <div class="validation-summary">
-                        <ul>
-                            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                            {
-                                <li>@error.ErrorMessage</li>
-                            }
-                        </ul>
+                    <div class="field">
+                        <label asp-for="UsernameOrEmail">Email</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-person lead-icon"></i>
+                            <input asp-for="UsernameOrEmail"
+                                   class="input"
+                                   placeholder="Enter your email"
+                                   autocomplete="username"
+                                   autofocus
+                                   id="usernameInput" />
+                        </div>
                     </div>
-                }
 
-                <div class="mb-3">
-                    <label asp-for="UsernameOrEmail" class="form-label">Email</label>
-                    <input asp-for="UsernameOrEmail"
-                           class="form-control"
-                           placeholder="Enter here"
-                           autocomplete="username"
-                           id="usernameInput" />
-                </div>
+                    <div class="field">
+                        <label asp-for="Password">Password</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-lock lead-icon"></i>
+                            <input asp-for="Password"
+                                   type="password"
+                                   class="input"
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password"
+                                   id="passwordInput" />
+                            <button type="button" class="toggle-pass" id="togglePass" aria-label="Show password" aria-pressed="false">
+                                <i class="bi bi-eye" id="togglePassIcon"></i>
+                            </button>
+                        </div>
+                    </div>
 
-                <div class="mb-2">
-                    <label asp-for="Password" class="form-label">Password</label>
-                    <input asp-for="Password"
-                           class="form-control"
-                           placeholder="Enter here"
-                           autocomplete="current-password"
-                           id="passwordInput" />
-                </div>
+                    <button type="submit" class="btn-proceed" id="submitBtn">
+                        <span class="spinner" aria-hidden="true"></span>
+                        <span id="submitLabel">Sign in</span>
+                    </button>
+                </form>
 
-                <button type="submit" class="btn-proceed">Proceed</button>
-            </form>
+                <div class="card-accent"></div>
+                <p class="help-note">Can't sign in? Contact your administrator.</p>
+            </div>
+        </main>
+    </div>
 
+    <!-- ================= LOGIN SUCCESS TOAST ================= -->
+    <div class="toast" id="loginToast" role="status" aria-live="polite" aria-atomic="true">
+        <span class="toast-icon" aria-hidden="true"><i class="bi bi-check-lg"></i></span>
+        <div class="toast-text">
+            <strong>Login successful</strong>
         </div>
+        <span class="toast-progress" aria-hidden="true"></span>
     </div>
 
     <script>
-        function fillLogin(username, password) {
-            document.getElementById('usernameInput').value = username;
-            document.getElementById('passwordInput').value = password;
-            document.getElementById('passwordInput').focus();
-        }
+        (function () {
+            var pass   = document.getElementById('passwordInput');
+            var toggle = document.getElementById('togglePass');
+            var icon   = document.getElementById('togglePassIcon');
+            var form   = document.getElementById('loginForm');
+            var btn    = document.getElementById('submitBtn');
+            var label  = document.getElementById('submitLabel');
+            var toast  = document.getElementById('loginToast');
+
+            var TOAST_MS = 1600; // how long the success message shows before redirecting
+
+            // Show / hide password
+            toggle.addEventListener('click', function () {
+                var show = pass.type === 'password';
+                pass.type = show ? 'text' : 'password';
+                icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+                toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+                toggle.setAttribute('aria-pressed', show ? 'true' : 'false');
+                pass.focus();
+            });
+
+            function setLoading(on, text) {
+                btn.disabled = on;
+                btn.classList.toggle('is-loading', on);
+                label.textContent = text;
+            }
+
+            // Green "Login successful" message, then go to the app
+            function handleSuccess(url) {
+                label.textContent = 'Redirecting...';
+                toast.style.setProperty('--toast-ms', TOAST_MS + 'ms');
+                toast.classList.add('is-visible');
+                setTimeout(function () { window.location.href = url; }, TOAST_MS);
+            }
+
+            // Wrong credentials: show the server's error message without reloading
+            function handleFailure(html) {
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+
+                // The server returned something other than the login page: show it as-is
+                if (!doc.getElementById('loginForm')) {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                    return;
+                }
+
+                var old = form.querySelector('.validation-summary');
+                if (old) old.remove();
+
+                var incoming = doc.querySelector('#loginForm .validation-summary');
+                if (incoming) {
+                    form.insertBefore(document.importNode(incoming, true), form.firstChild);
+                }
+
+                // keep the antiforgery token fresh
+                var newToken = doc.querySelector('#loginForm input[name="__RequestVerificationToken"]');
+                var curToken = form.querySelector('input[name="__RequestVerificationToken"]');
+                if (newToken && curToken) curToken.value = newToken.value;
+
+                setLoading(false, 'Sign in');
+                pass.value = '';
+                pass.focus();
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (btn.disabled) return;
+                setLoading(true, 'Signing in...');
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new URLSearchParams(new FormData(form)),
+                    credentials: 'same-origin'
+                })
+                .then(function (res) {
+                    var landedOnLogin = new URL(res.url).pathname.toLowerCase() ===
+                                        window.location.pathname.toLowerCase();
+
+                    // Successful login = server redirected us to another page
+                    if (res.redirected && !landedOnLogin) { handleSuccess(res.url); return; }
+
+                    // Redirected back to the login page (e.g. error stored in TempData)
+                    if (res.redirected) { window.location.href = res.url; return; }
+
+                    return res.text().then(handleFailure);
+                })
+                .catch(function () {
+                    // Network hiccup: fall back to a normal form post
+                    form.submit();
+                });
+            });
+
+            // Reset everything if the user comes back via the browser's back button
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) {
+                    toast.classList.remove('is-visible');
+                    setLoading(false, 'Sign in');
+                }
+            });
+        })();
     </script>
 </body>
 </html>

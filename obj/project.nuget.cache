@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ufh7F+yWPYY=",
+  "dgSpecHash": "7oose+T0sGU=",
   "success": true,
-  "projectFilePath": "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj",
+  "projectFilePath": "E:\\git-mv\\multiverse-main\\ERPDemo.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\ashis\\.nuget\\packages\\azure.core\\1.50.0\\azure.core.1.50.0.nupkg.sha512",
     "C:\\Users\\ashis\\.nuget\\packages\\azure.identity\\1.17.1\\azure.identity.1.17.1.nupkg.sha512",
