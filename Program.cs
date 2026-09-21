@@ -32,10 +32,13 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie(options =>
 {
-    options.LoginPath = "/Auth/Login";
-    options.AccessDeniedPath = "/Auth/Login";
+     options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;   // Localhost pe HTTP ke liye
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
 })
 .AddJwtBearer(options =>
 {
@@ -64,6 +67,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 app.UseHttpsRedirection();

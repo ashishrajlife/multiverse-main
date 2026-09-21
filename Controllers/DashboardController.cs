@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ERPDemo.Data;
 using ERPDemo.Filters;
 using Microsoft.AspNetCore.Authorization;
@@ -18,24 +19,24 @@ namespace ERPDemo.Controllers
         }
 
         public IActionResult Index()
-        {
-            // Try both: session aur claims se role nikalo
-            var role = HttpContext.Session.GetString("RoleName");
+{
+    var role = HttpContext.Session.GetString("RoleName")
+               ?? User.FindFirst(ClaimTypes.Role)?.Value;
 
-            // Fallback: agar session empty hai toh claims se lo
-            if (string.IsNullOrEmpty(role))
-            {
-                role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-            }
+    // Safety — agar role hi nahi hai toh login pe bhejo
+    if (string.IsNullOrEmpty(role))
+    {
+        return RedirectToAction("Login", "Auth");
+    }
 
-            return role switch
-            {
-                "SuperAdmin" => RedirectToAction(nameof(SuperAdminDashboard)),
-                "Admin"      => RedirectToAction(nameof(AdminDashboard)),
-                "Manager"    => RedirectToAction(nameof(AdminDashboard)),
-                _            => RedirectToAction(nameof(UserDashboard))
-            };
-        }
+    return role switch
+    {
+        "SuperAdmin" => RedirectToAction(nameof(SuperAdminDashboard)),
+        "Admin"      => RedirectToAction(nameof(AdminDashboard)),
+        "Manager"    => RedirectToAction(nameof(AdminDashboard)),
+        _            => RedirectToAction(nameof(UserDashboard))
+    };
+}
 
        [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> SuperAdminDashboard()
@@ -77,8 +78,8 @@ namespace ERPDemo.Controllers
             public int Count { get; set; }
         }
 
-        [Authorize(Roles = "Admin,SuperAdmin")]
-        public async Task<IActionResult> AdminDashboard()
+[Authorize(Roles = "Admin,Manager,SuperAdmin")]
+public async Task<IActionResult> AdminDashboard()
         {
             ViewBag.TotalUsers = await _context.Users.CountAsync();
             ViewBag.ActiveUsers = await _context.Users.Where(u => u.IsActive).CountAsync();
@@ -91,7 +92,7 @@ namespace ERPDemo.Controllers
             return View();
         }
 
-        [Authorize(Roles = "User,Admin,SuperAdmin")]
+        [Authorize(Roles = "User,Manager,Admin,SuperAdmin")]
         public async Task<IActionResult> UserDashboard()
         {
             var userId = HttpContext.Session.GetInt32("UserId");

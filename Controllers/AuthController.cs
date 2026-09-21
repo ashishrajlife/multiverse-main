@@ -18,20 +18,33 @@ namespace ERPDemo.Controllers
             _authService = authService;
         }
 
-        // ✅ GET: If already logged in, send them to their dashboard
         [HttpGet]
         public IActionResult Login()
         {
+            // Sirf tab redirect karo jab cookie AUTHENTIC ho
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-                return role switch
+                // Safety — agar role hi nahi mila toh login page dikhao
+                if (!string.IsNullOrEmpty(role))
                 {
-                    "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
-                    "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
-                    _            => RedirectToAction("UserDashboard", "Dashboard")
-                };
+                    try
+                    {
+                        return role switch
+                        {
+                            "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
+                            "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
+                            "Manager"    => RedirectToAction("UserDashboard", "Dashboard"),
+                            _            => RedirectToAction("UserDashboard", "Dashboard")
+                        };
+                    }
+                    catch
+                    {
+                        // Fallback — redirect fail hone pe login page dikhao
+                        return View();
+                    }
+                }
             }
 
             return View();

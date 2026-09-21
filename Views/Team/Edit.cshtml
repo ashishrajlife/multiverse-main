@@ -1,0 +1,76 @@
+@model ERPDemo.ViewModels.EditTeamMemberViewModel
+@{
+    ViewData["Title"] = "Edit Team Member";
+    Layout = "_DashboardLayout";
+    var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
+}
+
+<div class="page-header">
+    <div class="header-left">
+        <a asp-action="Index" class="back-btn" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>Edit Team Member</h1>
+            <p>Update user details and role</p>
+            <div class="page-accent"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm" style="max-width: 720px;">
+    <div class="card-body p-4">
+        <form asp-action="Edit" method="post" asp-antiforgery="true">
+            <input type="hidden" asp-for="UserId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Username" class="form-label fw-semibold">Username</label>
+                    <input asp-for="Username" class="form-control" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label fw-semibold">Full Name</label>
+                    <input asp-for="FullName" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="form-label fw-semibold">Phone</label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="RoleId" class="form-label fw-semibold">Role</label>
+                    <select asp-for="RoleId" class="form-select">
+                        @foreach (var r in roles)
+                        {
+                            <option value="@r.RoleId" selected="@(r.RoleId == Model.RoleId)">@r.RoleName</option>
+                        }
+                    </select>
+                    <span asp-validation-for="RoleId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6 d-flex align-items-center pt-4">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsActive" class="form-check-label fw-semibold">Active</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check2 me-1"></i> Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
