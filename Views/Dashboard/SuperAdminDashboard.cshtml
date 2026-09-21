@@ -2,194 +2,266 @@
     ViewData["Title"] = "Super Admin Dashboard";
     Layout = "_DashboardLayout";
 
-    // Compact KPI cards. Each one only shows up if the controller actually set its ViewBag value,
-    // so nothing renders blank if a value is missing.
-    var kpis = new List<(string Label, object Value, string Icon, string Tone)>();
-    if (ViewBag.TotalUsers != null)         { kpis.Add(("Total users",   (object)ViewBag.TotalUsers,         "bi-people",       "violet")); }
-    if (ViewBag.TotalOrganizations != null) { kpis.Add(("Organizations", (object)ViewBag.TotalOrganizations, "bi-building",     "sky")); }
-    if (ViewBag.TotalAdmins != null)        { kpis.Add(("Admins",        (object)ViewBag.TotalAdmins,        "bi-person-badge", "coral")); }
+    var recentOrgs = ViewBag.RecentOrganizations as List<ERPDemo.Models.Organization> ?? new();
+    var monthLabels = ViewBag.MonthLabels as List<string> ?? new();
+    var monthCounts = ViewBag.MonthCounts as List<int> ?? new();
 }
 
 @section Styles {
 <style>
     /* =====================================================
-       SUPER ADMIN DASHBOARD - compact cards
-       Builds on _DashboardLayout: .icon-tile, .tone-*, .section-label
+       SUPER ADMIN DASHBOARD
     ===================================================== */
 
-    /* One shared grid so KPI cards and module cards line up in the same columns */
-    .dash-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-        gap: 14px;
-        margin-bottom: 28px;
-    }
-
-    .dash-section .section-label { margin-bottom: 12px; }
-
-    /* ---------- KPI mini cards ---------- */
-    .kpi-mini {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 12px 16px;
+    .report-card {
+        padding: 20px;
         background: var(--card);
         border: 1px solid var(--card-border);
-        border-radius: 14px;
+        border-radius: 16px;
         box-shadow: var(--shadow-sm);
+        height: 100%;
     }
 
-    .kpi-mini .icon-tile {
-        flex: 0 0 auto;
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
-        font-size: 18px;
+    .report-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
     }
 
-    .kpi-text { min-width: 0; line-height: 1.2; }
-
-    .kpi-label {
-        display: block;
-        font-size: 12.5px;
-        font-weight: 600;
-        color: var(--ink-mute);
-    }
-
-    .kpi-value {
-        display: block;
-        margin-top: 2px;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: -0.6px;
-        color: var(--ink);
-        font-variant-numeric: tabular-nums;
-    }
-
-    /* ---------- Module cards ---------- */
-    .module-card {
-    position: relative;          /* anchor for absolute positioning */
-    display: block;
-    padding: 1rem;
-    border: 2px solid black;
-    border-radius: 10px;
-    text-decoration: none;
-}
-
-.module-header {
-    display: flex;
-    justify-content: space-between;  /* pushes h3 left, arrow right */
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.module-header h3 {
-    margin: 0;
-}
-
-.module-arrow {
-    font-size: 1.25rem;
-    flex-shrink: 0;
-    color: black;
-}
-
-    .module-card:hover {
-        color: var(--ink);
-        transform: translateY(-2px);
-        border-color: color-mix(in srgb, var(--tone) 55%, var(--line));
-        box-shadow: 0 12px 26px -14px color-mix(in srgb, var(--tone) 55%, transparent);
-    }
-
-    .module-card:focus-visible {
-        outline: 3px solid rgba(74, 144, 226, 0.45);
-        outline-offset: 2px;
-    }
-
-    .module-card .icon-tile {
-        flex: 0 0 auto;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        font-size: 20px;
-    }
-
-    .module-text { flex: 1 1 auto; min-width: 0; line-height: 1.3; }
-
-    .module-text h3 {
-        margin: 0 0 2px;
-        font-size: 14.5px;
-        font-weight: 700;
-        letter-spacing: -0.1px;
-        color: var(--ink);
-    }
-
-    .module-text p {
-        display: -webkit-box;
+    .report-card-header h3 {
         margin: 0;
-        overflow: hidden;
-        font-size: 12.5px;
-        color: var(--ink-mute);
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-
-    .module-count {
-        flex: 0 0 auto;
-        padding: 2px 10px;
-        border-radius: 999px;
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 700;
-        color: var(--tone);
-        background: var(--tone-soft);
-        font-variant-numeric: tabular-nums;
+        color: var(--ink);
     }
 
-    .module-arrow {
-        flex: 0 0 auto;
-        font-size: 14px;
+    .report-card-header small {
+        font-size: 12px;
         color: var(--ink-mute);
-        transition: transform 0.2s ease, color 0.2s ease;
     }
 
-    .module-card:hover .module-arrow {
-        color: var(--tone);
-        transform: translateX(3px);
+    .chart-wrap {
+        position: relative;
+        height: 320px;
+    }
+
+    /* ---------- Recent orgs list ---------- */
+    .mini-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .mini-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px dashed #edf0f4;
+    }
+
+    .mini-item:last-child { border-bottom: none; }
+
+    .mini-item .avatar {
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .mini-item-body {
+        flex: 1;
+        min-width: 0;
+        line-height: 1.3;
+    }
+
+    .mini-item-title {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mini-item-sub {
+        display: block;
+        font-size: 12px;
+        color: var(--ink-mute);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mini-item-meta {
+        flex: 0 0 auto;
+        text-align: right;
+        font-size: 11.5px;
+        color: var(--ink-mute);
+        line-height: 1.4;
     }
 
     @@media (max-width: 575.98px) {
-        .dash-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; }
-    }
-
-    @@media (prefers-reduced-motion: reduce) {
-        .module-card, .module-arrow { transition: none; }
-        .module-card:hover { transform: none; }
-        .module-card:hover .module-arrow { transform: none; }
+        .chart-wrap { height: 240px; }
     }
 </style>
 }
 
+<!-- ====================== PAGE HEADER ====================== -->
 <div class="page-header">
     <div>
         <h1>Control Center</h1>
-        <p class="fw-bold text-black">Complete authority over organizations, users, roles, and the platform</p>
+        <p>Complete authority over organizations, users, roles, and the platform</p>
         <div class="page-accent"></div>
     </div>
 </div>
 
-<!-- ====================== AUTHORITY MODULES ====================== -->
-<section class="dash-section">
-
-  <div class="dash-grid">
-    <a asp-controller="Organization" asp-action="Index" class="module-card tone-violet">
-        <div class="module-text">
-            <div class="module-header">
-                <h3>Organizations</h3>
-                <i class="bi bi-arrow-right module-arrow text-black"></i>
+<!-- ====================== GROWTH + RECENT ORGS ====================== -->
+<div class="row g-3 g-lg-4">
+    <!-- Organization Growth Line Chart -->
+    <div class="col-lg-7">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Organization Growth</h3>
+                <small>Last 6 months</small>
             </div>
-            <hr style="height: 2px;" />
-    
-            <p class="fw-bold text-black">Create, manage and activate companies across the platform</p>
+            <div class="chart-wrap">
+                <canvas id="orgGrowthChart"></canvas>
+            </div>
         </div>
-    </a>
+    </div>
+
+    <!-- Recently Added Organizations -->
+    <div class="col-lg-5">
+        <div class="report-card">
+            <div class="report-card-header">
+                <h3><i class="bi bi-building-add me-2 text-primary"></i>Recently Added Organizations</h3>
+                <a asp-controller="Organization" asp-action="Index" class="panel-link">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            @if (!recentOrgs.Any())
+            {
+                <div class="empty-state" style="padding: 30px 10px;">
+                    <i class="bi bi-building"></i>
+                    <strong>No organizations yet</strong>
+                    <span>New companies will appear here</span>
+                </div>
+            }
+            else
+            {
+                <ul class="mini-list">
+                    @foreach (var org in recentOrgs)
+                    {
+                        var planTone = org.Plan switch
+                        {
+                            "Enterprise" => "coral",
+                            "Pro" => "amber",
+                            _ => "sky"
+                        };
+                        var initials = !string.IsNullOrEmpty(org.Name)
+                            ? org.Name.Substring(0, 1).ToUpper()
+                            : "?";
+
+                        <li class="mini-item">
+                            <span class="avatar tone-violet">@initials</span>
+                            <div class="mini-item-body">
+                                <span class="mini-item-title">@org.Name</span>
+                                <span class="mini-item-sub">
+                                    @org.Code • @(org.City ?? "—")@(org.Country != null ? ", " + org.Country : "")
+                                </span>
+                            </div>
+                            <div class="mini-item-meta">
+                                <span class="pill tone-@planTone" style="font-size:11px;">@org.Plan</span>
+                                <br />
+                                <small>@org.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
 </div>
-</section>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    (function () {
+        const violet = '#7c5cff';
+
+        // ---------- Organization Growth (LINE CHART) ----------
+        const orgGrowthEl = document.getElementById('orgGrowthChart');
+        if (orgGrowthEl) {
+            const ctx = orgGrowthEl.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+            gradient.addColorStop(0, 'rgba(124, 92, 255, 0.35)');
+            gradient.addColorStop(1, 'rgba(124, 92, 255, 0.02)');
+
+            new Chart(orgGrowthEl, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthLabels)),
+                    datasets: [{
+                        label: 'Organizations',
+                        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthCounts)),
+                        borderColor: violet,
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: violet,
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#0f172a',
+                            padding: 10,
+                            cornerRadius: 8,
+                            titleFont: { size: 12 },
+                            bodyFont: { size: 13, weight: 'bold' },
+                            callbacks: {
+                                label: function (ctx) {
+                                    return ctx.parsed.y + ' organization' + (ctx.parsed.y === 1 ? '' : 's');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, color: '#64748b' },
+                            grid: { color: '#eef2f7' }
+                        },
+                        x: {
+                            ticks: { color: '#64748b' },
+                            grid: { display: false }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+    })();
+</script>
+}

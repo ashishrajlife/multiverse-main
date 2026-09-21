@@ -37,25 +37,44 @@ namespace ERPDemo.Controllers
             };
         }
 
-        [Authorize(Roles = "SuperAdmin")]
+       [Authorize(Roles = "SuperAdmin")]
         public async Task<IActionResult> SuperAdminDashboard()
         {
-            ViewBag.TotalUsers = await _context.Users.CountAsync();
-            ViewBag.TotalAdmins = await _context.Users.Where(u => u.RoleId == 3).CountAsync();
-            ViewBag.TotalSuperAdmins = await _context.Users.Where(u => u.RoleId == 4).CountAsync();
-
-            // These will populate once we build the modules
-            ViewBag.TotalOrganizations = 0;
-            ViewBag.TotalRoles = await _context.Roles.CountAsync();
-
-            // Optional: pass recent users still (if you want to keep it for later)
-            ViewBag.RecentUsers = await _context.Users
-                .Include(u => u.Role)
-                .OrderByDescending(u => u.CreatedAt)
+            // ===== RECENT ORGANIZATIONS (Last 5) =====
+            ViewBag.RecentOrganizations = await _context.Organizations
+                .OrderByDescending(o => o.CreatedAt)
                 .Take(5)
                 .ToListAsync();
 
+            // ===== ORGANIZATION GROWTH (Last 6 months) =====
+            var sixMonthsAgo = DateTime.Now.AddMonths(-5);
+            var startOfMonth = new DateTime(sixMonthsAgo.Year, sixMonthsAgo.Month, 1);
+
+            var orgsByMonth = await _context.Organizations
+                .Where(o => o.CreatedAt >= startOfMonth)
+                .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
+                .Select(g => new { g.Key.Year, g.Key.Month, Count = g.Count() })
+                .ToListAsync();
+
+            var monthLabels = new List<string>();
+            var monthCounts = new List<int>();
+            for (int i = 0; i < 6; i++)
+            {
+                var m = startOfMonth.AddMonths(i);
+                monthLabels.Add(m.ToString("MMM yyyy"));
+                var match = orgsByMonth.FirstOrDefault(x => x.Year == m.Year && x.Month == m.Month);
+                monthCounts.Add(match?.Count ?? 0);
+            }
+            ViewBag.MonthLabels = monthLabels;
+            ViewBag.MonthCounts = monthCounts;
+
             return View();
+        }
+        // Helper class — controller ke andar hi rakh sakte ho ya ViewModels mein
+        public class CityStat
+        {
+            public string City { get; set; } = string.Empty;
+            public int Count { get; set; }
         }
 
         [Authorize(Roles = "Admin,SuperAdmin")]
