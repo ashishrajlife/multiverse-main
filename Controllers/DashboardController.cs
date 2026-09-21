@@ -19,12 +19,20 @@ namespace ERPDemo.Controllers
 
         public IActionResult Index()
         {
+            // Try both: session aur claims se role nikalo
             var role = HttpContext.Session.GetString("RoleName");
+
+            // Fallback: agar session empty hai toh claims se lo
+            if (string.IsNullOrEmpty(role))
+            {
+                role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            }
 
             return role switch
             {
                 "SuperAdmin" => RedirectToAction(nameof(SuperAdminDashboard)),
                 "Admin"      => RedirectToAction(nameof(AdminDashboard)),
+                "Manager"    => RedirectToAction(nameof(AdminDashboard)),
                 _            => RedirectToAction(nameof(UserDashboard))
             };
         }

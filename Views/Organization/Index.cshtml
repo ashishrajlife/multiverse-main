@@ -2,163 +2,591 @@
 @{
     ViewData["Title"] = "Organizations";
     Layout = "_DashboardLayout";
+
+    // Numbers below describe the organizations currently listed (i.e. after search / status filters).
+    var orgs          = Model.Organizations;
+    var totalCount    = orgs.Count();
+    var activeCount   = orgs.Count(o => o.IsActive);
+    var inactiveCount = totalCount - activeCount;
+    var totalUsers    = orgs.Sum(o => o.UserCount);
+    var hasFilter     = !string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.StatusFilter);
+
+    var avatarTones = new[] { "violet", "sky", "pink", "amber", "green", "coral" };
+
+    string InitialsOf(string name)
+    {
+        var parts = (name ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2);
+        var text  = string.Concat(parts.Select(p => char.ToUpper(p[0])));
+        return string.IsNullOrEmpty(text) ? "?" : text;
+    }
 }
 
-<div class="page-header">
-    <div>
-        <h1>Organizations</h1>
-        <p>Manage companies onboarded to the platform</p>
-        <div class="page-accent"></div>
+@section Styles {
+<style>
+    /* =====================================================
+       ORGANIZATIONS LIST
+       Builds on _DashboardLayout: .panel, .data-table, .pill,
+       .avatar, .stat-card, .icon-tile, .empty-state, .tone-*
+    ===================================================== */
+
+    /* ---------- Buttons (project tokens) ---------- */
+    .org-list .btn-primary {
+        background: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .org-list .btn-primary:hover:not(:disabled),
+    .org-list .btn-primary:focus-visible {
+        background: var(--primary-deep);
+        border-color: var(--primary-deep);
+    }
+
+    .org-list .btn-outline-secondary {
+        color: var(--ink-soft);
+        border-color: var(--line);
+        background: #fff;
+    }
+
+    .org-list .btn-outline-secondary:hover {
+        color: var(--ink);
+        background: #f8fafd;
+        border-color: #cfd8e6;
+    }
+
+    .org-list .btn:focus-visible {
+        outline: 3px solid rgba(74, 144, 226, 0.45);
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+
+    /* ---------- Flash messages ---------- */
+    .org-list .flash {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 13px 16px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .org-list .flash-success { color: #167a40; background: #e0f7e9; border: 1px solid #b8ebcc; }
+    .org-list .flash-error   { color: #d1303c; background: #ffecee; border: 1px solid #ffd0d5; }
+    .org-list .flash i { font-size: 18px; }
+
+    /* ---------- Stat row ---------- */
+    .stat-row { margin-bottom: 24px; }
+
+    /* ---------- Toolbar (search + status filter) ---------- */
+    .list-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .search-field { position: relative; flex: 1 1 280px; min-width: 0; max-width: 480px; }
+
+    .search-field > i {
+        position: absolute;
+        top: 50%;
+        left: 15px;
+        transform: translateY(-50%);
+        font-size: 15px;
+        color: var(--ink-mute);
+        pointer-events: none;
+    }
+
+    .search-field .form-control {
+        min-height: 44px;
+        padding-left: 42px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        font-size: 14.5px;
+        color: var(--ink);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-field .form-control::placeholder { color: #a7b2c3; }
+
+    .search-field .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+    }
+
+    .list-toolbar .btn { min-height: 44px; padding: 0 20px; border-radius: 12px; font-weight: 600; }
+
+    /* Segmented status filter */
+    .segmented {
+        display: inline-flex;
+        gap: 2px;
+        padding: 4px;
+        border-radius: 12px;
+        background: #f1f4f9;
+    }
+
+    .segmented label { position: relative; margin: 0; }
+
+    .segmented input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .segmented span {
+        display: block;
+        padding: 8px 16px;
+        border-radius: 9px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        white-space: nowrap;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .segmented label:hover span { color: var(--ink); }
+
+    .segmented input:checked + span {
+        color: var(--ink);
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
+    }
+
+    .segmented input:focus-visible + span {
+        outline: 3px solid rgba(74, 144, 226, 0.45);
+        outline-offset: 1px;
+    }
+
+    .clear-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink-soft);
+        text-decoration: none;
+    }
+
+    .clear-link:hover { color: var(--primary-deep); }
+
+    .result-count { margin-left: auto; font-size: 13px; font-weight: 500; color: var(--ink-mute); }
+
+    /* ---------- Table ---------- */
+    .org-list .data-table .user-email { max-width: 340px; }
+
+    .code-chip {
+        display: inline-block;
+        margin-right: 6px;
+        padding: 1px 8px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        color: var(--ink-soft);
+        background: #f1f4f9;
+    }
+
+    .data-table tr.is-inactive .user-cell { opacity: 0.6; }
+
+    .users-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13.5px;
+        font-weight: 600;
+        color: var(--ink);
+    }
+
+    .users-chip i { font-size: 15px; color: var(--ink-mute); }
+
+    .place {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--ink-soft);
+    }
+
+    .place i { color: var(--ink-mute); }
+    .place-empty { color: #b3bdcc; }
+
+    /* Icon buttons in the Actions column */
+    .row-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 6px; }
+    .row-actions form { margin: 0; }
+
+    .icon-btn {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        font-size: 15px;
+        color: var(--ink-soft);
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .icon-btn:hover {
+        color: var(--tone);
+        background: var(--tone-soft);
+        border-color: color-mix(in srgb, var(--tone) 35%, transparent);
+    }
+
+    .icon-btn.is-on { color: #22a35a; }
+
+    .icon-btn:focus-visible {
+        outline: 3px solid rgba(74, 144, 226, 0.45);
+        outline-offset: 2px;
+    }
+
+    /* Empty state gets a call to action */
+    .empty-state .btn { margin-top: 16px; }
+
+    /* ---------- Delete modal ---------- */
+    #deleteModal .modal-content {
+        border: 0;
+        border-radius: 18px;
+        font-family: var(--font);
+        box-shadow: 0 30px 70px -20px rgba(15, 23, 42, 0.45);
+    }
+
+    #deleteModal .modal-body { padding: 28px 28px 8px; text-align: center; }
+
+    #deleteModal .icon-tile { width: 54px; height: 54px; margin: 0 auto 16px; border-radius: 16px; font-size: 24px; }
+
+    #deleteModal h2 { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--ink); }
+
+    #deleteModal p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-soft); }
+
+    #deleteModal .modal-footer { justify-content: center; gap: 10px; padding: 20px 28px 26px; border: 0; }
+
+    #deleteModal .btn { min-width: 120px; min-height: 44px; border-radius: 12px; font-weight: 600; }
+
+    /* ---------- Responsive ---------- */
+    @@media (max-width: 767.98px) {
+        .search-field { max-width: none; flex-basis: 100%; }
+        .result-count { margin-left: 0; }
+    }
+
+    @@media (max-width: 575.98px) {
+        .segmented { display: flex; width: 100%; }
+        .segmented label { flex: 1 1 0; }
+        .segmented span { text-align: center; padding: 8px 6px; }
+        .list-toolbar { padding: 14px 16px; }
+        .list-toolbar .btn { flex: 1 1 auto; }
+        .org-list .data-table td.cell-actions { margin-left: auto; }
+        .org-list .data-table .user-email { max-width: 60vw; }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .icon-btn, .segmented span, .search-field .form-control { transition: none; }
+    }
+</style>
+}
+
+<div class="org-list">
+
+    <div class="page-header">
+        <div>
+            <h1>Organizations</h1>
+            <p>Manage companies onboarded to the platform</p>
+            <div class="page-accent"></div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-controller="Dashboard" asp-action="SuperAdminDashboard" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> New Organization
+            </a>
+        </div>
     </div>
 
-    <div class="d-flex gap-2">
-        <a asp-controller="Dashboard" asp-action="SuperAdminDashboard" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back
-        </a>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> New Organization
-        </a>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert flash flash-success alert-dismissible fade show" role="status">
+            <i class="bi bi-check-circle-fill"></i>
+            <span>@TempData["Success"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert flash flash-error alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>@TempData["Error"]</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- ================= SUMMARY ================= -->
+    <div class="row g-3 stat-row">
+        <div class="col-6 col-xl-3">
+            <div class="stat-card tone-violet">
+                <div>
+                    <span class="stat-label">Organizations</span>
+                    <span class="stat-value">@totalCount</span>
+                    <span class="stat-note">@(hasFilter ? "Matching your filters" : "Onboarded companies")</span>
+                </div>
+                <span class="icon-tile"><i class="bi bi-building"></i></span>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card tone-green">
+                <div>
+                    <span class="stat-label">Active</span>
+                    <span class="stat-value">@activeCount</span>
+                    <span class="stat-note">Currently using the platform</span>
+                </div>
+                <span class="icon-tile"><i class="bi bi-check-circle"></i></span>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card tone-coral">
+                <div>
+                    <span class="stat-label">Inactive</span>
+                    <span class="stat-value">@inactiveCount</span>
+                    <span class="stat-note">Deactivated organizations</span>
+                </div>
+                <span class="icon-tile"><i class="bi bi-pause-circle"></i></span>
+            </div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="stat-card tone-sky">
+                <div>
+                    <span class="stat-label">Total users</span>
+                    <span class="stat-value">@totalUsers</span>
+                    <span class="stat-note">Across listed organizations</span>
+                </div>
+                <span class="icon-tile"><i class="bi bi-people"></i></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LIST ================= -->
+    <section class="panel">
+
+        <!-- Filters -->
+        <form method="get" class="list-toolbar" role="search">
+            <div class="search-field">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" value="@Model.SearchTerm" class="form-control"
+                       placeholder="Search by name, code or email..." aria-label="Search organizations" />
+            </div>
+
+            <div class="segmented" role="radiogroup" aria-label="Filter by status">
+                <label>
+                    <input type="radio" name="status" value="" checked="@(string.IsNullOrEmpty(Model.StatusFilter))" />
+                    <span>All</span>
+                </label>
+                <label>
+                    <input type="radio" name="status" value="active" checked="@(Model.StatusFilter == "active")" />
+                    <span>Active</span>
+                </label>
+                <label>
+                    <input type="radio" name="status" value="inactive" checked="@(Model.StatusFilter == "inactive")" />
+                    <span>Inactive</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Search</button>
+
+            @if (hasFilter)
+            {
+                <a asp-action="Index" class="clear-link"><i class="bi bi-x-circle"></i>Clear filters</a>
+            }
+
+            <span class="result-count">@totalCount @(totalCount == 1 ? "organization" : "organizations")</span>
+        </form>
+
+        @if (orgs.Any())
+        {
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Plan</th>
+                            <th>Users</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var o in orgs)
+                        {
+                            var planTone = o.Plan switch
+                            {
+                                "Enterprise" => "amber",
+                                "Pro"        => "violet",
+                                _            => "sky"
+                            };
+
+                            var avatarTone = avatarTones[(o.Name ?? "").Sum(c => (int)c) % avatarTones.Length];
+                            var location   = string.Join(", ", new[] { o.City, o.Country }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+                            <tr class="@(o.IsActive ? "" : "is-inactive")">
+                                <td class="cell-user">
+                                    <div class="user-cell">
+                                        <span class="avatar tone-@avatarTone">@InitialsOf(o.Name)</span>
+                                        <div class="meta">
+                                            <span class="user-name-text">@o.Name</span>
+                                            <span class="user-email">
+                                                @if (!string.IsNullOrEmpty(o.Code))
+                                                {
+                                                    <span class="code-chip">@o.Code</span>
+                                                }
+                                                @o.Email
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><span class="pill tone-@planTone">@o.Plan</span></td>
+                                <td>
+                                    <span class="users-chip"><i class="bi bi-people"></i>@o.UserCount</span>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(location))
+                                    {
+                                        <span class="place"><i class="bi bi-geo-alt"></i>@location</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="place-empty">—</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (o.IsActive)
+                                    {
+                                        <span class="pill pill-dot tone-green">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill pill-dot tone-coral">Inactive</span>
+                                    }
+                                </td>
+                                <td class="text-end cell-actions">
+                                    <div class="row-actions">
+                                        <a asp-action="Details" asp-route-id="@o.OrganizationId"
+                                           class="icon-btn tone-slate" title="View" aria-label="View @o.Name">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@o.OrganizationId"
+                                           class="icon-btn tone-sky" title="Edit" aria-label="Edit @o.Name">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="ToggleActive" asp-route-id="@o.OrganizationId" method="post" asp-antiforgery="true">
+                                            <button type="submit" class="icon-btn tone-amber @(o.IsActive ? "is-on" : "")"
+                                                    title="@(o.IsActive ? "Deactivate" : "Activate")"
+                                                    aria-label="@(o.IsActive ? "Deactivate" : "Activate") @o.Name">
+                                                <i class="bi bi-@(o.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                            </button>
+                                        </form>
+                                        <form asp-action="Delete" asp-route-id="@o.OrganizationId" method="post" asp-antiforgery="true"
+                                              class="js-delete" data-org-name="@o.Name">
+                                            <button type="submit" class="icon-btn tone-coral" title="Delete" aria-label="Delete @o.Name">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else if (hasFilter)
+        {
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <strong>No organizations match your filters</strong>
+                <span>Try a different search term or status.</span>
+                <div>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Clear filters
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-building"></i>
+                <strong>No organizations yet</strong>
+                <span>Create your first organization to get started.</span>
+                <div>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i> New Organization
+                    </a>
+                </div>
+            </div>
+        }
+    </section>
+</div>
+
+<!-- ================= DELETE CONFIRMATION ================= -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <span class="icon-tile tone-coral"><i class="bi bi-trash"></i></span>
+                <h2 id="deleteModalTitle">Delete organization?</h2>
+                <p>
+                    <strong id="deleteOrgName"></strong> will be deleted.
+                    Users assigned to this organization will become unassigned.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+            </div>
+        </div>
     </div>
 </div>
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+@section Scripts {
+    <script>
+        (function () {
+            // Status filter: apply as soon as a segment is picked
+            document.querySelectorAll('.segmented input').forEach(function (input) {
+                input.addEventListener('change', function () { input.form.submit(); });
+            });
 
-<!-- Filters -->
-<form method="get" class="mb-3">
-    <div class="row g-2">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                <input type="text" name="search" value="@Model.SearchTerm" class="form-control"
-                       placeholder="Search by name, code or email..." />
-            </div>
-        </div>
-        <div class="col-md-3">
-            <select name="status" class="form-select">
-                <option value="">All statuses</option>
-                <option value="active"   selected="@(Model.StatusFilter == "active")">Active only</option>
-                <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive only</option>
-            </select>
-        </div>
-        <div class="col-md-3 d-flex gap-2">
-            <button class="btn btn-primary flex-fill" type="submit">Apply</button>
-            @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.StatusFilter))
-            {
-                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
-            }
-        </div>
-    </div>
-</form>
+            // Delete: confirm in a modal instead of the browser's confirm() dialog
+            var modalEl = document.getElementById('deleteModal');
+            var nameEl  = document.getElementById('deleteOrgName');
+            var confirmBtn = document.getElementById('confirmDelete');
+            var pendingForm = null;
+            var modal = new bootstrap.Modal(modalEl);
 
-<!-- Table -->
-<section class="panel">
-    <div class="table-responsive">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Organization</th>
-                    <th>Plan</th>
-                    <th>Users</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                    <th class="text-end">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var o in Model.Organizations)
-                {
-                    var planTone = o.Plan switch
-                    {
-                        "Enterprise" => "coral",
-                        "Pro" => "amber",
-                        _ => "sky"
-                    };
+            document.querySelectorAll('form.js-delete').forEach(function (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    pendingForm = form;
+                    nameEl.textContent = form.dataset.orgName || 'This organization';
+                    modal.show();
+                });
+            });
 
-                    <tr>
-                        <td>
-                            <div class="user-cell">
-                                <span class="avatar tone-violet">@o.Name.Substring(0, 1).ToUpper()</span>
-                                <div class="meta">
-                                    <span class="user-name-text">@o.Name</span>
-                                    <span class="user-email">@o.Code @(o.Email != null ? "• " + o.Email : "")</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td><span class="pill tone-@planTone">@o.Plan</span></td>
-                        <td>
-                            <span class="badge-count">@o.UserCount</span>
-                        </td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(o.City) || !string.IsNullOrEmpty(o.Country))
-                            {
-                                <span>@o.City@(o.Country != null ? ", " + o.Country : "")</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted small">—</span>
-                            }
-                        </td>
-                        <td>
-                            @if (o.IsActive)
-                            {
-                                <span class="pill pill-dot tone-green">Active</span>
-                            }
-                            else
-                            {
-                                <span class="pill pill-dot tone-coral">Inactive</span>
-                            }
-                        </td>
-                        <td class="text-end">
-                            <div class="btn-group btn-group-sm">
-                                <a asp-action="Details" asp-route-id="@o.OrganizationId" class="btn btn-outline-secondary" title="View">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@o.OrganizationId" class="btn btn-outline-primary" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form asp-action="ToggleActive" asp-route-id="@o.OrganizationId" method="post" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button class="btn btn-outline-warning" title="@(o.IsActive ? "Deactivate" : "Activate")">
-                                        <i class="bi bi-@(o.IsActive ? "toggle-on" : "toggle-off")"></i>
-                                    </button>
-                                </form>
-                                <form asp-action="Delete" asp-route-id="@o.OrganizationId" method="post" class="d-inline"
-                                     onsubmit="return confirm('Delete @o.Name? Users assigned to this org will become unassigned.');">
-                                    @Html.AntiForgeryToken()
-                                    <button class="btn btn-outline-danger" title="Delete">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
+            confirmBtn.addEventListener('click', function () {
+                if (pendingForm) {
+                    confirmBtn.disabled = true;
+                    pendingForm.submit();
                 }
-                @if (!Model.Organizations.Any())
-                {
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty-state">
-                                <i class="bi bi-buildings"></i>
-                                <strong>No organizations found</strong>
-                                <span>Create your first organization to get started.</span>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
+            });
+        })();
+    </script>
+}

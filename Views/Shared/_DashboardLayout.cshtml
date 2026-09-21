@@ -1,11 +1,25 @@
+@using System.Security.Claims
 @{
     var controllerName = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
-    var fullName = Context.Session.GetString("FullName") ?? "User";
+
+    // ✅ FullName: pehle session, phir claims se
+    var fullName = Context.Session.GetString("FullName")
+                   ?? User.FindFirst("FullName")?.Value
+                   ?? User.FindFirst(ClaimTypes.Name)?.Value
+                   ?? "User";
+
     var initials = string.Concat(
         fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Take(2)
                 .Select(p => char.ToUpper(p[0])));
     if (string.IsNullOrEmpty(initials)) { initials = "U"; }
+
+    // ✅ Role: pehle session, phir claims se
+    var currentRole = Context.Session.GetString("RoleName")
+                      ?? User.FindFirst(ClaimTypes.Role)?.Value
+                      ?? "User";
+
+    var isSuperAdmin = currentRole == "SuperAdmin";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -889,35 +903,41 @@
         </div>
 
         <ul class="sidebar-nav">
-            <li>
-                <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                   style="--nav-tone:#48dbfb">
-                    <i class="bi bi-speedometer2"></i>Dashboard
-                </a>
-            </li>
-
-             <li>
-    </li>
+    <!-- Dashboard — everyone -->
     <li>
-            
+        <a class="side-link @(controllerName.Equals("SuperAdminDashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+           asp-controller="Dashboard" asp-action="Index"
+           style="--nav-tone:#48dbfb">
+            <i class="bi bi-speedometer2"></i>Dashboard
+        </a>
+    </li>
 
-            @* <li>
-                <a class="side-link" style="--nav-tone:#a29bfe" href="#">
-                    <i class="bi bi-people"></i>User Management
-                </a>
-            </li> 
-            <li>
-                <a class="side-link" style="--nav-tone:#feca57" href="#">
-                    <i class="bi bi-file-earmark-text"></i>Reports
-                </a>
-            </li>
-            <li>
-            *@
-                <a class="side-link" style="--nav-tone:#ff9ff3" href="#">
-                    <i class="bi bi-gear"></i>Settings
-                </a>
-            </li>
-        </ul>
+    @if (isSuperAdmin)
+    {
+        <li>
+            <a class="side-link @(controllerName.Equals("Organization", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Organization" asp-action="Index"
+               style="--nav-tone:#a29bfe">
+                <i class="bi bi-buildings"></i>Organizations
+            </a>
+        </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("UserManagement", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="UserManagement" asp-action="Index"
+               style="--nav-tone:#ff9ff3">
+                <i class="bi bi-people"></i>User Management
+            </a>
+        </li>
+    }
+
+    <!-- Settings — everyone (ya agar sirf superadmin chahiye toh upar wale block mein daal do) -->
+    <li>
+        <a class="side-link" asp-controller="Settings" asp-action="Index" style="--nav-tone:#feca57">
+            <i class="bi bi-gear"></i>Settings
+        </a>
+    </li>
+</ul>
 
         <div class="sidebar-foot">&copy; @DateTime.Now.Year Multiverse</div>
     </aside>
@@ -935,22 +955,24 @@
             </div>
 
             <div class="dropdown">
-                <button type="button" class="user-chip dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="user-avatar">@initials</span>
-                    <span class="d-none d-sm-inline">@fullName</span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end user-menu">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i>Profile</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form asp-controller="Auth" asp-action="Logout" method="post" asp-antiforgery="true">
-                            <button type="submit" class="dropdown-item text-danger">
-                                <i class="bi bi-box-arrow-right"></i>Logout
-                            </button>
-                        </form>
-                    </li>
-                </ul>
-            </div>
+            <button type="button" class="user-chip dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="user-avatar">@initials</span>
+                <span class="d-none d-sm-inline">@fullName</span>
+                <span class="badge ms-2 @(isSuperAdmin ? "bg-danger" : currentRole == "Admin" ? "bg-warning text-dark" : "bg-secondary")"
+                    style="font-size:10px;">@currentRole</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end user-menu">
+                <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i>Profile</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form asp-controller="Auth" asp-action="Logout" method="post" asp-antiforgery="true">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right"></i>Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
         </header>
 
         <main class="content-area">

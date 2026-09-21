@@ -41,8 +41,7 @@ namespace ERPDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             var user = await _authService.ValidateUserAsync(model.UsernameOrEmail, model.Password);
 
@@ -56,6 +55,7 @@ namespace ERPDemo.Controllers
 
             var roleName = user.Role?.RoleName ?? "User";
 
+            // ✅ Build claims
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
@@ -77,6 +77,7 @@ namespace ERPDemo.Controllers
                     ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
                 });
 
+            // ✅ JWT token (API ke liye)
             var token = _authService.GenerateJwtToken(user);
             Response.Cookies.Append("JWToken", token, new CookieOptions
             {
@@ -86,15 +87,18 @@ namespace ERPDemo.Controllers
                 Expires = DateTime.Now.AddMinutes(60)
             });
 
+            // ✅✅✅ SESSION VARIABLES — YEH ZAROORI HAI ✅✅✅
             HttpContext.Session.SetInt32("UserId", user.UserId);
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("RoleName", roleName);
+            HttpContext.Session.SetString("RoleName", roleName);          // ⚠️ Yeh missing tha!
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
 
+            // ✅ Redirect to correct dashboard
             return roleName switch
             {
                 "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                 "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
+                "Manager"    => RedirectToAction("AdminDashboard", "Dashboard"),
                 _            => RedirectToAction("UserDashboard", "Dashboard")
             };
         }

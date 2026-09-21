@@ -108,6 +108,11 @@ namespace ERPDemo.Controllers
                 Country = model.Country,
                 Plan = model.Plan,
                 IsActive = true,
+                GSTIN = model.GSTIN,
+                GSTLastVerifiedAt = System.DateTime.UtcNow,
+                GSTStatus = "Active",
+                LegalName = model.Name,
+                TradeName = model.Name,
                 CreatedAt = DateTime.Now
             });
 
