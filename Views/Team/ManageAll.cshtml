@@ -1,348 +1,176 @@
 @model ERPDemo.ViewModels.ManageAllViewModel
 @{
-    ViewData["Title"] = "Manage All";
+    ViewData["Title"] = "Manage Team Members";
     Layout = "_DashboardLayout";
 }
 
-@section Styles {
-<link rel="stylesheet" href="~/css/retro.css" asp-append-version="true" />
+<div class="rt-head mb-4">
+    <div class="rt-head-left">
+        <div>
+            <h1>Team Members Directory</h1>
+            <p class="text-muted mb-0">Overview of all organization users, roles, departments, and system details.</p>
+        </div>
+    </div>
+    <div class="rt-head-right">
+        <a asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Add New Member
+        </a>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 }
 
-<div class="rt-page">
-
-<div class="rt-head">
-    <div class="rt-head-left">
-        <a asp-controller="Dashboard" asp-action="Index" class="rt-btn rt-btn-icon rt-btn-back" title="Back">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <div>
-            <h1>Manage All</h1>
-            <p>Change roles and departments instantly</p>
-        </div>
-    </div>
-    <a asp-action="Create" class="rt-btn rt-btn-primary">
-        <i class="bi bi-person-plus"></i> Add Member
-    </a>
-</div>
-
-<!-- KPI strip -->
-<div class="rt-stats">
-    <div class="rt-stat rt-sky">
-        <span class="rt-stat-icon"><i class="bi bi-people"></i></span>
-        <div>
-            <span class="rt-stat-label">Total members</span>
-            <span class="rt-stat-value">@Model.TotalMembers</span>
-        </div>
-    </div>
-    <div class="rt-stat rt-amber">
-        <span class="rt-stat-icon"><i class="bi bi-person-workspace"></i></span>
-        <div>
-            <span class="rt-stat-label">Managers</span>
-            <span class="rt-stat-value">@Model.ManagerCount</span>
-        </div>
-    </div>
-    <div class="rt-stat rt-violet">
-        <span class="rt-stat-icon"><i class="bi bi-person"></i></span>
-        <div>
-            <span class="rt-stat-label">Employees</span>
-            <span class="rt-stat-value">@Model.EmployeeCount</span>
-        </div>
-    </div>
-    <div class="rt-stat rt-green">
-        <span class="rt-stat-icon"><i class="bi bi-person-check"></i></span>
-        <div>
-            <span class="rt-stat-label">Active</span>
-            <span class="rt-stat-value">@Model.ActiveCount</span>
-        </div>
+<!-- Filter Form -->
+<div class="rt-window mb-4">
+    <div class="rt-titlebar"><span>Filter Directory</span></div>
+    <div class="p-3">
+        <form method="get" asp-action="ManageAll" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" name="search" value="@Model.SearchTerm" class="rt-field w-100" placeholder="Search by name, email..." />
+            </div>
+            <div class="col-md-3">
+                <select name="role" class="rt-field w-100">
+                    <option value="">All Roles</option>
+                    <option value="manager" selected="@(Model.RoleFilter == "manager")">Manager</option>
+                    <option value="employee" selected="@(Model.RoleFilter == "employee")">Employee</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="department" class="rt-field w-100">
+                    <option value="">All Departments</option>
+                    @foreach (var d in Model.Departments)
+                    {
+                        <option value="@d.DepartmentId" selected="@(Model.DepartmentFilter == d.DepartmentId.ToString())">@d.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="rt-field w-100">
+                    <option value="">All Statuses</option>
+                    <option value="active" selected="@(Model.StatusFilter == "active")">Active</option>
+                    <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="rt-btn rt-btn-primary w-100">Filter</button>
+                <a asp-action="ManageAll" class="rt-btn">Reset</a>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Filters -->
-<form method="get" class="rt-filter">
-    <i class="bi bi-funnel rt-filter-icon" aria-hidden="true"></i>
-
-    <div class="rt-search">
-        <i class="bi bi-search" aria-hidden="true"></i>
-        <input type="text" name="search" value="@Model.SearchTerm" class="rt-field"
-               placeholder="Name, username or email" aria-label="Search members" />
-    </div>
-
-    <select name="role" class="rt-field" aria-label="Role">
-        <option value="">All roles</option>
-        <option value="manager"  selected="@(Model.RoleFilter == "manager")">Managers</option>
-        <option value="employee" selected="@(Model.RoleFilter == "employee")">Employees</option>
-    </select>
-
-    <select name="department" class="rt-field" aria-label="Department">
-        <option value="">All departments</option>
-        @foreach (var d in Model.Departments)
-        {
-            <option value="@d.DepartmentId" selected="@(Model.DepartmentFilter == d.DepartmentId.ToString())">@d.Name</option>
-        }
-    </select>
-
-    <select name="status" class="rt-field" aria-label="Status">
-        <option value="">All statuses</option>
-        <option value="active"   selected="@(Model.StatusFilter == "active")">Active</option>
-        <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive</option>
-    </select>
-
-    <button class="rt-btn rt-btn-primary" type="submit">Apply</button>
-    @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.RoleFilter) || !string.IsNullOrEmpty(Model.DepartmentFilter) || !string.IsNullOrEmpty(Model.StatusFilter))
-    {
-        <a asp-action="ManageAll" class="rt-btn">Clear</a>
-    }
-</form>
-
-<!-- Table -->
-<section class="rt-window">
+<!-- Data Table -->
+<div class="rt-window">
     <div class="rt-titlebar">
-        <span><i class="bi bi-table me-2"></i>Member list</span>
+        <span>Members List (@Model.TotalMembers)</span>
     </div>
-
-    <div class="rt-scroll">
-        <table class="rt-table">
-            <thead>
-                <tr>
-                    <th>Member</th>
-                    <th>Department</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Last login</th>
-                    <th class="rt-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var m in Model.Members)
+  <div class="table-responsive">
+    <table class="table table-hover table-bordered border-secondary align-middle mb-0" style="font-size: 15px;">
+        <thead class="table-dark text-uppercase text-center" style="font-size: 12px; letter-spacing: 0.5px;">
+            <tr>
+                <th class="text-center">Member</th>
+                <th class="text-center">Email Address</th>
+                <th class="text-center">Phone Number</th>
+                <th class="text-center">Department</th>
+                <th class="text-center">Role</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Last Login</th>
+                <th class="text-center">Created / Updated</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Members != null && Model.Members.Any())
+            {
+                foreach (var m in Model.Members)
                 {
-                    var isManager = m.RoleName == "Manager";
-                    var initials = !string.IsNullOrEmpty(m.FullName)
-                        ? m.FullName.Substring(0, 1).ToUpper()
-                        : m.Username.Substring(0, 1).ToUpper();
-
-                    <tr data-user-id="@m.UserId">
-                        <td>
-                            <div class="rt-user">
-                                <span class="rt-avatar rt-sky">@initials</span>
-                                <div>
-                                    <span class="rt-user-name">@(m.FullName ?? m.Username)</span>
-                                    <span class="rt-user-email">@m.Email</span>
-                                </div>
-                            </div>
+                    <tr>
+                        <td class="text-center">
+                            <div class="fw-bold text-dark">@m.FullName</div>
+                            <div class="text-muted" style="font-size:11px;">@@@m.Username</div>
                         </td>
-
-                        <td>
-                            <select class="dept-select" data-user-id="@m.UserId" data-original="@(m.DepartmentId?.ToString() ?? "")">
-                                <option value="">— None —</option>
-                                @foreach (var d in Model.Departments)
-                                {
-                                    <option value="@d.DepartmentId" selected="@(m.DepartmentId == d.DepartmentId)">@d.Name</option>
-                                }
-                            </select>
+                        <td class="text-center">
+                            <div class="text-dark">@m.Email</div>
                         </td>
-
-                        <td>
-                            <div class="role-toggle @(isManager ? "is-manager" : "")"
-                                 data-user-id="@m.UserId"
-                                 data-role="@(isManager ? "manager" : "employee")"
-                                 role="button"
-                                 tabindex="0"
-                                 title="Click to switch role">
-                                <span class="knob">
-                                    <i class="bi @(isManager ? "bi-person-workspace" : "bi-person")"></i>
-                                </span>
-                                <span class="role-label">@(isManager ? "Manager" : "Employee")</span>
-                            </div>
+                        <td class="text-center">
+                            <div class="text-dark">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</div>
                         </td>
-
-                        <td>
+                        <td class="text-center">
+                            <span class="badge bg-light text-dark border">@(string.IsNullOrEmpty(m.DepartmentName) ? "Unassigned" : m.DepartmentName)</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge @(m.RoleName == "Manager" ? "bg-info text-dark" : "bg-secondary")">@m.RoleName</span>
+                        </td>
+                        <td class="text-center">
                             @if (m.IsActive)
                             {
-                                <span class="rt-tag rt-green">Active</span>
+                                <span class="badge bg-success">Active</span>
                             }
                             else
                             {
-                                <span class="rt-tag rt-coral">Inactive</span>
+                                <span class="badge bg-danger">Inactive</span>
                             }
                         </td>
-
-                        <td>@(m.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
-
-                        <td class="rt-right">
-                            <div class="rt-actions">
-                                <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn rt-btn-icon rt-i-edit" title="Edit">
+                        <td class="text-center">
+                            @if (m.LastLoginAt.HasValue)
+                            {
+                                <span>@m.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Never</span>
+                            }
+                        </td>
+                        <td style="font-size: 11px;" class="text-center text-muted">
+                            <div>Created: @m.CreatedAt.ToString("yyyy-MM-dd")</div>
+                            @if (m.UpdatedAt.HasValue)
+                            {
+                                <div>Updated: @m.UpdatedAt.Value.ToString("yyyy-MM-dd")</div>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit User">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn rt-btn-icon rt-i-key" title="Reset password">
+                                <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
                                     <i class="bi bi-key"></i>
                                 </a>
-                           <form asp-action="ToggleActive" asp-route-id="@m.UserId" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="search"     value="@Model.SearchTerm" />
-                            <input type="hidden" name="role"       value="@Model.RoleFilter" />
-                            <input type="hidden" name="department" value="@Model.DepartmentFilter" />
-                            <input type="hidden" name="status"     value="@Model.StatusFilter" />
-                            <button class="rt-btn rt-btn-icon rt-i-warn" title="@(m.IsActive ? "Deactivate" : "Activate")">
-                                <i class="bi bi-@(m.IsActive ? "toggle-on" : "toggle-off")"></i>
-                            </button>
-                        </form>
-                              <form asp-action="Delete" asp-route-id="@m.UserId" method="post"
-                                onsubmit="return confirm('Delete @m.Username? Ye undo nahi hoga.');">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="search"     value="@Model.SearchTerm" />
-                                <input type="hidden" name="role"       value="@Model.RoleFilter" />
-                                <input type="hidden" name="department" value="@Model.DepartmentFilter" />
-                                <input type="hidden" name="status"     value="@Model.StatusFilter" />
-                                <button class="rt-btn rt-btn-icon rt-i-danger" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                                <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="search" value="@Model.SearchTerm" />
+                                    <input type="hidden" name="role" value="@Model.RoleFilter" />
+                                    <input type="hidden" name="department" value="@Model.DepartmentFilter" />
+                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                    <button type="submit" class="rt-btn text-danger" title="Delete User">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
                 }
-                @if (!Model.Members.Any())
-                {
-                    <tr>
-                        <td colspan="6">
-                            <div class="rt-empty">
-                                <i class="bi bi-people"></i>
-                                <strong>No members found</strong>
-                                <span>Try different filters or add a member.</span>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-    <div class="rt-statusbar">
-        <span>Showing @Model.Members.Count() of @Model.TotalMembers members</span>
-        <span>Click a role to switch it. Department saves on change.</span>
-    </div>
-</section>
-
-<!-- Toast -->
-<div class="toast-note" id="toastNote">
-    <i class="bi bi-check-circle"></i>
-    <span id="toastMessage"></span>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center py-4 text-muted">No team members found matching your criteria.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
-
 </div>
-
-@section Scripts {
-<script>
-    (function () {
-        // ---------- Toast helper ----------
-        const toast = document.getElementById('toastNote');
-        const toastMsg = document.getElementById('toastMessage');
-        let toastTimeout;
-
-        function showToast(message, type) {
-            toastMsg.textContent = message;
-            toast.className = 'toast-note ' + (type || 'success');
-            toast.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        // ---------- Get anti-forgery token ----------
-        function getToken() {
-            return document.querySelector('input[name="__RequestVerificationToken"]').value;
-        }
-
-        // ---------- Role toggle ----------
-        document.querySelectorAll('.role-toggle').forEach(function (el) {
-            el.addEventListener('click', async function () {
-                if (this.classList.contains('is-loading')) return;
-
-                const userId = this.dataset.userId;
-                const originalState = this.dataset.role;
-                const newState = originalState === 'manager' ? 'employee' : 'manager';
-
-                // Optimistic UI update
-                this.classList.add('is-loading');
-
-                try {
-                    const resp = await fetch('/Team/ToggleRole', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': getToken()
-                        },
-                        body: JSON.stringify({ userId: parseInt(userId) })
-                    });
-
-                    const data = await resp.json();
-
-                    if (data.success) {
-                        // Update UI
-                        this.dataset.role = newState;
-                        this.classList.toggle('is-manager', newState === 'manager');
-                        this.querySelector('.knob i').className =
-                            newState === 'manager' ? 'bi bi-person-workspace' : 'bi bi-person';
-                        this.querySelector('.role-label').textContent =
-                            newState === 'manager' ? 'Manager' : 'Employee';
-
-                        showToast(data.message || 'Role updated', 'success');
-                    } else {
-                        showToast(data.error || 'Update failed', 'error');
-                    }
-                } catch (e) {
-                    showToast('Network error. Try again.', 'error');
-                } finally {
-                    this.classList.remove('is-loading');
-                }
-            });
-        });
-
-        // Keyboard support for the role toggle
-        document.querySelectorAll('.role-toggle').forEach(function (el) {
-            el.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    el.click();
-                }
-            });
-        });
-
-        // ---------- Department change ----------
-        document.querySelectorAll('.dept-select').forEach(function (el) {
-            el.addEventListener('change', async function () {
-                const userId = this.dataset.userId;
-                const deptId = this.value;
-                const original = this.dataset.original || '';
-
-                try {
-                    const resp = await fetch('/Team/UpdateDepartment', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': getToken()
-                        },
-                        body: JSON.stringify({
-                            userId: parseInt(userId),
-                            departmentId: deptId ? parseInt(deptId) : null
-                        })
-                    });
-
-                    const data = await resp.json();
-
-                    if (data.success) {
-                        this.dataset.original = deptId;
-                        showToast('Department updated', 'success');
-                    } else {
-                        // Revert
-                        this.value = original;
-                        showToast(data.error || 'Update failed', 'error');
-                    }
-                } catch (e) {
-                    this.value = original;
-                    showToast('Network error. Try again.', 'error');
-                }
-            });
-        });
-    })();
-</script>
-}

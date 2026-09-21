@@ -29,70 +29,13 @@ namespace ERPDemo.Controllers
             return admin?.OrganizationId;
         }
 
-        // Role IDs (seed se):
-        // 1 = User, 2 = Manager, 3 = Admin, 4 = SuperAdmin
+        // Role IDs: 1 = User, 2 = Manager, 3 = Admin, 4 = SuperAdmin
         private static readonly int[] AssignableRoleIds = { 1, 2 };
 
-        // ============ LIST ============
-        public async Task<IActionResult> Index(string? search, string? role, string? status)
+        // ============ INDEX / FALLBACK ============
+        public IActionResult Index()
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null)
-            {
-                TempData["Error"] = "Aap kisi organization se attached nahi hai.";
-                return RedirectToAction("AdminDashboard", "Dashboard");
-            }
-
-            var query = _context.Users
-                .Include(u => u.Role)
-                .Where(u => u.OrganizationId == orgId)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                var s = search.Trim().ToLower();
-                query = query.Where(u =>
-                    u.Username.ToLower().Contains(s) ||
-                    u.Email.ToLower().Contains(s) ||
-                    (u.FullName != null && u.FullName.ToLower().Contains(s)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(role))
-                query = query.Where(u => u.Role!.RoleName == role);
-
-            if (status == "active") query = query.Where(u => u.IsActive);
-            else if (status == "inactive") query = query.Where(u => !u.IsActive);
-
-            var members = await query
-                .OrderBy(u => u.RoleId).ThenBy(u => u.Username)
-                .Select(u => new TeamRow
-                {
-                    UserId = u.UserId,
-                    Username = u.Username,
-                    Email = u.Email,
-                    FullName = u.FullName,
-                    PhoneNumber = u.PhoneNumber,
-                    RoleName = u.Role!.RoleName,
-                    RoleId = u.RoleId,
-                    IsActive = u.IsActive,
-                    LastLoginAt = u.LastLoginAt,
-                    CreatedAt = u.CreatedAt
-                })
-                .ToListAsync();
-
-            var vm = new TeamViewModel
-            {
-                Members = members,
-                SearchTerm = search,
-                RoleFilter = role,
-                StatusFilter = status,
-                TotalMembers = members.Count,
-                ActiveMembers = members.Count(m => m.IsActive),
-                ManagerCount = members.Count(m => m.RoleName == "Manager"),
-                UserCount = members.Count(m => m.RoleName == "User")
-            };
-
-            return View(vm);
+            return RedirectToAction(nameof(ManageAll));
         }
 
         // ============ CREATE ============
@@ -105,6 +48,11 @@ namespace ERPDemo.Controllers
             ViewBag.Roles = await _context.Roles
                 .Where(r => AssignableRoleIds.Contains(r.RoleId))
                 .OrderBy(r => r.RoleId)
+                .ToListAsync();
+
+            ViewBag.Departments = await _context.Departments
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Name)
                 .ToListAsync();
 
             return View(new CreateTeamMemberViewModel());
@@ -120,6 +68,11 @@ namespace ERPDemo.Controllers
             ViewBag.Roles = await _context.Roles
                 .Where(r => AssignableRoleIds.Contains(r.RoleId))
                 .OrderBy(r => r.RoleId)
+                .ToListAsync();
+
+            ViewBag.Departments = await _context.Departments
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Name)
                 .ToListAsync();
 
             if (!ModelState.IsValid) return View(model);
@@ -151,6 +104,7 @@ namespace ERPDemo.Controllers
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
                 RoleId = model.RoleId,
+                DepartmentId = model.DepartmentId,
                 OrganizationId = orgId,
                 IsActive = true,
                 CreatedAt = DateTime.Now
@@ -172,7 +126,6 @@ namespace ERPDemo.Controllers
                 .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
             if (user == null) return NotFound();
 
-            // Admin/Manager edit kar sakta hai, Admin/SuperAdmin ko nahi
             if (user.RoleId == 3 || user.RoleId == 4)
             {
                 TempData["Error"] = "Aap Admin ya SuperAdmin ko edit nahi kar sakte.";
@@ -184,6 +137,11 @@ namespace ERPDemo.Controllers
                 .OrderBy(r => r.RoleId)
                 .ToListAsync();
 
+            ViewBag.Departments = await _context.Departments
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Name)
+                .ToListAsync();
+
             var vm = new EditTeamMemberViewModel
             {
                 UserId = user.UserId,
@@ -192,6 +150,7 @@ namespace ERPDemo.Controllers
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 RoleId = user.RoleId,
+                DepartmentId = user.DepartmentId,
                 IsActive = user.IsActive
             };
             return View(vm);
@@ -211,12 +170,17 @@ namespace ERPDemo.Controllers
             if (user.RoleId == 3 || user.RoleId == 4)
             {
                 TempData["Error"] = "Aap Admin ya SuperAdmin ko edit nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ManageAll));
             }
 
             ViewBag.Roles = await _context.Roles
                 .Where(r => AssignableRoleIds.Contains(r.RoleId))
                 .OrderBy(r => r.RoleId)
+                .ToListAsync();
+
+            ViewBag.Departments = await _context.Departments
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Name)
                 .ToListAsync();
 
             if (!ModelState.IsValid) return View(model);
@@ -244,6 +208,7 @@ namespace ERPDemo.Controllers
             user.FullName = model.FullName;
             user.PhoneNumber = model.PhoneNumber;
             user.RoleId = model.RoleId;
+            user.DepartmentId = model.DepartmentId;
             user.IsActive = model.IsActive;
             user.UpdatedAt = DateTime.Now;
 
@@ -253,45 +218,44 @@ namespace ERPDemo.Controllers
         }
 
         // ============ TOGGLE ACTIVE ============
-       [HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> ToggleActive(
-    int id,
-    string? search = null,
-    string? role = null,
-    string? department = null,
-    string? status = null)
-{
-    // Helper to rebuild the redirect with filters preserved
-    IActionResult BackToManageAll() =>
-        RedirectToAction(nameof(ManageAll), new { search, role, department, status });
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleActive(
+            int id,
+            string? search = null,
+            string? role = null,
+            string? department = null,
+            string? status = null)
+        {
+            IActionResult BackToManageAll() =>
+                RedirectToAction(nameof(ManageAll), new { search, role, department, status });
 
-    var orgId = await GetAdminOrgIdAsync();
-    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
+            var orgId = await GetAdminOrgIdAsync();
+            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
 
-    if (id == CurrentUserId)
-    {
-        TempData["Error"] = "Aap khud ko deactivate nahi kar sakte.";
-        return BackToManageAll();
-    }
+            if (id == CurrentUserId)
+            {
+                TempData["Error"] = "Aap khud ko deactivate nahi kar sakte.";
+                return BackToManageAll();
+            }
 
-    var user = await _context.Users
-        .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
-    if (user == null) return NotFound();
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+            if (user == null) return NotFound();
 
-    if (user.RoleId == 3 || user.RoleId == 4)
-    {
-        TempData["Error"] = "Aap is user ki status change nahi kar sakte.";
-        return BackToManageAll();
-    }
+            if (user.RoleId == 3 || user.RoleId == 4)
+            {
+                TempData["Error"] = "Aap is user ki status change nahi kar sakte.";
+                return BackToManageAll();
+            }
 
-    user.IsActive = !user.IsActive;
-    user.UpdatedAt = DateTime.Now;
-    await _context.SaveChangesAsync();
+            user.IsActive = !user.IsActive;
+            user.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
 
-    TempData["Success"] = $"'{user.Username}' {(user.IsActive ? "activate" : "deactivate")} ho gaya.";
-    return BackToManageAll();
-}
+            TempData["Success"] = $"'{user.Username}' {(user.IsActive ? "activate" : "deactivate")} ho gaya.";
+            return BackToManageAll();
+        }
 
         // ============ RESET PASSWORD ============
         [HttpGet]
@@ -366,8 +330,8 @@ public async Task<IActionResult> ToggleActive(
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"'{user.Username}' delete ho gaya.";
-    return RedirectToAction(nameof(ManageAll), new { search, role, department, status });
-}
+            return RedirectToAction(nameof(ManageAll), new { search, role, department, status });
+        }
 
         // ============ MANAGE ALL (Super Table) ============
         [HttpGet]
@@ -384,7 +348,7 @@ public async Task<IActionResult> ToggleActive(
                 .Include(u => u.Role)
                 .Include(u => u.Department)
                 .Where(u => u.OrganizationId == orgId)
-                .Where(u => u.RoleId != 3 && u.RoleId != 4)  // Admin aur SuperAdmin exclude
+                .Where(u => u.RoleId != 3 && u.RoleId != 4)  // Admin and SuperAdmin excluded from list
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -402,7 +366,7 @@ public async Task<IActionResult> ToggleActive(
                 else if (role == "employee") query = query.Where(u => u.RoleId == 1);
             }
 
-            if (department.HasValue() && int.TryParse(department, out var deptId))
+            if (!string.IsNullOrWhiteSpace(department) && int.TryParse(department, out var deptId))
                 query = query.Where(u => u.DepartmentId == deptId);
 
             if (status == "active") query = query.Where(u => u.IsActive);
@@ -423,7 +387,8 @@ public async Task<IActionResult> ToggleActive(
                     DepartmentName = u.Department != null ? u.Department.Name : null,
                     IsActive = u.IsActive,
                     LastLoginAt = u.LastLoginAt,
-                    CreatedAt = u.CreatedAt
+                    CreatedAt = u.CreatedAt,
+                    UpdatedAt = u.UpdatedAt
                 })
                 .ToListAsync();
 
@@ -447,94 +412,5 @@ public async Task<IActionResult> ToggleActive(
 
             return View(vm);
         }
-
-        // ============ TOGGLE ROLE (AJAX) ============
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleRole([FromBody] ToggleRoleRequest request)
-        {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null)
-                return Json(new { success = false, error = "No organization attached." });
-
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserId == request.UserId && u.OrganizationId == orgId);
-
-            if (user == null)
-                return Json(new { success = false, error = "User not found." });
-
-            // Safety: Admin aur SuperAdmin ko touch nahi karna
-            if (user.RoleId == 3 || user.RoleId == 4)
-                return Json(new { success = false, error = "Admin aur SuperAdmin ka role change nahi ho sakta." });
-
-            // Sirf User (1) ↔ Manager (2) allowed
-            if (user.RoleId != 1 && user.RoleId != 2)
-                return Json(new { success = false, error = "Ye role change nahi ho sakta." });
-
-            // Toggle
-            user.RoleId = user.RoleId == 1 ? 2 : 1;
-            user.UpdatedAt = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-
-            var roleName = user.RoleId == 2 ? "Manager" : "Employee";
-            return Json(new
-            {
-                success = true,
-                newRoleId = user.RoleId,
-                newRoleName = roleName,
-                message = $"{user.Username} is now a {roleName}."
-            });
-        }
-
-        // ============ UPDATE DEPARTMENT (AJAX) ============
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateDepartment([FromBody] UpdateDepartmentRequest request)
-        {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null)
-                return Json(new { success = false, error = "No organization attached." });
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == request.UserId && u.OrganizationId == orgId);
-            if (user == null)
-                return Json(new { success = false, error = "User not found." });
-
-            if (user.RoleId == 3 || user.RoleId == 4)
-                return Json(new { success = false, error = "Admin ka department change nahi ho sakta." });
-
-            // Validate department belongs to same org
-            if (request.DepartmentId.HasValue)
-            {
-                var deptExists = await _context.Departments
-                    .AnyAsync(d => d.DepartmentId == request.DepartmentId);
-                if (!deptExists)
-                    return Json(new { success = false, error = "Department valid nahi hai." });
-            }
-
-            user.DepartmentId = request.DepartmentId;
-            user.UpdatedAt = DateTime.Now;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Department update ho gaya." });
-        }
-
-        // DTOs
-        public class ToggleRoleRequest
-        {
-            public int UserId { get; set; }
-        }
-
-        public class UpdateDepartmentRequest
-        {
-            public int UserId { get; set; }
-            public int? DepartmentId { get; set; }
-        }
-
-
-
     }
-
 }

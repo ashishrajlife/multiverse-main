@@ -49,6 +49,8 @@ namespace ERPDemo.ViewModels
 
         [Required(ErrorMessage = "Role select karo")]
         public int RoleId { get; set; }
+
+        public int? DepartmentId { get; set; }
     }
 
     public class EditTeamMemberViewModel
@@ -68,6 +70,7 @@ namespace ERPDemo.ViewModels
         public int RoleId { get; set; }
 
         public bool IsActive { get; set; }
+        public int? DepartmentId { get; set; }
     }
 
     public class ResetPasswordViewModel

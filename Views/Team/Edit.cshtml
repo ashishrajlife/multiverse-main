@@ -3,23 +3,23 @@
     ViewData["Title"] = "Edit Team Member";
     Layout = "_DashboardLayout";
     var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
+    var departments = ViewBag.Departments as List<ERPDemo.Models.Department> ?? new();
 }
 
 <div class="rt-head">
     <div class="rt-head-left">
-        <!-- Back button rerouted to ManageAll -->
-        <a asp-action="ManageAll" class="rt-btn rt-btn-back" title="Back to Manage All">
+        <a asp-action="ManageAll" class="rt-btn rt-btn-back" title="Back">
             <i class="bi bi-arrow-left"></i>
         </a>
         <div>
             <h1>Edit Team Member</h1>
-            <p>Update user details and role</p>
+            <p>Update user information, assignments, and activation status</p>
         </div>
     </div>
 </div>
 
-<div class="rt-window" style="max-width: 720px;">
-    <div class="rt-titlebar"><span>Update Details</span></div>
+<div class="rt-window" style="max-width: 800px;">
+    <div class="rt-titlebar"><span>Edit Member Profile</span></div>
     <div class="p-4">
         <form asp-action="Edit" method="post" asp-antiforgery="true">
             <input type="hidden" asp-for="UserId" />
@@ -32,7 +32,7 @@
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="Email" class="form-label fw-semibold" style="font-size:13px;">Email</label>
+                    <label asp-for="Email" class="form-label fw-semibold" style="font-size:13px;">Email Address</label>
                     <input asp-for="Email" class="rt-field w-100" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
@@ -41,11 +41,11 @@
                     <input asp-for="FullName" class="rt-field w-100" />
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone</label>
+                    <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone Number</label>
                     <input asp-for="PhoneNumber" class="rt-field w-100" />
                 </div>
                 <div class="col-md-6">
-                    <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">Role</label>
+                    <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">System Role</label>
                     <select asp-for="RoleId" class="rt-field w-100">
                         @foreach (var r in roles)
                         {
@@ -54,17 +54,27 @@
                     </select>
                     <span asp-validation-for="RoleId" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6 d-flex align-items-center pt-4">
+                <div class="col-md-6">
+                    <label asp-for="DepartmentId" class="form-label fw-semibold" style="font-size:13px;">Department</label>
+                    <select asp-for="DepartmentId" class="rt-field w-100">
+                        <option value="">-- None --</option>
+                        @foreach (var d in departments)
+                        {
+                            <option value="@d.DepartmentId" selected="@(d.DepartmentId == Model.DepartmentId)">@d.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-12 pt-2">
                     <div class="form-check form-switch">
                         <input asp-for="IsActive" class="form-check-input" type="checkbox" />
-                        <label asp-for="IsActive" class="form-check-label fw-semibold" style="font-size:13px;">Active</label>
+                        <label asp-for="IsActive" class="form-check-label fw-semibold" style="font-size:13px;">Active Account Status</label>
                     </div>
                 </div>
             </div>
 
             <div class="mt-4 d-flex gap-2">
                 <button type="submit" class="rt-btn rt-btn-primary">
-                    <i class="bi bi-check2 me-1"></i> Save Changes
+                    <i class="bi bi-check2 me-1"></i> Update Changes
                 </button>
                 <a asp-action="ManageAll" class="rt-btn">Cancel</a>
             </div>
