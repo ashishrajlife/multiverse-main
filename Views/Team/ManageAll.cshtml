@@ -4,6 +4,159 @@
     Layout = "_DashboardLayout";
 }
 
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+    /* ---------- smooth toast container & animation ---------- */
+    .toast-container-custom {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 1090;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+        pointer-events: none;
+    }
+
+    .toast.custom-toast {
+        pointer-events: auto;
+        width: 360px;
+        max-width: calc(100vw - 48px);
+        border: none;
+        border-radius: 16px;
+        backdrop-filter: blur(6px);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 15px 35px -8px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s cubic-bezier(0.21, 1.02, 0.73, 1), opacity 0.25s ease, box-shadow 0.2s ease;
+        transform: translateX(0) scale(1);
+        opacity: 1;
+        will-change: transform, opacity;
+    }
+
+    .toast.custom-toast:hover {
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+    }
+
+    /* success theme */
+    .custom-success-toast {
+        background: linear-gradient(135deg, #f0f9f4 0%, #e3f3e9 100%);
+        border-left: 6px solid #2e7d5e;
+        color: #0b3b2a;
+    }
+    .custom-success-toast .toast-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(46, 125, 94, 0.12);
+        padding: 0.75rem 1rem 0.5rem 1rem;
+        color: #0b3b2a;
+        font-weight: 600;
+    }
+    .custom-success-toast .toast-body {
+        padding: 0.6rem 1rem 1rem 1rem;
+        font-size: 0.9rem;
+        color: #1a4d3a;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    /* error theme */
+    .custom-error-toast {
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe9e9 100%);
+        border-left: 6px solid #b3404a;
+        color: #4a1a1f;
+    }
+    .custom-error-toast .toast-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(179, 64, 74, 0.12);
+        padding: 0.75rem 1rem 0.5rem 1rem;
+        color: #4a1a1f;
+        font-weight: 600;
+    }
+    .custom-error-toast .toast-body {
+        padding: 0.6rem 1rem 1rem 1rem;
+        font-size: 0.9rem;
+        color: #5e2a2f;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .toast-header i {
+        font-size: 1.3rem;
+        line-height: 1;
+    }
+
+    .toast .btn-close {
+        opacity: 0.5;
+        transition: opacity 0.2s;
+        filter: drop-shadow(0 1px 1px rgba(0,0,0,0.05));
+    }
+    .toast .btn-close:hover {
+        opacity: 1;
+    }
+
+    .custom-error-toast .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        opacity: 0.6;
+    }
+    .custom-error-toast .btn-close:hover {
+        opacity: 1;
+    }
+
+    .toast-header small {
+        font-weight: 400;
+        color: #5e7a6b;
+        font-size: 0.7rem;
+        letter-spacing: 0.2px;
+    }
+    .custom-error-toast .toast-header small {
+        color: #8f5e62;
+    }
+
+    /* entry animation */
+    @@keyframes toastSlideIn {
+        0% {
+            opacity: 0;
+            transform: translateX(40px) scale(0.96);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+
+    .toast.custom-toast.show {
+        animation: toastSlideIn 0.35s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+    }
+
+.toast.custom-toast.hiding {
+    opacity: 0;
+    transform: translateX(120%) scale(0.96);
+    transition: opacity 1s ease,
+                transform 0.4s cubic-bezier(0.5, -0.2, 0.8, 0.4);
+}
+
+    /* small screens */
+    @@media (max-width: 480px) {
+        .toast-container-custom {
+            top: 12px;
+            right: 12px;
+            left: 12px;
+            align-items: stretch;
+        }
+        .toast.custom-toast {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+</style>
+
+<!-- Top-Right Toast Container (empty — toasts are injected by JS) -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container-custom"></div>
+</div>
+
 <div class="rt-head mb-4">
     <div class="rt-head-left">
         <div>
@@ -17,21 +170,6 @@
         </a>
     </div>
 </div>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["Error"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
 
 <!-- Filter Form -->
 <div class="rt-window mb-4">
@@ -77,100 +215,198 @@
     <div class="rt-titlebar">
         <span>Members List (@Model.TotalMembers)</span>
     </div>
-  <div class="table-responsive">
-    <table class="table table-hover table-bordered border-secondary align-middle mb-0" style="font-size: 15px;">
-        <thead class="table-dark text-uppercase text-center" style="font-size: 12px; letter-spacing: 0.5px;">
-            <tr>
-                <th class="text-center">Member</th>
-                <th class="text-center">Email Address</th>
-                <th class="text-center">Phone Number</th>
-                <th class="text-center">Department</th>
-                <th class="text-center">Role</th>
-                <th class="text-center">Status</th>
-                <th class="text-center">Last Login</th>
-                <th class="text-center">Created / Updated</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model.Members != null && Model.Members.Any())
-            {
-                foreach (var m in Model.Members)
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered border-secondary align-middle mb-0" style="font-size: 15px;">
+            <thead class="table-dark text-uppercase text-center" style="font-size: 12px; letter-spacing: 0.5px;">
+                <tr>
+                    <th class="text-center">Member</th>
+                    <th class="text-center">Email Address</th>
+                    <th class="text-center">Phone Number</th>
+                    <th class="text-center">Department</th>
+                    <th class="text-center">Role</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Last Login</th>
+                    <th class="text-center">Created / Updated</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Members != null && Model.Members.Any())
+                {
+                    foreach (var m in Model.Members)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <div class="fw-bold text-dark">@m.FullName</div>
+                                <div class="text-muted" style="font-size:11px;">@@@m.Username</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="text-dark">@m.Email</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="text-dark">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border">@(string.IsNullOrEmpty(m.DepartmentName) ? "Unassigned" : m.DepartmentName)</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge @(m.RoleName == "Manager" ? "bg-info text-dark" : "bg-secondary")">@m.RoleName</span>
+                            </td>
+                            <td class="text-center">
+                                @if (m.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (m.LastLoginAt.HasValue)
+                                {
+                                    <span>@m.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Never</span>
+                                }
+                            </td>
+                            <td style="font-size: 11px;" class="text-center text-muted">
+                                <div>Created: @m.CreatedAt.ToString("yyyy-MM-dd")</div>
+                                @if (m.UpdatedAt.HasValue)
+                                {
+                                    <div>Updated: @m.UpdatedAt.Value.ToString("yyyy-MM-dd")</div>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit User">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
+                                        <i class="bi bi-key"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="search" value="@Model.SearchTerm" />
+                                        <input type="hidden" name="role" value="@Model.RoleFilter" />
+                                        <input type="hidden" name="department" value="@Model.DepartmentFilter" />
+                                        <input type="hidden" name="status" value="@Model.StatusFilter" />
+                                        <button type="submit" class="rt-btn text-danger" title="Delete User">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
                 {
                     <tr>
-                        <td class="text-center">
-                            <div class="fw-bold text-dark">@m.FullName</div>
-                            <div class="text-muted" style="font-size:11px;">@@@m.Username</div>
-                        </td>
-                        <td class="text-center">
-                            <div class="text-dark">@m.Email</div>
-                        </td>
-                        <td class="text-center">
-                            <div class="text-dark">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</div>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge bg-light text-dark border">@(string.IsNullOrEmpty(m.DepartmentName) ? "Unassigned" : m.DepartmentName)</span>
-                        </td>
-                        <td class="text-center">
-                            <span class="badge @(m.RoleName == "Manager" ? "bg-info text-dark" : "bg-secondary")">@m.RoleName</span>
-                        </td>
-                        <td class="text-center">
-                            @if (m.IsActive)
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Inactive</span>
-                            }
-                        </td>
-                        <td class="text-center">
-                            @if (m.LastLoginAt.HasValue)
-                            {
-                                <span>@m.LastLoginAt.Value.ToString("MMM dd, yyyy HH:mm")</span>
-                            }
-                            else
-                            {
-                                <span class="text-muted">Never</span>
-                            }
-                        </td>
-                        <td style="font-size: 11px;" class="text-center text-muted">
-                            <div>Created: @m.CreatedAt.ToString("yyyy-MM-dd")</div>
-                            @if (m.UpdatedAt.HasValue)
-                            {
-                                <div>Updated: @m.UpdatedAt.Value.ToString("yyyy-MM-dd")</div>
-                            }
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm">
-                                <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit User">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
-                                    <i class="bi bi-key"></i>
-                                </a>
-                                <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="search" value="@Model.SearchTerm" />
-                                    <input type="hidden" name="role" value="@Model.RoleFilter" />
-                                    <input type="hidden" name="department" value="@Model.DepartmentFilter" />
-                                    <input type="hidden" name="status" value="@Model.StatusFilter" />
-                                    <button type="submit" class="rt-btn text-danger" title="Delete User">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
+                        <td colspan="9" class="text-center py-4 text-muted">No team members found matching your criteria.</td>
                     </tr>
                 }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="9" class="text-center py-4 text-muted">No team members found matching your criteria.</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
-</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function () {
+            const AUTO_HIDE_DELAY = 2500;
+
+            // ----- create a fresh toast element -----
+            function createToast(type, message) {
+                const isSuccess = type === 'success';
+                const container = document.querySelector('.toast-container-custom');
+                if (!container) return null;
+
+                const toastId = 'toast-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+                const iconClass = isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+                const iconColor = isSuccess ? '#2e7d5e' : '#b3404a';
+
+                const toastEl = document.createElement('div');
+                toastEl.id = toastId;
+                toastEl.className = `toast custom-toast ${isSuccess ? 'custom-success-toast' : 'custom-error-toast'}`;
+                toastEl.setAttribute('role', 'alert');
+                toastEl.setAttribute('aria-live', 'assertive');
+                toastEl.setAttribute('aria-atomic', 'true');
+
+                toastEl.innerHTML = `
+                    <div class="toast-header">
+                        <i class="bi ${iconClass} me-2" style="color: ${iconColor};"></i>
+                        <strong class="me-auto">${isSuccess ? 'Success' : 'Error'}</strong>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                `;
+
+                container.appendChild(toastEl);
+                return toastEl;
+            }
+
+            // ----- smooth hide -----
+            function hideToast(toastElement) {
+                if (!toastElement || !toastElement.parentNode) return;
+
+                if (toastElement._hideTimer) {
+                    clearTimeout(toastElement._hideTimer);
+                    delete toastElement._hideTimer;
+                }
+
+                toastElement.classList.add('hiding');
+                toastElement.classList.remove('show');
+
+                setTimeout(() => {
+                    if (toastElement && toastElement.parentNode) {
+                        toastElement.remove();
+                    }
+                }, 1500);
+            }
+
+            // ----- auto-hide -----
+            function autoHideToast(toastElement, delay) {
+                if (!toastElement) return;
+                toastElement._hideTimer = setTimeout(() => hideToast(toastElement), delay);
+            }
+
+            // ----- public: show a toast -----
+            function showSmoothToast(type, message, delay) {
+                const toastEl = createToast(type, message);
+                if (!toastEl) return;
+
+                void toastEl.offsetWidth;          // force reflow
+                toastEl.classList.add('show');
+                autoHideToast(toastEl, delay || AUTO_HIDE_DELAY);
+
+                const closeBtn = toastEl.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        hideToast(toastEl);
+                    });
+                }
+            }
+
+            // expose globally
+            window.showSmoothToast = showSmoothToast;
+
+            // ----- on page load: fire TempData toasts -----
+            document.addEventListener('DOMContentLoaded', function () {
+                @if (TempData["Success"] != null)
+                {
+                    <text>showSmoothToast('success', @Html.Raw(Json.Serialize(TempData["Success"].ToString())));</text>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <text>showSmoothToast('error', @Html.Raw(Json.Serialize(TempData["Error"].ToString())));</text>
+                }
+            });
+        })();
+    </script>
+}
