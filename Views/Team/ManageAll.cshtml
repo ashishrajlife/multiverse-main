@@ -1,0 +1,449 @@
+@model ERPDemo.ViewModels.ManageAllViewModel
+@{
+    ViewData["Title"] = "Manage All";
+    Layout = "_DashboardLayout";
+}
+
+@section Styles {
+<style>
+    /* ---------- Role toggle switch ---------- */
+    .role-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 10px 4px 4px;
+        border-radius: 999px;
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #0369a1;
+        min-width: 130px;
+        user-select: none;
+    }
+
+    .role-toggle:hover {
+        box-shadow: 0 4px 12px rgba(3, 105, 161, 0.15);
+    }
+
+    .role-toggle .knob {
+        position: relative;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+        color: #0369a1;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
+    }
+
+    .role-toggle .role-label {
+        transition: color 0.25s ease;
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Manager state */
+    .role-toggle.is-manager {
+        background: #fef3c7;
+        border-color: #fde68a;
+        color: #92400e;
+        flex-direction: row-reverse;
+        padding: 4px 4px 4px 10px;
+    }
+
+    .role-toggle.is-manager .knob {
+        color: #92400e;
+        background: #fff;
+    }
+
+    /* Loading state */
+    .role-toggle.is-loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    .role-toggle.is-loading .knob {
+        animation: pulse 1s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(0.85); }
+    }
+
+    /* ---------- Department inline select ---------- */
+    .dept-select {
+        padding: 5px 10px;
+        border-radius: 8px;
+        border: 1px solid #e5e9f0;
+        font-size: 12.5px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        max-width: 160px;
+    }
+
+    .dept-select:hover { border-color: #4A90E2; }
+    .dept-select:focus { outline: none; border-color: #4A90E2; box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15); }
+
+    /* ---------- Toast notification ---------- */
+    .toast-note {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: #0f172a;
+        color: #fff;
+        font-size: 13.5px;
+        font-weight: 500;
+        box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .toast-note.show { opacity: 1; transform: translateY(0); }
+    .toast-note.success { background: #16a34a; }
+    .toast-note.error { background: #dc2626; }
+
+    @@media (max-width: 575.98px) {
+        .role-toggle { min-width: 110px; font-size: 11.5px; }
+        .role-toggle .knob { width: 22px; height: 22px; font-size: 11px; }
+    }
+</style>
+}
+
+<div class="page-header">
+    <div class="header-left">
+        <a asp-controller="Dashboard" asp-action="Index" class="back-btn" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>Manage All</h1>
+            <p>Change roles and departments instantly</p>
+            <div class="page-accent"></div>
+        </div>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i> Add Member
+    </a>
+</div>
+
+<!-- KPI strip -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card tone-sky">
+            <div>
+                <span class="stat-label">Total Members</span>
+                <span class="stat-value">@Model.TotalMembers</span>
+            </div>
+            <span class="icon-tile"><i class="bi bi-people"></i></span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card tone-amber">
+            <div>
+                <span class="stat-label">Managers</span>
+                <span class="stat-value">@Model.ManagerCount</span>
+            </div>
+            <span class="icon-tile"><i class="bi bi-person-workspace"></i></span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card tone-violet">
+            <div>
+                <span class="stat-label">Employees</span>
+                <span class="stat-value">@Model.EmployeeCount</span>
+            </div>
+            <span class="icon-tile"><i class="bi bi-person"></i></span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card tone-green">
+            <div>
+                <span class="stat-label">Active</span>
+                <span class="stat-value">@Model.ActiveCount</span>
+            </div>
+            <span class="icon-tile"><i class="bi bi-person-check"></i></span>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="get" class="mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" value="@Model.SearchTerm" class="form-control"
+                       placeholder="Name, username or email..." />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <select name="role" class="form-select">
+                <option value="">All roles</option>
+                <option value="manager"  selected="@(Model.RoleFilter == "manager")">Managers</option>
+                <option value="employee" selected="@(Model.RoleFilter == "employee")">Employees</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="department" class="form-select">
+                <option value="">All departments</option>
+                @foreach (var d in Model.Departments)
+                {
+                    <option value="@d.DepartmentId" selected="@(Model.DepartmentFilter == d.DepartmentId.ToString())">@d.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">All statuses</option>
+                <option value="active"   selected="@(Model.StatusFilter == "active")">Active</option>
+                <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button class="btn btn-primary flex-fill" type="submit">Apply</button>
+            @if (!string.IsNullOrEmpty(Model.SearchTerm) || !string.IsNullOrEmpty(Model.RoleFilter) || !string.IsNullOrEmpty(Model.DepartmentFilter) || !string.IsNullOrEmpty(Model.StatusFilter))
+            {
+                <a asp-action="ManageAll" class="btn btn-outline-secondary">Clear</a>
+            }
+        </div>
+    </div>
+</form>
+
+<!-- Table -->
+<section class="panel">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Department</th>
+                    <th>Role (toggle)</th>
+                    <th>Status</th>
+                    <th>Last Login</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in Model.Members)
+                {
+                    var isManager = m.RoleName == "Manager";
+                    var initials = !string.IsNullOrEmpty(m.FullName)
+                        ? m.FullName.Substring(0, 1).ToUpper()
+                        : m.Username.Substring(0, 1).ToUpper();
+
+                    <tr data-user-id="@m.UserId">
+                        <td>
+                            <div class="user-cell">
+                                <span class="avatar tone-sky">@initials</span>
+                                <div class="meta">
+                                    <span class="user-name-text">@(m.FullName ?? m.Username)</span>
+                                    <span class="user-email">@m.Email</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <select class="dept-select" data-user-id="@m.UserId" data-original="@(m.DepartmentId?.ToString() ?? "")">
+                                <option value="">— None —</option>
+                                @foreach (var d in Model.Departments)
+                                {
+                                    <option value="@d.DepartmentId" selected="@(m.DepartmentId == d.DepartmentId)">@d.Name</option>
+                                }
+                            </select>
+                        </td>
+
+                        <td>
+                            <div class="role-toggle @(isManager ? "is-manager" : "")"
+                                 data-user-id="@m.UserId"
+                                 data-role="@(isManager ? "manager" : "employee")"
+                                 role="button"
+                                 title="Click to toggle role">
+                                <span class="knob">
+                                    <i class="bi @(isManager ? "bi-person-workspace" : "bi-person")"></i>
+                                </span>
+                                <span class="role-label">@(isManager ? "Manager" : "Employee")</span>
+                            </div>
+                        </td>
+
+                        <td>
+                            @if (m.IsActive)
+                            {
+                                <span class="pill pill-dot tone-green">Active</span>
+                            }
+                            else
+                            {
+                                <span class="pill pill-dot tone-coral">Inactive</span>
+                            }
+                        </td>
+
+                        <td>@(m.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
+
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a asp-action="Edit" asp-route-id="@m.UserId" class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="btn btn-outline-info" title="Reset Password">
+                                    <i class="bi bi-key"></i>
+                                </a>
+                                <form asp-action="ToggleActive" asp-route-id="@m.UserId" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-outline-warning" title="@(m.IsActive ? "Deactivate" : "Activate")">
+                                        <i class="bi bi-@(m.IsActive ? "toggle-on" : "toggle-off")"></i>
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete @m.Username? Ye undo nahi hoga.');">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-outline-danger" title="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Members.Any())
+                {
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <i class="bi bi-people"></i>
+                                <strong>No members found</strong>
+                                <span>Try different filters or add a member.</span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Toast -->
+<div class="toast-note" id="toastNote">
+    <i class="bi bi-check-circle"></i>
+    <span id="toastMessage"></span>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        // ---------- Toast helper ----------
+        const toast = document.getElementById('toastNote');
+        const toastMsg = document.getElementById('toastMessage');
+        let toastTimeout;
+
+        function showToast(message, type) {
+            toastMsg.textContent = message;
+            toast.className = 'toast-note ' + (type || 'success');
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ---------- Get anti-forgery token ----------
+        function getToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]').value;
+        }
+
+        // ---------- Role toggle ----------
+        document.querySelectorAll('.role-toggle').forEach(function (el) {
+            el.addEventListener('click', async function () {
+                if (this.classList.contains('is-loading')) return;
+
+                const userId = this.dataset.userId;
+                const originalState = this.dataset.role;
+                const newState = originalState === 'manager' ? 'employee' : 'manager';
+
+                // Optimistic UI update
+                this.classList.add('is-loading');
+
+                try {
+                    const resp = await fetch('/Team/ToggleRole', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getToken()
+                        },
+                        body: JSON.stringify({ userId: parseInt(userId) })
+                    });
+
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        // Update UI
+                        this.dataset.role = newState;
+                        this.classList.toggle('is-manager', newState === 'manager');
+                        this.querySelector('.knob i').className =
+                            newState === 'manager' ? 'bi bi-person-workspace' : 'bi bi-person';
+                        this.querySelector('.role-label').textContent =
+                            newState === 'manager' ? 'Manager' : 'Employee';
+
+                        showToast(data.message || 'Role updated', 'success');
+                    } else {
+                        showToast(data.error || 'Update failed', 'error');
+                    }
+                } catch (e) {
+                    showToast('Network error. Try again.', 'error');
+                } finally {
+                    this.classList.remove('is-loading');
+                }
+            });
+        });
+
+        // ---------- Department change ----------
+        document.querySelectorAll('.dept-select').forEach(function (el) {
+            el.addEventListener('change', async function () {
+                const userId = this.dataset.userId;
+                const deptId = this.value;
+                const original = this.dataset.original || '';
+
+                try {
+                    const resp = await fetch('/Team/UpdateDepartment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getToken()
+                        },
+                        body: JSON.stringify({
+                            userId: parseInt(userId),
+                            departmentId: deptId ? parseInt(deptId) : null
+                        })
+                    });
+
+                    const data = await resp.json();
+
+                    if (data.success) {
+                        this.dataset.original = deptId;
+                        showToast('Department updated', 'success');
+                    } else {
+                        // Revert
+                        this.value = original;
+                        showToast(data.error || 'Update failed', 'error');
+                    }
+                } catch (e) {
+                    this.value = original;
+                    showToast('Network error. Try again.', 'error');
+                }
+            });
+        });
+    })();
+</script>
+}

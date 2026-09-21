@@ -354,5 +354,173 @@ namespace ERPDemo.Controllers
             TempData["Success"] = $"'{user.Username}' delete ho gaya.";
             return RedirectToAction(nameof(Index));
         }
+
+        // ============ MANAGE ALL (Super Table) ============
+        [HttpGet]
+        public async Task<IActionResult> ManageAll(string? search, string? role, string? department, string? status)
+        {
+            var orgId = await GetAdminOrgIdAsync();
+            if (orgId == null)
+            {
+                TempData["Error"] = "Aap kisi organization se attached nahi hai.";
+                return RedirectToAction("AdminDashboard", "Dashboard");
+            }
+
+            var query = _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.Department)
+                .Where(u => u.OrganizationId == orgId)
+                .Where(u => u.RoleId != 3 && u.RoleId != 4)  // Admin aur SuperAdmin exclude
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim().ToLower();
+                query = query.Where(u =>
+                    u.Username.ToLower().Contains(s) ||
+                    u.Email.ToLower().Contains(s) ||
+                    (u.FullName != null && u.FullName.ToLower().Contains(s)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(role))
+            {
+                if (role == "manager") query = query.Where(u => u.RoleId == 2);
+                else if (role == "employee") query = query.Where(u => u.RoleId == 1);
+            }
+
+            if (department.HasValue() && int.TryParse(department, out var deptId))
+                query = query.Where(u => u.DepartmentId == deptId);
+
+            if (status == "active") query = query.Where(u => u.IsActive);
+            else if (status == "inactive") query = query.Where(u => !u.IsActive);
+
+            var members = await query
+                .OrderBy(u => u.RoleId).ThenBy(u => u.Username)
+                .Select(u => new ManageRow
+                {
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    Email = u.Email,
+                    FullName = u.FullName,
+                    PhoneNumber = u.PhoneNumber,
+                    RoleName = u.Role!.RoleName,
+                    RoleId = u.RoleId,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department != null ? u.Department.Name : null,
+                    IsActive = u.IsActive,
+                    LastLoginAt = u.LastLoginAt,
+                    CreatedAt = u.CreatedAt
+                })
+                .ToListAsync();
+
+            var vm = new ManageAllViewModel
+            {
+                Members = members,
+                Departments = await _context.Departments
+                    .Where(d => d.OrganizationId == orgId && d.IsActive)
+                    .OrderBy(d => d.Name)
+                    .Select(d => new DepartmentOption { DepartmentId = d.DepartmentId, Name = d.Name })
+                    .ToListAsync(),
+                SearchTerm = search,
+                RoleFilter = role,
+                DepartmentFilter = department,
+                StatusFilter = status,
+                TotalMembers = members.Count,
+                ManagerCount = members.Count(m => m.RoleName == "Manager"),
+                EmployeeCount = members.Count(m => m.RoleName == "User"),
+                ActiveCount = members.Count(m => m.IsActive)
+            };
+
+            return View(vm);
+        }
+
+        // ============ TOGGLE ROLE (AJAX) ============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleRole([FromBody] ToggleRoleRequest request)
+        {
+            var orgId = await GetAdminOrgIdAsync();
+            if (orgId == null)
+                return Json(new { success = false, error = "No organization attached." });
+
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.UserId == request.UserId && u.OrganizationId == orgId);
+
+            if (user == null)
+                return Json(new { success = false, error = "User not found." });
+
+            // Safety: Admin aur SuperAdmin ko touch nahi karna
+            if (user.RoleId == 3 || user.RoleId == 4)
+                return Json(new { success = false, error = "Admin aur SuperAdmin ka role change nahi ho sakta." });
+
+            // Sirf User (1) ↔ Manager (2) allowed
+            if (user.RoleId != 1 && user.RoleId != 2)
+                return Json(new { success = false, error = "Ye role change nahi ho sakta." });
+
+            // Toggle
+            user.RoleId = user.RoleId == 1 ? 2 : 1;
+            user.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            var roleName = user.RoleId == 2 ? "Manager" : "Employee";
+            return Json(new
+            {
+                success = true,
+                newRoleId = user.RoleId,
+                newRoleName = roleName,
+                message = $"{user.Username} is now a {roleName}."
+            });
+        }
+
+        // ============ UPDATE DEPARTMENT (AJAX) ============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateDepartment([FromBody] UpdateDepartmentRequest request)
+        {
+            var orgId = await GetAdminOrgIdAsync();
+            if (orgId == null)
+                return Json(new { success = false, error = "No organization attached." });
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == request.UserId && u.OrganizationId == orgId);
+            if (user == null)
+                return Json(new { success = false, error = "User not found." });
+
+            if (user.RoleId == 3 || user.RoleId == 4)
+                return Json(new { success = false, error = "Admin ka department change nahi ho sakta." });
+
+            // Validate department belongs to same org
+            if (request.DepartmentId.HasValue)
+            {
+                var deptExists = await _context.Departments
+                    .AnyAsync(d => d.DepartmentId == request.DepartmentId && d.OrganizationId == orgId);
+                if (!deptExists)
+                    return Json(new { success = false, error = "Department valid nahi hai." });
+            }
+
+            user.DepartmentId = request.DepartmentId;
+            user.UpdatedAt = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Department update ho gaya." });
+        }
+
+        // DTOs
+        public class ToggleRoleRequest
+        {
+            public int UserId { get; set; }
+        }
+
+        public class UpdateDepartmentRequest
+        {
+            public int UserId { get; set; }
+            public int? DepartmentId { get; set; }
+        }
+
+
+
     }
+
 }

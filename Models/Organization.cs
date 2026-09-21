@@ -40,20 +40,22 @@ namespace ERPDemo.Models
         public DateTime? UpdatedAt { get; set; }
 
         [StringLength(15)]
-public string? GSTIN { get; set; }
+        public string? GSTIN { get; set; }
 
-[StringLength(200)]
-public string? LegalName { get; set; }   // Auto-filled from GST API
+        [StringLength(200)]
+        public string? LegalName { get; set; }   // Auto-filled from GST API
 
-[StringLength(200)]
-public string? TradeName { get; set; }   // Auto-filled
+        [StringLength(200)]
+        public string? TradeName { get; set; }   // Auto-filled
 
-[StringLength(50)]
-public string? GSTStatus { get; set; }   // Active / Cancelled / Suspended
+        [StringLength(50)]
+        public string? GSTStatus { get; set; }   // Active / Cancelled / Suspended
 
-public DateTime? GSTLastVerifiedAt { get; set; }
+        public DateTime? GSTLastVerifiedAt { get; set; }
 
         // Navigation
         public ICollection<User> Users { get; set; } = new List<User>();
+
+        public ICollection<Department> Departments { get; set; } = new List<Department>();
     }
 }

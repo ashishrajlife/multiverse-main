@@ -12,8 +12,8 @@ namespace ERPDemo.Data
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-        public DbSet<Organization> Organizations { get; set; }   // ✅ NEW
-
+        public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Department> Departments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -41,6 +41,18 @@ namespace ERPDemo.Data
                 .HasOne(u => u.Organization)
                 .WithMany(o => o.Users)
                 .HasForeignKey(u => u.OrganizationId)
+                .OnDelete(DeleteBehavior.SetNull);    
+          modelBuilder.Entity<Department>()
+    .HasOne(d => d.Organization)
+    .WithMany(o => o.Departments)
+    .HasForeignKey(d => d.OrganizationId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            // Department delete hone pe users' DepartmentId NULL ho jaye
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Department)
+                .WithMany(d => d.Users)
+                .HasForeignKey(u => u.DepartmentId)
                 .OnDelete(DeleteBehavior.SetNull);    
 
             // ---------- Seed Roles ----------

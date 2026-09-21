@@ -45,6 +45,11 @@ namespace ERPDemo.Models
 
         public DateTime? UpdatedAt { get; set; }
 
+        public int? DepartmentId { get; set; }
+
+        [ForeignKey("DepartmentId")]
+        public Department? Department { get; set; }
+
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
