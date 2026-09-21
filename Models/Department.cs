@@ -15,12 +15,6 @@ namespace ERPDemo.Models
         [StringLength(250)]
         public string? Description { get; set; }
 
-        [Required]
-        public int OrganizationId { get; set; }
-
-        [ForeignKey("OrganizationId")]
-        public Organization? Organization { get; set; }
-
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; }

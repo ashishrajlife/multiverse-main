@@ -42,11 +42,6 @@ namespace ERPDemo.Data
                 .WithMany(o => o.Users)
                 .HasForeignKey(u => u.OrganizationId)
                 .OnDelete(DeleteBehavior.SetNull);    
-          modelBuilder.Entity<Department>()
-    .HasOne(d => d.Organization)
-    .WithMany(o => o.Departments)
-    .HasForeignKey(d => d.OrganizationId)
-    .OnDelete(DeleteBehavior.NoAction);
 
             // Department delete hone pe users' DepartmentId NULL ho jaye
             modelBuilder.Entity<User>()

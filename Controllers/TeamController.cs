@@ -431,7 +431,7 @@ public async Task<IActionResult> ToggleActive(
             {
                 Members = members,
                 Departments = await _context.Departments
-                    .Where(d => d.OrganizationId == orgId && d.IsActive)
+                    .Where(d => d.IsActive)
                     .OrderBy(d => d.Name)
                     .Select(d => new DepartmentOption { DepartmentId = d.DepartmentId, Name = d.Name })
                     .ToListAsync(),
@@ -509,7 +509,7 @@ public async Task<IActionResult> ToggleActive(
             if (request.DepartmentId.HasValue)
             {
                 var deptExists = await _context.Departments
-                    .AnyAsync(d => d.DepartmentId == request.DepartmentId && d.OrganizationId == orgId);
+                    .AnyAsync(d => d.DepartmentId == request.DepartmentId);
                 if (!deptExists)
                     return Json(new { success = false, error = "Department valid nahi hai." });
             }
