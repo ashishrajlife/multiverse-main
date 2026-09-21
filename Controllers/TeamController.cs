@@ -253,36 +253,45 @@ namespace ERPDemo.Controllers
         }
 
         // ============ TOGGLE ACTIVE ============
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleActive(int id)
-        {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
+       [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ToggleActive(
+    int id,
+    string? search = null,
+    string? role = null,
+    string? department = null,
+    string? status = null)
+{
+    // Helper to rebuild the redirect with filters preserved
+    IActionResult BackToManageAll() =>
+        RedirectToAction(nameof(ManageAll), new { search, role, department, status });
 
-            if (id == CurrentUserId)
-            {
-                TempData["Error"] = "Aap khud ko deactivate nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
-            }
+    var orgId = await GetAdminOrgIdAsync();
+    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
-            if (user == null) return NotFound();
+    if (id == CurrentUserId)
+    {
+        TempData["Error"] = "Aap khud ko deactivate nahi kar sakte.";
+        return BackToManageAll();
+    }
 
-            if (user.RoleId == 3 || user.RoleId == 4)
-            {
-                TempData["Error"] = "Aap is user ki status change nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
-            }
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+    if (user == null) return NotFound();
 
-            user.IsActive = !user.IsActive;
-            user.UpdatedAt = DateTime.Now;
-            await _context.SaveChangesAsync();
+    if (user.RoleId == 3 || user.RoleId == 4)
+    {
+        TempData["Error"] = "Aap is user ki status change nahi kar sakte.";
+        return BackToManageAll();
+    }
 
-            TempData["Success"] = $"'{user.Username}' {(user.IsActive ? "activate" : "deactivate")} ho gaya.";
-            return RedirectToAction(nameof(Index));
-        }
+    user.IsActive = !user.IsActive;
+    user.UpdatedAt = DateTime.Now;
+    await _context.SaveChangesAsync();
+
+    TempData["Success"] = $"'{user.Username}' {(user.IsActive ? "activate" : "deactivate")} ho gaya.";
+    return BackToManageAll();
+}
 
         // ============ RESET PASSWORD ============
         [HttpGet]
@@ -327,7 +336,12 @@ namespace ERPDemo.Controllers
         // ============ DELETE ============
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(
+            int id,
+            string? search = null,
+            string? role = null,
+            string? department = null,
+            string? status = null)
         {
             var orgId = await GetAdminOrgIdAsync();
             if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
@@ -352,8 +366,8 @@ namespace ERPDemo.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"'{user.Username}' delete ho gaya.";
-            return RedirectToAction(nameof(Index));
-        }
+    return RedirectToAction(nameof(ManageAll), new { search, role, department, status });
+}
 
         // ============ MANAGE ALL (Super Table) ============
         [HttpGet]
