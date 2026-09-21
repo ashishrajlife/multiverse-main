@@ -158,7 +158,7 @@ namespace ERPDemo.Controllers
 
             await _context.SaveChangesAsync();
             TempData["Success"] = $"'{model.Username}' team me add ho gaya.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ManageAll));
         }
 
         // ============ EDIT ============
@@ -176,7 +176,7 @@ namespace ERPDemo.Controllers
             if (user.RoleId == 3 || user.RoleId == 4)
             {
                 TempData["Error"] = "Aap Admin ya SuperAdmin ko edit nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ManageAll));
             }
 
             ViewBag.Roles = await _context.Roles
@@ -249,7 +249,7 @@ namespace ERPDemo.Controllers
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "User details update ho gayi.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ManageAll));
         }
 
         // ============ TOGGLE ACTIVE ============
@@ -330,7 +330,7 @@ public async Task<IActionResult> ToggleActive(
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"'{user.Username}' ka password reset ho gaya.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(ManageAll));
         }
 
         // ============ DELETE ============
@@ -349,7 +349,7 @@ public async Task<IActionResult> ToggleActive(
             if (id == CurrentUserId)
             {
                 TempData["Error"] = "Aap khud ko delete nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ManageAll));
             }
 
             var user = await _context.Users
@@ -359,7 +359,7 @@ public async Task<IActionResult> ToggleActive(
             if (user.RoleId == 3 || user.RoleId == 4)
             {
                 TempData["Error"] = "Aap is user ko delete nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(ManageAll));
             }
 
             _context.Users.Remove(user);
