@@ -280,30 +280,38 @@
                                 }
                             </td>
                             <td class="text-center">
-                                <div class="btn-group btn-group-sm">
-
-                                     <button type="button" class="rt-btn" title="View Details" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId">
+    <div class="btn-group btn-group-sm">
+        <!-- View Details (Eye) -->
+        <button type="button" class="rt-btn" title="View Details" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId">
             <i class="bi bi-eye text-primary"></i>
         </button>
 
-                                    <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit User">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
-                                        <i class="bi bi-key"></i>
-                                    </a>
-                                    <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="search" value="@Model.SearchTerm" />
-                                        <input type="hidden" name="role" value="@Model.RoleFilter" />
-                                        <input type="hidden" name="department" value="@Model.DepartmentFilter" />
-                                        <input type="hidden" name="status" value="@Model.StatusFilter" />
-                                        <button type="submit" class="rt-btn text-danger" title="Delete User">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
+        <!-- Edit (Pencil) -->
+        <a asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit User">
+            <i class="bi bi-pencil"></i>
+        </a>
+
+        <!-- Reset Password (Key) — Sirf Manager/HOD/Admin ke liye -->
+        @if (m.RoleId != 1)   @* Employee nahi hai toh dikhao *@
+        {
+            <a asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
+                <i class="bi bi-key"></i>
+            </a>
+        }
+
+        <!-- Delete (Trash) -->
+        <form asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this user?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="search" value="@Model.SearchTerm" />
+            <input type="hidden" name="role" value="@Model.RoleFilter" />
+            <input type="hidden" name="department" value="@Model.DepartmentFilter" />
+            <input type="hidden" name="status" value="@Model.StatusFilter" />
+            <button type="submit" class="rt-btn text-danger" title="Delete User">
+                <i class="bi bi-trash"></i>
+            </button>
+        </form>
+    </div>
+</td>
                         </tr>
                     }
                 }

@@ -43,14 +43,16 @@
                     <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone Number</label>
                     <input asp-for="PhoneNumber" class="rt-field w-100" placeholder="9999999991" />
                 </div>
-             <!--   <div class="col-md-6">
-                    <label asp-for="Password" class="form-label fw-semibold" style="font-size:13px;">Password</label>
-                    <input asp-for="Password" type="password" class="rt-field w-100" placeholder="Secure password" />
-                    <span asp-validation-for="Password" class="text-danger small"></span>
-                </div> --->
+                  <div class="col-md-6" id="passwordField" style="display:none;">
+                        <label asp-for="Password" class="form-label fw-semibold" style="font-size:13px;">
+                            Password <small class="text-muted">(for login)</small>
+                        </label>
+                        <input asp-for="Password" type="password" class="rt-field w-100" placeholder="Secure password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
                 <div class="col-md-6">
                     <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">System Role</label>
-                    <select asp-for="RoleId" class="rt-field w-100">
+                    <select asp-for="RoleId" class="rt-field w-100" id="roleDropdown">
                         <option value="">-- Select Role --</option>
                         @foreach (var r in roles)
                         {
@@ -167,4 +169,23 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var roleDropdown = document.getElementById('roleDropdown');
+            var passwordField = document.getElementById('passwordField');
+
+            function togglePassword() {
+                // Role 1 = Employee → password hide
+                // Role 2 = Manager, 3 = Admin, 4 = SuperAdmin, 5 = HOD → password show
+                if (roleDropdown.value === '1' || roleDropdown.value === '') {
+                    passwordField.style.display = 'none';
+                } else {
+                    passwordField.style.display = 'block';
+                }
+            }
+
+            roleDropdown.addEventListener('change', togglePassword);
+            togglePassword();
+        })();
+    </script>
 }

@@ -131,17 +131,27 @@
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
+                                    <!-- View -->
                                     <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId">
                                         <i class="bi bi-eye text-primary"></i>
                                     </button>
+
+                                    <!-- Edit -->
                                     <a asp-controller="Hod" asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a asp-controller="Hod" asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
-                                        <i class="bi bi-key"></i>
-                                    </a>
+
+                                    <!-- Reset Password (Key) — Sirf Manager ke liye (HOD khud Employee nahi banayega) -->
+                                    @if (m.RoleId == 2)   @* Sirf Manager ke liye *@
+                                    {
+                                        <a asp-controller="Hod" asp-action="ResetPassword" asp-route-id="@m.UserId" class="rt-btn" title="Reset Password">
+                                            <i class="bi bi-key"></i>
+                                        </a>
+                                    }
+
+                                    <!-- Delete -->
                                     <form asp-controller="Hod" asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline"
-                                          onsubmit="return confirm('Are you sure?');">
+                                        onsubmit="return confirm('Are you sure?');">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="rt-btn text-danger" title="Delete">
                                             <i class="bi bi-trash"></i>

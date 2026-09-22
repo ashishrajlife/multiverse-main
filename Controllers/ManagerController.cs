@@ -122,7 +122,7 @@ namespace ERPDemo.Controllers
             {
                 Username = model.Username,
                 Email = model.Email,
-                Password = Guid.NewGuid().ToString(),   // Dummy — Employee login nahi karega
+                Password = Guid.NewGuid().ToString(),  
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
                 RoleId = 1,                              // Employee

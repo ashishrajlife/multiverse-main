@@ -166,4 +166,21 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var roleDropdown = document.getElementById('roleDropdown');
+            var passwordField = document.getElementById('passwordField');
+
+            function togglePassword() {
+                if (roleDropdown.value === '1') {
+                    passwordField.style.display = 'none';
+                } else {
+                    passwordField.style.display = 'block';
+                }
+            }
+
+            roleDropdown.addEventListener('change', togglePassword);
+            togglePassword();
+        })();
+    </script>
 }

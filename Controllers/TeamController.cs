@@ -100,7 +100,7 @@ namespace ERPDemo.Controllers
             {
                 Username = model.Username,
                 Email = model.Email,
-               Password = Guid.NewGuid().ToString(),
+                Password = model.RoleId == 1 ? Guid.NewGuid().ToString() : model.Password,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
                 RoleId = model.RoleId,
