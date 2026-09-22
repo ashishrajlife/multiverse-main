@@ -234,6 +234,35 @@ select.rt-field { flex: 0 1 150px; padding: 0 6px; cursor: pointer; }
 }
 .rt-scroll { overflow-x: auto; }
 
+/* ============ STATS COLORS ============ */
+.rt-stat.rt-violet {
+    --rt-stat-tone: #a29bfe;
+}
+.rt-stat.rt-amber {
+    --rt-stat-tone: #feca57;
+}
+.rt-stat.rt-pink {
+    --rt-stat-tone: #ff9ff3;
+}
+
+/* ============ TAG COLORS ============ */
+.rt-tag.rt-amber {
+    background: #fff5d6;
+    color: #8a6d1a;
+    border-color: #feca57;
+}
+.rt-tag.rt-coral {
+    background: #ffe5e5;
+    color: #a12f2f;
+    border-color: #ff6b6b;
+}
+
+/* ============ QUICK ACTIONS HOVER ============ */
+.rt-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 /* ---------- Table ---------- */
 .rt-table {
     width: 100%;
