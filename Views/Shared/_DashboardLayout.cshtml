@@ -200,6 +200,53 @@
         </main>
     </div>
 
+    <!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container-custom" id="globalToastContainer"></div>
+</div>
+
+<script>
+    (function () {
+        const AUTO_HIDE_DELAY = 3000;
+
+        function showToast(type, message) {
+            const container = document.getElementById('globalToastContainer');
+            if (!container) return;
+
+            const isSuccess = type === 'success';
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast custom-toast ${isSuccess ? 'custom-success-toast' : 'custom-error-toast'}`;
+            toastEl.setAttribute('role', 'alert');
+            toastEl.innerHTML = `
+                <div class="toast-header">
+                    <i class="bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"
+                       style="color:${isSuccess ? '#2e7d5e' : '#b3404a'};"></i>
+                    <strong class="me-auto">${isSuccess ? 'Success' : 'Error'}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">${message}</div>
+            `;
+            container.appendChild(toastEl);
+            new bootstrap.Toast(toastEl, { delay: AUTO_HIDE_DELAY }).show();
+
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
+        window.showSmoothToast = showToast;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (TempData["Success"] != null)
+            {
+                <text>showToast('success', @Html.Raw(Json.Serialize(TempData["Success"].ToString())));</text>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <text>showToast('error', @Html.Raw(Json.Serialize(TempData["Error"].ToString())));</text>
+            }
+        });
+    })();
+</script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function () {

@@ -1,6 +1,7 @@
 @{
     ViewData["Title"] = "Manager Dashboard";
     Layout = "_DashboardLayout";
+    var teamMembers = ViewBag.TeamMembers as List<ERPDemo.Models.User> ?? new List<ERPDemo.Models.User>();
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,6 +13,11 @@
             <h1>Welcome, @ViewBag.ManagerName 👋</h1>
             <p class="text-muted mb-0">Department: <strong>@ViewBag.DepartmentName</strong></p>
         </div>
+    </div>
+    <div class="rt-head-right">
+        <a asp-controller="Manager" asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Add Employee
+        </a>
     </div>
 </div>
 
@@ -66,57 +72,64 @@
         <span>My Team Members</span>
     </div>
     <div class="table-responsive">
-        <table class="table table-hover table-bordered align-middle mb-0" style="font-size: 14px;">
-            <thead class="table-dark text-uppercase text-center" style="font-size: 12px;">
+        <table class="table table-hover table-bordered border-secondary align-middle mb-0" style="font-size: 15px;">
+            <thead class="table-dark text-uppercase text-center" style="font-size: 12px; letter-spacing: 0.5px;">
                 <tr>
-                    <th class="text-center">Employee</th>
-                    <th class="text-center">Email</th>
-                    <th class="text-center">Phone</th>
-                    <th class="text-center">Designation</th>
-                    <th class="text-center">Shift</th>
-                    <th class="text-center">Status</th>
+                    <th class="text-center">Full Name</th>
+                    <th class="text-center">Phone Number</th>
+                    <th class="text-center">City</th>
+                    <th class="text-center">State</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @if (ViewBag.TeamMembers != null && ((List<ERPDemo.Models.User>)ViewBag.TeamMembers).Any())
+                @if (teamMembers.Any())
                 {
-                    foreach (var m in (List<ERPDemo.Models.User>)ViewBag.TeamMembers)
+                    foreach (var m in teamMembers)
                     {
                         <tr>
                             <td class="text-center">
-                                <div class="fw-bold">@m.FullName</div>
+                                <div class="fw-bold text-dark">@m.FullName</div>
                                 <div class="text-muted" style="font-size:11px;">@@@m.Username</div>
                             </td>
-                            <td class="text-center">@m.Email</td>
-                            <td class="text-center">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</td>
-                            <td class="text-center">@(string.IsNullOrEmpty(m.Designation) ? "N/A" : m.Designation)</td>
                             <td class="text-center">
-                                @if (!string.IsNullOrEmpty(m.ShiftStartTime) && !string.IsNullOrEmpty(m.ShiftEndTime))
-                                {
-                                    <span class="badge bg-light text-dark border">@m.ShiftStartTime - @m.ShiftEndTime</span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">N/A</span>
-                                }
+                                <div class="text-dark">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</div>
                             </td>
                             <td class="text-center">
-                                @if (m.IsActive)
-                                {
-                                    <span class="badge bg-success">Active</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-danger">Inactive</span>
-                                }
+                                <div class="text-dark">@(string.IsNullOrEmpty(m.City) ? "N/A" : m.City)</div>
                             </td>
+                            <td class="text-center">
+                                <div class="text-dark">@(string.IsNullOrEmpty(m.State) ? "N/A" : m.State)</div>
+                            </td>
+                           <td class="text-center">
+    <div class="btn-group btn-group-sm">
+        <!-- View -->
+        <button type="button" class="rt-btn" title="View" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId">
+            <i class="bi bi-eye text-primary"></i>
+        </button>
+
+        <!-- Edit -->
+        <a asp-controller="Manager" asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit">
+            <i class="bi bi-pencil"></i>
+        </a>
+
+        <!-- Delete -->
+        <form asp-controller="Manager" asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline"
+              onsubmit="return confirm('Are you sure you want to delete this employee?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="rt-btn text-danger" title="Delete">
+                <i class="bi bi-trash"></i>
+            </button>
+        </form>
+    </div>
+</td>
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
+                        <td colspan="5" class="text-center py-4 text-muted">
                             No team members found in your department.
                         </td>
                     </tr>
@@ -125,3 +138,144 @@
         </table>
     </div>
 </div>
+
+<!-- ============================================= -->
+<!-- VIEW DETAILS MODALS — Ek modal per employee   -->
+<!-- ============================================= -->
+@foreach (var m in teamMembers)
+{
+    <div class="modal fade" id="viewModal-@m.UserId" tabindex="-1" aria-labelledby="viewModalLabel-@m.UserId" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+
+                <div class="modal-header bg-dark text-white" style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h5 class="modal-title" id="viewModalLabel-@m.UserId">
+                        <i class="bi bi-person-badge me-2"></i> @m.FullName's Profile
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+
+                    <!-- Section 1: Basic Info -->
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                        <i class="bi bi-person me-1"></i> Basic Information
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">Username</label>
+                            <div class="fw-bold">@m.Username</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">Email Address</label>
+                            <div class="fw-bold">@m.Email</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">Phone Number</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.PhoneNumber) ? "N/A" : m.PhoneNumber)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">Status</label>
+                            <div>
+                                @if (m.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Inactive</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Personal & Contact -->
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                        <i class="bi bi-geo-alt me-1"></i> Personal & Contact Details
+                    </h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="text-muted small fw-semibold">Address</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.Address) ? "N/A" : m.Address)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">City</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.City) ? "N/A" : m.City)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">State</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.State) ? "N/A" : m.State)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Pincode</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.Pincode) ? "N/A" : m.Pincode)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">Aadhaar Number</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.AadhaarNumber) ? "N/A" : m.AadhaarNumber)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small fw-semibold">PAN Number</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.PanNumber) ? "N/A" : m.PanNumber)</div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Employment Details -->
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">
+                        <i class="bi bi-briefcase me-1"></i> Employment & Shift Details
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Employment Type</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.EmploymentType) ? "N/A" : m.EmploymentType)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Designation</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.Designation) ? "N/A" : m.Designation)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Plant Location</label>
+                            <div class="fw-bold">@(string.IsNullOrEmpty(m.PlantLocation) ? "N/A" : m.PlantLocation)</div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Joining Date</label>
+                            <div class="fw-bold">
+                                @(m.JoiningDate.HasValue ? m.JoiningDate.Value.ToString("dd MMM yyyy") : "N/A")
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Shift Timing</label>
+                            <div class="fw-bold">
+                                @if (!string.IsNullOrEmpty(m.ShiftStartTime) && !string.IsNullOrEmpty(m.ShiftEndTime))
+                                {
+                                    <span class="badge bg-light text-dark border">@m.ShiftStartTime - @m.ShiftEndTime</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="text-muted small fw-semibold">Salary</label>
+                            <div class="fw-bold">
+                                @if (!string.IsNullOrEmpty(m.SalaryType))
+                                {
+                                    <span>@m.SalaryType @(m.SalaryAmount.HasValue ? $"- ₹{m.SalaryAmount.Value:N2}" : "")</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                    <button type="button" class="rt-btn" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
