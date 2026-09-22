@@ -101,24 +101,24 @@
                             <td class="text-center">
                                 <div class="text-dark">@(string.IsNullOrEmpty(m.State) ? "N/A" : m.State)</div>
                             </td>
-                          <td class="text-center">
+    <td class="text-center">
     <div class="btn-group btn-group-sm">
         <!-- View -->
-        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId">
-            <i class="bi bi-eye text-primary"></i>
+        <button type="button" class="rt-btn bg-primary me-1" data-bs-toggle="modal" data-bs-target="#viewModal-@m.UserId" title="View">
+            <i class="bi bi-eye text-dark fw-bold"></i>
         </button>
 
         <!-- Edit -->
-        <a asp-controller="Manager" asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn" title="Edit">
-            <i class="bi bi-pencil"></i>
+        <a asp-controller="Manager" asp-action="Edit" asp-route-id="@m.UserId" class="rt-btn bg-warning me-1" title="Edit">
+            <i class="bi bi-pencil text-dark fw-bold"></i>
         </a>
 
         <!-- Delete -->
         <form asp-controller="Manager" asp-action="Delete" asp-route-id="@m.UserId" method="post" class="d-inline"
-              onsubmit="return confirm('Are you sure?');">
+            onsubmit="return confirm('Are you sure?');">
             @Html.AntiForgeryToken()
-            <button type="submit" class="rt-btn text-danger" title="Delete">
-                <i class="bi bi-trash"></i>
+            <button type="submit" class="rt-btn bg-danger" title="Delete">
+                <i class="bi bi-trash text-dark fw-bold"></i>
             </button>
         </form>
     </div>

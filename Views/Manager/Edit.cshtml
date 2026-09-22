@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Edit Employee";
     Layout = "_DashboardLayout";
+    var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
+    var departments = ViewBag.Departments as List<ERPDemo.Models.Department> ?? new();
+}
 }
 
 <div class="rt-head">

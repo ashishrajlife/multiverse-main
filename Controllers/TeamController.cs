@@ -300,44 +300,59 @@ user.SalaryAmount = model.SalaryAmount;
         }
 
         // ============ RESET PASSWORD ============
-        [HttpGet]
-        public async Task<IActionResult> ResetPassword(int id)
-        {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
+       [HttpGet]
+public async Task<IActionResult> ResetPassword(int id)
+{
+    var orgId = await GetAdminOrgIdAsync();
+    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
-            if (user == null) return NotFound();
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+    if (user == null) return NotFound();
 
-            ViewBag.UserName = user.FullName ?? user.Username;
-            return View(new ResetPasswordViewModel { UserId = user.UserId });
-        }
+    // 🔒 Admin/SuperAdmin ka password reset nahi ho sakta
+    if (user.RoleId == 3 || user.RoleId == 4)
+    {
+        TempData["Error"] = "Admin ya SuperAdmin ka password reset nahi kar sakte.";
+        return RedirectToAction(nameof(ManageAll));
+    }
+
+    ViewBag.UserName = user.FullName ?? user.Username;
+    return View(new ResetPasswordViewModel { UserId = user.UserId });
+}
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-        {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+{
+    var orgId = await GetAdminOrgIdAsync();
+    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == model.UserId && u.OrganizationId == orgId);
-            if (user == null) return NotFound();
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == model.UserId && u.OrganizationId == orgId);
+    if (user == null) return NotFound();
 
-            if (!ModelState.IsValid)
-            {
-                ViewBag.UserName = user.FullName ?? user.Username;
-                return View(model);
-            }
+    // 🔒 Admin/SuperAdmin ka password reset nahi ho sakta
+    if (user.RoleId == 3 || user.RoleId == 4)
+    {
+        TempData["Error"] = "Admin ya SuperAdmin ka password reset nahi kar sakte.";
+        return RedirectToAction(nameof(ManageAll));
+    }
 
-            user.Password = model.NewPassword;
-            user.UpdatedAt = DateTime.Now;
-            await _context.SaveChangesAsync();
+    if (!ModelState.IsValid)
+    {
+        ViewBag.UserName = user.FullName ?? user.Username;
+        return View(model);
+    }
 
-            TempData["Success"] = $"'{user.Username}' ka password reset ho gaya.";
-            return RedirectToAction(nameof(ManageAll));
-        }
+    user.Password = model.NewPassword!;
+    user.UpdatedAt = DateTime.Now;
+    await _context.SaveChangesAsync();
+
+    TempData["Success"] = $"'{user.Username}' ka password reset ho gaya.";
+    return RedirectToAction(nameof(ManageAll));
+}
+
 
         // ============ DELETE ============
         [HttpPost]

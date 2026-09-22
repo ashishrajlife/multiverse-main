@@ -333,59 +333,75 @@ namespace ERPDemo.Controllers
         }
 
         // ============ RESET PASSWORD ============
-        [HttpGet]
-        public async Task<IActionResult> ResetPassword(int id)
-        {
-            var hod = await GetCurrentHodAsync();
-            if (hod == null) return RedirectToAction("Login", "Auth");
+[HttpGet]
+public async Task<IActionResult> ResetPassword(int id)
+{
+    var hod = await GetCurrentHodAsync();
+    if (hod == null) return RedirectToAction("Login", "Auth");
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id
-                                       && u.OrganizationId == hod.OrganizationId
-                                       && u.DepartmentId == hod.DepartmentId
-                                       && (u.RoleId == 1 || u.RoleId == 2));
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == id
+                               && u.OrganizationId == hod.OrganizationId
+                               && u.DepartmentId == hod.DepartmentId
+                               && (u.RoleId == 1 || u.RoleId == 2));
 
-            if (user == null)
-            {
-                TempData["Error"] = "User nahi mila.";
-                return RedirectToAction(nameof(Dashboard));
-            }
+    if (user == null)
+    {
+        TempData["Error"] = "User nahi mila.";
+        return RedirectToAction(nameof(Dashboard));
+    }
 
-            ViewBag.UserName = user.FullName ?? user.Username;
-            return View(new ResetPasswordViewModel { UserId = user.UserId });
-        }
+    // 🔒 HOD khud ka password yahan se reset nahi kar sakta
+    if (user.UserId == CurrentUserId)
+    {
+        TempData["Error"] = "Aap apna password yahan se reset nahi kar sakte.";
+        return RedirectToAction(nameof(Dashboard));
+    }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-        {
-            var hod = await GetCurrentHodAsync();
-            if (hod == null) return RedirectToAction("Login", "Auth");
+    ViewBag.UserName = user.FullName ?? user.Username;
+    return View(new ResetPasswordViewModel { UserId = user.UserId });
+}
 
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == model.UserId
-                                       && u.OrganizationId == hod.OrganizationId
-                                       && u.DepartmentId == hod.DepartmentId
-                                       && (u.RoleId == 1 || u.RoleId == 2));
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+{
+    var hod = await GetCurrentHodAsync();
+    if (hod == null) return RedirectToAction("Login", "Auth");
 
-            if (user == null)
-            {
-                TempData["Error"] = "User nahi mila.";
-                return RedirectToAction(nameof(Dashboard));
-            }
+    var user = await _context.Users
+        .FirstOrDefaultAsync(u => u.UserId == model.UserId
+                               && u.OrganizationId == hod.OrganizationId
+                               && u.DepartmentId == hod.DepartmentId
+                               && (u.RoleId == 1 || u.RoleId == 2));
 
-            if (!ModelState.IsValid)
-            {
-                ViewBag.UserName = user.FullName ?? user.Username;
-                return View(model);
-            }
+    if (user == null)
+    {
+        TempData["Error"] = "User nahi mila.";
+        return RedirectToAction(nameof(Dashboard));
+    }
 
-            user.Password = model.NewPassword;
-            user.UpdatedAt = DateTime.Now;
-            await _context.SaveChangesAsync();
+    // 🔒 Khud ka password reset nahi
+    if (user.UserId == CurrentUserId)
+    {
+        TempData["Error"] = "Aap apna password yahan se reset nahi kar sakte.";
+        return RedirectToAction(nameof(Dashboard));
+    }
 
-            TempData["Success"] = $"'{user.Username}' ka password reset ho gaya.";
-            return RedirectToAction(nameof(Dashboard));
-        }
+    if (!ModelState.IsValid)
+    {
+        ViewBag.UserName = user.FullName ?? user.Username;
+        return View(model);
+    }
+
+    user.Password = model.NewPassword!;
+    user.UpdatedAt = DateTime.Now;
+    await _context.SaveChangesAsync();
+
+    TempData["Success"] = $"'{user.Username}' ka password reset ho gaya.";
+    return RedirectToAction(nameof(Dashboard));
+}
+      
+        
     }
 }

@@ -18,39 +18,39 @@
     </div>
 </div>
 
-<div class="rt-window" style="max-width: 800px;">
+<div class="rt-window w-100">
     <div class="rt-titlebar"><span>Member Record Information</span></div>
     <div class="p-4">
         <form asp-action="Create" method="post" asp-antiforgery="true">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="Username" class="form-label fw-semibold" style="font-size:13px;">Username</label>
                     <input asp-for="Username" class="rt-field w-100" placeholder="e.g. john_doe" />
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="Email" class="form-label fw-semibold" style="font-size:13px;">Email Address</label>
                     <input asp-for="Email" class="rt-field w-100" placeholder="john@erp.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="FullName" class="form-label fw-semibold" style="font-size:13px;">Full Name</label>
                     <input asp-for="FullName" class="rt-field w-100" placeholder="John Doe" />
                 </div>
-                <div class="col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone Number</label>
                     <input asp-for="PhoneNumber" class="rt-field w-100" placeholder="9999999991" />
                 </div>
-                  <div class="col-md-6" id="passwordField" style="display:none;">
+                  <div class="col-lg-3 col-md-6" id="passwordField" style="display:none;">
                         <label asp-for="Password" class="form-label fw-semibold" style="font-size:13px;">
                             Password <small class="text-muted">(for login)</small>
                         </label>
                         <input asp-for="Password" type="password" class="rt-field w-100" placeholder="Secure password" />
                         <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
-                <div class="col-md-6">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">System Role</label>
                     <select asp-for="RoleId" class="rt-field w-100" id="roleDropdown">
                         <option value="">-- Select Role --</option>
@@ -61,7 +61,7 @@
                     </select>
                     <span asp-validation-for="RoleId" class="text-danger small"></span>
                 </div>
-                <div class="col-md-12">
+                <div class="col-lg-3 col-md-6">
                     <label asp-for="DepartmentId" class="form-label fw-semibold" style="font-size:13px;">Department</label>
                     <select asp-for="DepartmentId" class="rt-field w-100">
                         <option value="">-- Select Department --</option>
@@ -83,27 +83,27 @@
             <hr class="my-4" />
 <h6 class="fw-bold text-primary mb-3"><i class="bi bi-person-vcard me-1"></i> Personal & Contact Details</h6>
 <div class="row g-3">
-    <div class="col-md-12">
+    <div class="col-lg-6 col-md-12">
         <label asp-for="Address" class="form-label fw-semibold" style="font-size:13px;">Address</label>
         <input asp-for="Address" class="rt-field w-100" placeholder="Street, Area, Landmark" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-2 col-md-4 col-6">
         <label asp-for="City" class="form-label fw-semibold" style="font-size:13px;">City</label>
         <input asp-for="City" class="rt-field w-100" value="Raipur" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-2 col-md-4 col-6">
         <label asp-for="State" class="form-label fw-semibold" style="font-size:13px;">State</label>
         <input asp-for="State" class="rt-field w-100" value="Chhattisgarh" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-2 col-md-4 col-6">
         <label asp-for="Pincode" class="form-label fw-semibold" style="font-size:13px;">Pincode</label>
         <input asp-for="Pincode" class="rt-field w-100" placeholder="492001" />
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-3 col-md-6">
         <label asp-for="AadhaarNumber" class="form-label fw-semibold" style="font-size:13px;">Aadhaar Number</label>
         <input asp-for="AadhaarNumber" class="rt-field w-100" placeholder="XXXX XXXX XXXX" />
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-3 col-md-6">
         <label asp-for="PanNumber" class="form-label fw-semibold" style="font-size:13px;">PAN Number</label>
         <input asp-for="PanNumber" class="rt-field w-100" placeholder="ABCDE1234F" />
     </div>
@@ -112,7 +112,7 @@
 <hr class="my-4" />
 <h6 class="fw-bold text-primary mb-3"><i class="bi bi-briefcase me-1"></i> Employment & Shift Details</h6>
 <div class="row g-3">
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="EmploymentType" class="form-label fw-semibold" style="font-size:13px;">Employment Type</label>
         <select asp-for="EmploymentType" class="rt-field w-100">
             <option value="">-- Select --</option>
@@ -122,11 +122,11 @@
             <option value="Apprentice">Apprentice</option>
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="Designation" class="form-label fw-semibold" style="font-size:13px;">Designation</label>
         <input asp-for="Designation" class="rt-field w-100" placeholder="e.g. Plant Supervisor" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="PlantLocation" class="form-label fw-semibold" style="font-size:13px;">Plant Location</label>
         <select asp-for="PlantLocation" class="rt-field w-100">
             <option value="">-- Select --</option>
@@ -136,19 +136,19 @@
             <option value="Bhilai">Bhilai</option>
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="JoiningDate" class="form-label fw-semibold" style="font-size:13px;">Joining Date</label>
         <input asp-for="JoiningDate" type="date" class="rt-field w-100" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="ShiftStartTime" class="form-label fw-semibold" style="font-size:13px;">Shift Start Time</label>
         <input asp-for="ShiftStartTime" type="time" class="rt-field w-100" />
     </div>
-    <div class="col-md-4">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="ShiftEndTime" class="form-label fw-semibold" style="font-size:13px;">Shift End Time</label>
         <input asp-for="ShiftEndTime" type="time" class="rt-field w-100" />
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="SalaryType" class="form-label fw-semibold" style="font-size:13px;">Salary Type</label>
         <select asp-for="SalaryType" class="rt-field w-100">
             <option value="">-- Select --</option>
@@ -157,7 +157,7 @@
             <option value="Hourly">Hourly</option>
         </select>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-3 col-md-4 col-6">
         <label asp-for="SalaryAmount" class="form-label fw-semibold" style="font-size:13px;">Salary Amount (₹)</label>
         <input asp-for="SalaryAmount" type="number" step="0.01" class="rt-field w-100" placeholder="e.g. 25000" />
     </div>
