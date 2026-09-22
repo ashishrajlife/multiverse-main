@@ -120,31 +120,49 @@
         </div>
 
         <ul class="sidebar-nav">
-            <li>
-                <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                   asp-controller="Dashboard" asp-action="Index">
-                    <i class="bi bi-speedometer2"></i>Dashboard
-                </a>
-            </li>
-            @if (isSuperAdmin)
-            {
-                <li>
-                    <a class="side-link @(controllerName.Equals("Organization", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                       asp-controller="Organization" asp-action="Index">
-                        <i class="bi bi-buildings"></i>Organizations
-                    </a>
-                </li>
-            }
-            else if (currentRole == "Admin")
-            {
-                <li>
-                    <a class="side-link @(controllerName.Equals("Team", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-                       asp-controller="Team" asp-action="ManageAll">
-                        <i class="bi bi-people"></i>My Team
-                    </a>
-                </li>
-            }
-        </ul>
+    @* SuperAdmin ke liye Dashboard *@
+    @if (isSuperAdmin)
+    {
+        <li>
+            <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Dashboard" asp-action="Index">
+                <i class="bi bi-speedometer2"></i>Dashboard
+            </a>
+        </li>
+        <li>
+            <a class="side-link @(controllerName.Equals("Organization", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Organization" asp-action="Index">
+                <i class="bi bi-buildings"></i>Organizations
+            </a>
+        </li>
+    }
+    @* Admin ke liye *@
+    else if (currentRole == "Admin")
+    {
+        <li>
+            <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Dashboard" asp-action="Index">
+                <i class="bi bi-speedometer2"></i>Dashboard
+            </a>
+        </li>
+        <li>
+            <a class="side-link @(controllerName.Equals("Team", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Team" asp-action="ManageAll">
+                <i class="bi bi-people"></i>My Team
+            </a>
+        </li>
+    }
+    @* Manager ke liye *@
+    else if (currentRole == "Manager")
+    {
+        <li>
+            <a class="side-link @(controllerName.Equals("Manager", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Manager" asp-action="Dashboard">
+                <i class="bi bi-speedometer2"></i>My Dashboard
+            </a>
+        </li>
+    }
+</ul>
         <div class="sidebar-foot p-3" style="font-size:11px; color:#8391ad; border-top:1px solid rgba(255,255,255,0.08);">&copy; @DateTime.Now.Year Multiverse</div>
     </aside>
 
