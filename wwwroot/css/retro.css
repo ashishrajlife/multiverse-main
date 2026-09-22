@@ -203,7 +203,7 @@ select.rt-field { flex: 0 1 150px; padding: 0 6px; cursor: pointer; }
 /* ---------- Window (table container) ---------- */
 .rt-window {
     background: var(--rt-paper);
-    border: 1px solid var(--rt-grid);
+    border: 1px solid black;
     border-radius: var(--rt-radius);
     box-shadow: var(--rt-shadow);
     overflow: hidden;
@@ -218,7 +218,7 @@ select.rt-field { flex: 0 1 150px; padding: 0 6px; cursor: pointer; }
     font-weight: 600;
     color: var(--rt-ink);
     background: var(--rt-face);
-    border-bottom: 1px solid var(--rt-grid);
+    border-bottom: 1px solid black;
 }
 .rt-titlebar .rt-btn { height: 24px; padding: 0 10px; font-size: 12px; }
 .rt-statusbar {
