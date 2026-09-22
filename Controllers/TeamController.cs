@@ -30,7 +30,7 @@ namespace ERPDemo.Controllers
         }
 
         // Role IDs: 1 = User, 2 = Manager, 3 = Admin, 4 = SuperAdmin
-        private static readonly int[] AssignableRoleIds = { 1, 2 };
+        private static readonly int[] AssignableRoleIds = { 1, 2, 5 };
 
         // ============ INDEX / FALLBACK ============
         public IActionResult Index()
@@ -215,7 +215,7 @@ namespace ERPDemo.Controllers
 
             if (!AssignableRoleIds.Contains(model.RoleId))
             {
-                ModelState.AddModelError("RoleId", "Aap sirf User ya Manager assign kar sakte hai.");
+                ModelState.AddModelError("RoleId", "You can Assign Employee Or Manager omly !.");
                 return View(model);
             }
 

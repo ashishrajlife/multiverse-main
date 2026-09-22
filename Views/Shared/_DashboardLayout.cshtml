@@ -152,6 +152,18 @@
             </a>
         </li>
     }
+    
+    @*HOD configurations*@
+    else if (currentRole == "HOD")
+    {
+        <li>
+            <a class="side-link @(controllerName.Equals("Hod", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+            asp-controller="Hod" asp-action="Dashboard">
+                <i class="bi bi-speedometer2"></i>HOD Dashboard
+            </a>
+        </li>
+    }
+
     @* Manager ke liye *@
     else if (currentRole == "Manager")
     {
@@ -181,7 +193,7 @@
                 <button type="button" class="user-chip dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="user-avatar">@initials</span>
                     <span class="d-none d-sm-inline">@fullName</span>
-                    <span class="badge ms-1 @(isSuperAdmin ? "bg-danger" : currentRole == "Admin" ? "bg-warning text-dark" : "bg-secondary")" style="font-size:10px;">@currentRole</span>
+                    <span class="badge ms-1 @(isSuperAdmin ? "bg-danger" : currentRole == "Admin" ? "bg-warning text-dark" : currentRole == "HOD" ? "bg-primary" : currentRole == "Manager" ? "bg-info text-dark" : "bg-secondary")" style="font-size:10px;">@currentRole</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:13px;">
                     <li><a class="dropdown-item" asp-controller="Profile" asp-action="Index"><i class="bi bi-person me-2"></i>My Profile</a></li>

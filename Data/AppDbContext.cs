@@ -55,7 +55,8 @@ namespace ERPDemo.Data
                 new Role { RoleId = 1, RoleName = "User",       Description = "Standard application user",                CreatedAt = seedDate },
                 new Role { RoleId = 2, RoleName = "Manager",    Description = "Team lead / module manager",               CreatedAt = seedDate },
                 new Role { RoleId = 3, RoleName = "Admin",      Description = "Administrator with elevated privileges",   CreatedAt = seedDate },
-                new Role { RoleId = 4, RoleName = "SuperAdmin", Description = "Full system access - super administrator", CreatedAt = seedDate }
+                new Role { RoleId = 4, RoleName = "SuperAdmin", Description = "Full system access - super administrator", CreatedAt = seedDate },
+                new Role { RoleId = 5, RoleName = "HOD",        Description = "Full system access - specific department", CreatedAt = seedDate }
             );
 
             // ---------- Seed Organizations ----------

@@ -35,6 +35,7 @@ namespace ERPDemo.Controllers
                         {
                             "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                             "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
+                            "HOD"        => RedirectToAction("Dashboard", "Hod"),  
                             "Manager"    => RedirectToAction("Dashboard", "Manager"),
                             _            => RedirectToAction("UserDashboard", "Dashboard")
                         };
@@ -109,12 +110,12 @@ namespace ERPDemo.Controllers
             HttpContext.Session.SetString("RoleName", roleName);        
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
 
-            // ✅ Redirect to correct dashboard
             return roleName switch
             {
                 "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                 "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
                "Manager"    => RedirectToAction("Dashboard", "Manager"),
+               "HOD"        => RedirectToAction("Dashboard", "Hod"),  
                 _            => RedirectToAction("UserDashboard", "Dashboard")
             };
         }

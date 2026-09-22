@@ -167,13 +167,20 @@ public decimal? SalaryAmount { get; set; }
 
     }
 
-    public class ResetPasswordViewModel
+   public class ResetPasswordViewModel
     {
-        [Required]
         public int UserId { get; set; }
 
-        [Required, StringLength(255, MinimumLength = 4)]
+        [Required(ErrorMessage = "New password is required")]
         [DataType(DataType.Password)]
-        public string NewPassword { get; set; } = string.Empty;
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; }
+
+        [Required(ErrorMessage = "Confirm password is required")]
+        [DataType(DataType.Password)]
+        [Compare("NewPassword", ErrorMessage = "Password and Confirm Password do not match")]
+        [Display(Name = "Confirm Password")]
+        public string ConfirmPassword { get; set; }
     }
+
 }

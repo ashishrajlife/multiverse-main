@@ -1,0 +1,158 @@
+@model ERPDemo.ViewModels.EditTeamMemberViewModel
+@{
+    ViewData["Title"] = "Edit Member";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-head">
+    <div class="rt-head-left">
+        <a asp-action="Dashboard" class="rt-btn rt-btn-back" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>Edit Member</h1>
+            <p>Update employee or manager information</p>
+        </div>
+    </div>
+</div>
+
+<div class="rt-window" style="max-width: 800px;">
+    <div class="rt-titlebar"><span>Edit Member Profile</span></div>
+    <div class="p-4">
+        <form asp-action="Edit" method="post" asp-antiforgery="true">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="DepartmentId" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="Username" class="form-label fw-semibold" style="font-size:13px;">Username</label>
+                    <input asp-for="Username" class="rt-field w-100" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label fw-semibold" style="font-size:13px;">Email Address</label>
+                    <input asp-for="Email" class="rt-field w-100" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FullName" class="form-label fw-semibold" style="font-size:13px;">Full Name</label>
+                    <input asp-for="FullName" class="rt-field w-100" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone Number</label>
+                    <input asp-for="PhoneNumber" class="rt-field w-100" />
+                </div>
+
+                <!-- 🔒 DEPARTMENT — DISABLED -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold" style="font-size:13px;">Department</label>
+                    <input type="text" class="rt-field w-100" value="@ViewBag.LockedDepartmentName" disabled
+                           style="background:#e9ecef; cursor:not-allowed;" />
+                </div>
+
+                <!-- ROLE — Employee + Manager -->
+                <div class="col-md-6">
+                    <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">Role</label>
+                    <select asp-for="RoleId" class="rt-field w-100">
+                        <option value="1">Employee</option>
+                        <option value="2">Manager</option>
+                    </select>
+                    <span asp-validation-for="RoleId" class="text-danger small"></span>
+                </div>
+
+                <!-- Personal Details -->
+                <div class="col-md-12">
+                    <label asp-for="Address" class="form-label fw-semibold" style="font-size:13px;">Address</label>
+                    <input asp-for="Address" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="City" class="form-label fw-semibold" style="font-size:13px;">City</label>
+                    <input asp-for="City" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="State" class="form-label fw-semibold" style="font-size:13px;">State</label>
+                    <input asp-for="State" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Pincode" class="form-label fw-semibold" style="font-size:13px;">Pincode</label>
+                    <input asp-for="Pincode" class="rt-field w-100" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="AadhaarNumber" class="form-label fw-semibold" style="font-size:13px;">Aadhaar Number</label>
+                    <input asp-for="AadhaarNumber" class="rt-field w-100" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PanNumber" class="form-label fw-semibold" style="font-size:13px;">PAN Number</label>
+                    <input asp-for="PanNumber" class="rt-field w-100" />
+                </div>
+
+                <!-- Employment Details -->
+                <div class="col-md-4">
+                    <label asp-for="EmploymentType" class="form-label fw-semibold" style="font-size:13px;">Employment Type</label>
+                    <select asp-for="EmploymentType" class="rt-field w-100">
+                        <option value="">-- Select --</option>
+                        <option value="Permanent">Permanent</option>
+                        <option value="Contractual">Contractual</option>
+                        <option value="Vendor">Vendor</option>
+                        <option value="Apprentice">Apprentice</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Designation" class="form-label fw-semibold" style="font-size:13px;">Designation</label>
+                    <input asp-for="Designation" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PlantLocation" class="form-label fw-semibold" style="font-size:13px;">Plant Location</label>
+                    <input asp-for="PlantLocation" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="JoiningDate" class="form-label fw-semibold" style="font-size:13px;">Joining Date</label>
+                    <input asp-for="JoiningDate" type="date" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ShiftStartTime" class="form-label fw-semibold" style="font-size:13px;">Shift Start Time</label>
+                    <input asp-for="ShiftStartTime" type="time" class="rt-field w-100" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="ShiftEndTime" class="form-label fw-semibold" style="font-size:13px;">Shift End Time</label>
+                    <input asp-for="ShiftEndTime" type="time" class="rt-field w-100" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SalaryType" class="form-label fw-semibold" style="font-size:13px;">Salary Type</label>
+                    <select asp-for="SalaryType" class="rt-field w-100">
+                        <option value="">-- Select --</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Hourly">Hourly</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SalaryAmount" class="form-label fw-semibold" style="font-size:13px;">Salary Amount (₹)</label>
+                    <input asp-for="SalaryAmount" type="number" step="0.01" class="rt-field w-100" />
+                </div>
+
+                <!-- IsActive Toggle -->
+                <div class="col-md-12 pt-2">
+                    <div class="form-check form-switch">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                        <label asp-for="IsActive" class="form-check-label fw-semibold" style="font-size:13px;">
+                            Active Account Status
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="rt-btn rt-btn-primary">
+                    <i class="bi bi-check2 me-1"></i> Update Changes
+                </button>
+                <a asp-action="Dashboard" class="rt-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
