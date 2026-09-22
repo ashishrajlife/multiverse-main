@@ -37,8 +37,6 @@ namespace ERPDemo.ViewModels
         [Required(ErrorMessage = "Email required hai"), EmailAddress, StringLength(150)]
         public string Email { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Password required hai"), StringLength(255, MinimumLength = 4)]
-        [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
 
         [StringLength(150)]

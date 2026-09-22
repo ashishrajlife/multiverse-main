@@ -64,6 +64,12 @@ namespace ERPDemo.Controllers
                 return View(model);
             }
 
+            if (user.RoleId == 1)
+            {
+                ModelState.AddModelError("", "Login access is restricted to Managers and Administrators only.");
+                return View(model);
+            }
+
             await _authService.UpdateLastLoginAsync(user.UserId);
 
             var roleName = user.Role?.RoleName ?? "User";
@@ -103,7 +109,7 @@ namespace ERPDemo.Controllers
             // ✅✅✅ SESSION VARIABLES — YEH ZAROORI HAI ✅✅✅
             HttpContext.Session.SetInt32("UserId", user.UserId);
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("RoleName", roleName);          // ⚠️ Yeh missing tha!
+            HttpContext.Session.SetString("RoleName", roleName);        
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
 
             // ✅ Redirect to correct dashboard
