@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ERPDemo.ViewModels
 {
     public class ManageAllViewModel
@@ -31,6 +33,52 @@ namespace ERPDemo.ViewModels
         public DateTime? LastLoginAt { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        // Personal Details
+        [Display(Name = "Address")]
+        public string? Address { get; set; }
+
+        [Display(Name = "City")]
+        public string? City { get; set; } = "Raipur"; // Default to Raipur
+
+        [Display(Name = "State")]
+        public string? State { get; set; } = "Chhattisgarh"; // Default to CG
+
+        [Display(Name = "Pincode")]
+        public string? Pincode { get; set; }
+
+        [Display(Name = "Aadhaar Number")]
+        public string? AadhaarNumber { get; set; }
+
+        [Display(Name = "PAN Number")]
+        public string? PanNumber { get; set; }
+
+        // Employment Details
+        [Display(Name = "Employment Type")]
+        public string? EmploymentType { get; set; }
+
+        [Display(Name = "Designation")]
+        public string? Designation { get; set; }
+
+        [Display(Name = "Plant Location")]
+        public string? PlantLocation { get; set; }
+
+        [Display(Name = "Joining Date")]
+        [DataType(DataType.Date)]
+        public DateTime? JoiningDate { get; set; }
+
+        [Display(Name = "Shift Start Time")]
+        [DataType(DataType.Time)]
+        public string? ShiftStartTime { get; set; }
+
+        [Display(Name = "Shift End Time")]
+        [DataType(DataType.Time)]
+        public string? ShiftEndTime { get; set; }
+
+        [Display(Name = "Salary Type")]
+        public string? SalaryType { get; set; }
+
+        [Display(Name = "Salary Amount")]
+        public decimal? SalaryAmount { get; set; }
     }
 
     public class DepartmentOption

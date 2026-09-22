@@ -106,6 +106,20 @@ namespace ERPDemo.Controllers
                 RoleId = model.RoleId,
                 DepartmentId = model.DepartmentId,
                 OrganizationId = orgId,
+                 Address = model.Address,
+            City = model.City,
+            State = model.State,
+            Pincode = model.Pincode,
+            AadhaarNumber = model.AadhaarNumber,
+            PanNumber = model.PanNumber,
+            EmploymentType = model.EmploymentType,
+            Designation = model.Designation,
+            PlantLocation = model.PlantLocation,
+            JoiningDate = model.JoiningDate,
+            ShiftStartTime = model.ShiftStartTime,
+            ShiftEndTime = model.ShiftEndTime,
+            SalaryType = model.SalaryType,
+            SalaryAmount = model.SalaryAmount,
                 IsActive = true,
                 CreatedAt = DateTime.Now
             });
@@ -151,7 +165,21 @@ namespace ERPDemo.Controllers
                 PhoneNumber = user.PhoneNumber,
                 RoleId = user.RoleId,
                 DepartmentId = user.DepartmentId,
-                IsActive = user.IsActive
+                IsActive = user.IsActive,
+                Address = user.Address,
+                AadhaarNumber = user.AadhaarNumber,
+                City = user.City,
+                Designation = user.Designation,
+                EmploymentType = user.EmploymentType,
+                JoiningDate = user.JoiningDate,
+                PanNumber = user.PanNumber,
+                Pincode = user.Pincode,
+                PlantLocation = user.PlantLocation,
+                SalaryAmount =user.SalaryAmount,
+                SalaryType = user.SalaryType,
+                ShiftStartTime = user.ShiftStartTime,
+                ShiftEndTime = user.ShiftEndTime,
+                State = user.State
             };
             return View(vm);
         }
@@ -211,6 +239,20 @@ namespace ERPDemo.Controllers
             user.DepartmentId = model.DepartmentId;
             user.IsActive = model.IsActive;
             user.UpdatedAt = DateTime.Now;
+            user.Address = model.Address;
+user.City = model.City;
+user.State = model.State;
+user.Pincode = model.Pincode;
+user.AadhaarNumber = model.AadhaarNumber;
+user.PanNumber = model.PanNumber;
+user.EmploymentType = model.EmploymentType;
+user.Designation = model.Designation;
+user.PlantLocation = model.PlantLocation;
+user.JoiningDate = model.JoiningDate;
+user.ShiftStartTime = model.ShiftStartTime;
+user.ShiftEndTime = model.ShiftEndTime;
+user.SalaryType = model.SalaryType;
+user.SalaryAmount = model.SalaryAmount;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "User details update ho gayi.";
@@ -388,7 +430,21 @@ namespace ERPDemo.Controllers
                     IsActive = u.IsActive,
                     LastLoginAt = u.LastLoginAt,
                     CreatedAt = u.CreatedAt,
-                    UpdatedAt = u.UpdatedAt
+                    UpdatedAt = u.UpdatedAt,
+                    Address = u.Address,
+                    City = u.City,
+                    State = u.State,
+                    Pincode = u.Pincode,
+                    AadhaarNumber = u.AadhaarNumber,
+                    PanNumber = u.PanNumber,
+                    EmploymentType = u.EmploymentType,
+                    Designation = u.Designation,
+                    PlantLocation = u.PlantLocation,
+                    JoiningDate = u.JoiningDate,
+                    ShiftStartTime = u.ShiftStartTime,
+                    ShiftEndTime = u.ShiftEndTime,
+                    SalaryType = u.SalaryType,
+                    SalaryAmount = u.SalaryAmount
                 })
                 .ToListAsync();
 
