@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Add Member";
     Layout = "_DashboardLayout";
+    var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
+    var lockedDepartmentName = ViewBag.LockedDepartmentName as string ?? "N/A";
 }
 
 <div class="rt-head">
@@ -11,48 +13,45 @@
         </a>
         <div>
             <h1>Add Member</h1>
-            <p>Create a new employee or manager in your department</p>
+            <p>Create a new employee or manager in <strong>@lockedDepartmentName</strong></p>
         </div>
     </div>
 </div>
 
-<div class="rt-window" style="max-width: 800px;">
+<div class="rt-window">
     <div class="rt-titlebar"><span>Member Record Information</span></div>
     <div class="p-4">
-        <form asp-action="Create" method="post" asp-antiforgery="true">
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label asp-for="Username" class="form-label fw-semibold" style="font-size:13px;">Username</label>
+        <form asp-action="Create" method="post" asp-antiforgery="true">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <!-- ============== BASIC INFO ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-person-badge me-1"></i> Basic Information
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Username" class="rt-label">Username <span class="text-danger">*</span></label>
                     <input asp-for="Username" class="rt-field w-100" placeholder="e.g. ashish_raj" />
                     <span asp-validation-for="Username" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="Email" class="form-label fw-semibold" style="font-size:13px;">Email Address</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Email" class="rt-label">Email Address <span class="text-danger">*</span></label>
                     <input asp-for="Email" class="rt-field w-100" placeholder="ashish@erp.com" />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="FullName" class="form-label fw-semibold" style="font-size:13px;">Full Name</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="FullName" class="rt-label">Full Name</label>
                     <input asp-for="FullName" class="rt-field w-100" placeholder="Ashish Raj" />
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="PhoneNumber" class="form-label fw-semibold" style="font-size:13px;">Phone Number</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PhoneNumber" class="rt-label">Phone Number</label>
                     <input asp-for="PhoneNumber" class="rt-field w-100" placeholder="9999999991" />
                 </div>
 
-                <!-- 🔒 DEPARTMENT — DISABLED -->
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold" style="font-size:13px;">Department</label>
-                    <input type="text" class="rt-field w-100" value="@ViewBag.LockedDepartmentName" disabled
-                           style="background:#e9ecef; cursor:not-allowed;" />
-                    <input type="hidden" asp-for="DepartmentId" />
-                </div>
-
-                <!-- ROLE — Employee + Manager -->
-                <div class="col-md-6">
-                    <label asp-for="RoleId" class="form-label fw-semibold" style="font-size:13px;">Role</label>
+                <!-- Role — Enabled (Employee / Manager) -->
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="RoleId" class="rt-label">System Role <span class="text-danger">*</span></label>
                     <select asp-for="RoleId" class="rt-field w-100" id="roleDropdown">
                         <option value="">-- Select Role --</option>
                         <option value="1">Employee</option>
@@ -61,44 +60,65 @@
                     <span asp-validation-for="RoleId" class="text-danger small"></span>
                 </div>
 
-                <!-- PASSWORD — Sirf Manager ke liye -->
-                <div class="col-md-6" id="passwordField" style="display:none;">
-                    <label asp-for="Password" class="form-label fw-semibold" style="font-size:13px;">
-                        Password <small class="text-muted">(Manager login ke liye)</small>
+                <!-- 🔒 Department — Disabled (HOD ka dept fixed) -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="rt-label">
+                        Department
+                        <i class="bi bi-lock-fill text-muted ms-1" style="font-size:10px;"></i>
+                    </label>
+                    <input type="text" class="rt-field w-100" value="@lockedDepartmentName" disabled
+                           style="background:#e9ecef; cursor:not-allowed;" />
+                    <input type="hidden" asp-for="DepartmentId" />
+                </div>
+
+                <!-- Password — Sirf Manager ke liye -->
+                <div class="col-lg-3 col-md-6" id="passwordField" style="display:none;">
+                    <label asp-for="Password" class="rt-label">
+                        Password <small class="text-muted">(for Manager login)</small>
                     </label>
                     <input asp-for="Password" type="password" class="rt-field w-100" placeholder="Secure password" />
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
+            </div>
 
-                <!-- Personal Details -->
-                <div class="col-md-12">
-                    <label asp-for="Address" class="form-label fw-semibold" style="font-size:13px;">Address</label>
+            <!-- ============== PERSONAL DETAILS ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-person-vcard me-1"></i> Personal & Contact Details
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="Address" class="rt-label">Address</label>
                     <input asp-for="Address" class="rt-field w-100" placeholder="Street, Area, Landmark" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="City" class="form-label fw-semibold" style="font-size:13px;">City</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="City" class="rt-label">City</label>
                     <input asp-for="City" class="rt-field w-100" value="Raipur" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="State" class="form-label fw-semibold" style="font-size:13px;">State</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="State" class="rt-label">State</label>
                     <input asp-for="State" class="rt-field w-100" value="Chhattisgarh" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="Pincode" class="form-label fw-semibold" style="font-size:13px;">Pincode</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Pincode" class="rt-label">Pincode</label>
                     <input asp-for="Pincode" class="rt-field w-100" placeholder="492001" />
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="AadhaarNumber" class="form-label fw-semibold" style="font-size:13px;">Aadhaar Number</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="AadhaarNumber" class="rt-label">Aadhaar Number</label>
                     <input asp-for="AadhaarNumber" class="rt-field w-100" placeholder="XXXX XXXX XXXX" />
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="PanNumber" class="form-label fw-semibold" style="font-size:13px;">PAN Number</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PanNumber" class="rt-label">PAN Number</label>
                     <input asp-for="PanNumber" class="rt-field w-100" placeholder="ABCDE1234F" />
                 </div>
+            </div>
 
-                <!-- Employment Details -->
-                <div class="col-md-4">
-                    <label asp-for="EmploymentType" class="form-label fw-semibold" style="font-size:13px;">Employment Type</label>
+            <!-- ============== EMPLOYMENT DETAILS ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-briefcase me-1"></i> Employment & Shift Details
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="EmploymentType" class="rt-label">Employment Type</label>
                     <select asp-for="EmploymentType" class="rt-field w-100">
                         <option value="">-- Select --</option>
                         <option value="Permanent">Permanent</option>
@@ -107,28 +127,34 @@
                         <option value="Apprentice">Apprentice</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="Designation" class="form-label fw-semibold" style="font-size:13px;">Designation</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Designation" class="rt-label">Designation</label>
                     <input asp-for="Designation" class="rt-field w-100" placeholder="e.g. Plant Supervisor" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="PlantLocation" class="form-label fw-semibold" style="font-size:13px;">Plant Location</label>
-                    <input asp-for="PlantLocation" class="rt-field w-100" placeholder="e.g. Siltara" />
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PlantLocation" class="rt-label">Plant Location</label>
+                    <select asp-for="PlantLocation" class="rt-field w-100">
+                        <option value="">-- Select --</option>
+                        <option value="Raipur - Main Plant">Raipur - Main Plant</option>
+                        <option value="Siltara Industrial Area">Siltara Industrial Area</option>
+                        <option value="Urla Industrial Area">Urla Industrial Area</option>
+                        <option value="Bhilai">Bhilai</option>
+                    </select>
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="JoiningDate" class="form-label fw-semibold" style="font-size:13px;">Joining Date</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="JoiningDate" class="rt-label">Joining Date</label>
                     <input asp-for="JoiningDate" type="date" class="rt-field w-100" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="ShiftStartTime" class="form-label fw-semibold" style="font-size:13px;">Shift Start Time</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="ShiftStartTime" class="rt-label">Shift Start Time</label>
                     <input asp-for="ShiftStartTime" type="time" class="rt-field w-100" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="ShiftEndTime" class="form-label fw-semibold" style="font-size:13px;">Shift End Time</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="ShiftEndTime" class="rt-label">Shift End Time</label>
                     <input asp-for="ShiftEndTime" type="time" class="rt-field w-100" />
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="SalaryType" class="form-label fw-semibold" style="font-size:13px;">Salary Type</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="SalaryType" class="rt-label">Salary Type</label>
                     <select asp-for="SalaryType" class="rt-field w-100">
                         <option value="">-- Select --</option>
                         <option value="Monthly">Monthly</option>
@@ -136,19 +162,21 @@
                         <option value="Hourly">Hourly</option>
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label asp-for="SalaryAmount" class="form-label fw-semibold" style="font-size:13px;">Salary Amount (₹)</label>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="SalaryAmount" class="rt-label">Salary Amount (₹)</label>
                     <input asp-for="SalaryAmount" type="number" step="0.01" class="rt-field w-100" placeholder="e.g. 25000" />
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <!-- ============== ACTIONS ============== -->
+            <div class="rt-form-actions">
                 <button type="submit" class="rt-btn rt-btn-primary">
                     <i class="bi bi-check2 me-1"></i> Save Member
                 </button>
                 <a asp-action="Dashboard" class="rt-btn">Cancel</a>
             </div>
         </form>
+
     </div>
 </div>
 
@@ -160,6 +188,7 @@
             var passwordField = document.getElementById('passwordField');
 
             function togglePassword() {
+                // Role 2 = Manager → password show
                 if (roleDropdown.value === '2') {
                     passwordField.style.display = 'block';
                 } else {
@@ -168,7 +197,7 @@
             }
 
             roleDropdown.addEventListener('change', togglePassword);
-            togglePassword();   // page load pe bhi check
+            togglePassword();
         })();
     </script>
 }
