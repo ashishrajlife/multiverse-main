@@ -37,8 +37,7 @@ namespace ERPDemo.Controllers
             if (manager == null) return RedirectToAction("Login", "Auth");
 
             var teamMembers = await _context.Users
-                .Where(u => u.OrganizationId == manager.OrganizationId
-                         && u.DepartmentId == manager.DepartmentId
+                .Where(u => u.DepartmentId == manager.DepartmentId
                          && u.RoleId == 1)
                 .OrderBy(u => u.FullName)
                 .ToListAsync();
@@ -127,7 +126,6 @@ namespace ERPDemo.Controllers
                 PhoneNumber = model.PhoneNumber,
                 RoleId = 1,                              // Employee
                 DepartmentId = manager.DepartmentId,     // Manager ka dept
-                OrganizationId = manager.OrganizationId,
                 IsActive = true,
                 CreatedAt = DateTime.Now,
 
@@ -163,7 +161,6 @@ namespace ERPDemo.Controllers
             // 🔒 Security: sirf apne department ka employee edit ho sakta hai
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == id
-                                       && u.OrganizationId == manager.OrganizationId
                                        && u.DepartmentId == manager.DepartmentId
                                        && u.RoleId == 1);
 
@@ -217,7 +214,6 @@ namespace ERPDemo.Controllers
             // 🔒 Security: sirf apne department ka employee edit
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == model.UserId
-                                       && u.OrganizationId == manager.OrganizationId
                                        && u.DepartmentId == manager.DepartmentId
                                        && u.RoleId == 1);
 
@@ -290,7 +286,6 @@ namespace ERPDemo.Controllers
             // 🔒 Security: sirf apne department ka employee delete
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == id
-                                       && u.OrganizationId == manager.OrganizationId
                                        && u.DepartmentId == manager.DepartmentId
                                        && u.RoleId == 1);
 

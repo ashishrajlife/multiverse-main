@@ -465,7 +465,6 @@ E:\git-mv\multiverse-main\obj\Debug\net10.0\ERPDemo.genruntimeconfig.cache
 E:\git-mv\multiverse-main\obj\Debug\net10.0\ref\ERPDemo.dll
 E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\zwpvh8zwxh-{0}-gakfx9j766-gakfx9j766.gz
 E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\poo5v5nhl5-{0}-gakfx9j766-gakfx9j766.gz
-E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-aiyjrzbjeu-aiyjrzbjeu.gz
 C:\mv-git\multiverse-main\bin\Debug\net10.0\appsettings.Development.json
 C:\mv-git\multiverse-main\bin\Debug\net10.0\appsettings.json
 C:\mv-git\multiverse-main\bin\Debug\net10.0\ERPDemo.staticwebassets.runtime.json
@@ -701,3 +700,4 @@ C:\mv-git\multiverse-main\obj\Debug\net10.0\ERPDemo.pdb
 C:\mv-git\multiverse-main\obj\Debug\net10.0\ERPDemo.genruntimeconfig.cache
 C:\mv-git\multiverse-main\obj\Debug\net10.0\ref\ERPDemo.dll
 C:\mv-git\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-zice6zmnqn-zice6zmnqn.gz
+E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-zice6zmnqn-zice6zmnqn.gz

@@ -23,13 +23,12 @@ namespace ERPDemo.Controllers
         // ============ HELPERS ============
         private int CurrentUserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        private async Task<int?> GetAdminOrgIdAsync()
-        {
-            var admin = await _context.Users.FirstOrDefaultAsync(u => u.UserId == CurrentUserId);
-            return admin?.OrganizationId;
-        }
+        // private async Task<int?> GetAdminOrgIdAsync()
+        // {
+        //     var admin = await _context.Users.FirstOrDefaultAsync(u => u.UserId == CurrentUserId);
+        //     return admin?.OrganizationId;
+        // }
 
-        // Role IDs: 1 = User, 2 = Manager, 3 = Admin, 4 = SuperAdmin
         private static readonly int[] AssignableRoleIds = { 1, 2, 5 };
 
         // ============ INDEX / FALLBACK ============
@@ -42,9 +41,6 @@ namespace ERPDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
             ViewBag.Roles = await _context.Roles
                 .Where(r => AssignableRoleIds.Contains(r.RoleId))
                 .OrderBy(r => r.RoleId)
@@ -62,9 +58,6 @@ namespace ERPDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateTeamMemberViewModel model)
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
             ViewBag.Roles = await _context.Roles
                 .Where(r => AssignableRoleIds.Contains(r.RoleId))
                 .OrderBy(r => r.RoleId)
@@ -105,7 +98,6 @@ namespace ERPDemo.Controllers
                 PhoneNumber = model.PhoneNumber,
                 RoleId = model.RoleId,
                 DepartmentId = model.DepartmentId,
-                OrganizationId = orgId,
                  Address = model.Address,
             City = model.City,
             State = model.State,
@@ -133,16 +125,13 @@ namespace ERPDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+                .FirstOrDefaultAsync(u => u.UserId == id );
             if (user == null) return NotFound();
 
             if (user.RoleId == 3 || user.RoleId == 4)
             {
-                TempData["Error"] = "Aap Admin ya SuperAdmin ko edit nahi kar sakte.";
+                TempData["Error"] = "Action Blocked.!";
                 return RedirectToAction(nameof(ManageAll));
             }
 
@@ -188,16 +177,13 @@ namespace ERPDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditTeamMemberViewModel model)
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == model.UserId && u.OrganizationId == orgId);
+                .FirstOrDefaultAsync(u => u.UserId == model.UserId);
             if (user == null) return NotFound();
 
             if (user.RoleId == 3 || user.RoleId == 4)
             {
-                TempData["Error"] = "Aap Admin ya SuperAdmin ko edit nahi kar sakte.";
+                TempData["Error"] = "Action Blocked.!";
                 return RedirectToAction(nameof(ManageAll));
             }
 
@@ -272,8 +258,6 @@ user.SalaryAmount = model.SalaryAmount;
             IActionResult BackToManageAll() =>
                 RedirectToAction(nameof(ManageAll), new { search, role, department, status });
 
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
 
             if (id == CurrentUserId)
             {
@@ -282,7 +266,7 @@ user.SalaryAmount = model.SalaryAmount;
             }
 
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+                .FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound();
 
             if (user.RoleId == 3 || user.RoleId == 4)
@@ -303,17 +287,14 @@ user.SalaryAmount = model.SalaryAmount;
        [HttpGet]
 public async Task<IActionResult> ResetPassword(int id)
 {
-    var orgId = await GetAdminOrgIdAsync();
-    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
     var user = await _context.Users
-        .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+        .FirstOrDefaultAsync(u => u.UserId == id);
     if (user == null) return NotFound();
 
-    // 🔒 Admin/SuperAdmin ka password reset nahi ho sakta
+    // 🔒 Admin ka password reset nahi ho sakta
     if (user.RoleId == 3 || user.RoleId == 4)
     {
-        TempData["Error"] = "Admin ya SuperAdmin ka password reset nahi kar sakte.";
+        TempData["Error"] = "Action Blocked.!";
         return RedirectToAction(nameof(ManageAll));
     }
 
@@ -325,17 +306,14 @@ public async Task<IActionResult> ResetPassword(int id)
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
 {
-    var orgId = await GetAdminOrgIdAsync();
-    if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
     var user = await _context.Users
-        .FirstOrDefaultAsync(u => u.UserId == model.UserId && u.OrganizationId == orgId);
+        .FirstOrDefaultAsync(u => u.UserId == model.UserId);
     if (user == null) return NotFound();
 
-    // 🔒 Admin/SuperAdmin ka password reset nahi ho sakta
+    // 🔒 Admin ka password reset nahi ho sakta
     if (user.RoleId == 3 || user.RoleId == 4)
     {
-        TempData["Error"] = "Admin ya SuperAdmin ka password reset nahi kar sakte.";
+        TempData["Error"] = "AAction Blocked.!";
         return RedirectToAction(nameof(ManageAll));
     }
 
@@ -364,9 +342,6 @@ public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
             string? department = null,
             string? status = null)
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null) return RedirectToAction("AdminDashboard", "Dashboard");
-
             if (id == CurrentUserId)
             {
                 TempData["Error"] = "Aap khud ko delete nahi kar sakte.";
@@ -374,7 +349,7 @@ public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
             }
 
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == id && u.OrganizationId == orgId);
+                .FirstOrDefaultAsync(u => u.UserId == id);
             if (user == null) return NotFound();
 
             if (user.RoleId == 3 || user.RoleId == 4)
@@ -394,18 +369,10 @@ public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         [HttpGet]
         public async Task<IActionResult> ManageAll(string? search, string? role, string? department, string? status)
         {
-            var orgId = await GetAdminOrgIdAsync();
-            if (orgId == null)
-            {
-                TempData["Error"] = "Aap kisi organization se attached nahi hai.";
-                return RedirectToAction("AdminDashboard", "Dashboard");
-            }
-
             var query = _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.Department)
-                .Where(u => u.OrganizationId == orgId)
-                .Where(u => u.RoleId != 3 && u.RoleId != 4)  // Admin and SuperAdmin excluded from list
+                .Where(u => u.RoleId != 3 && u.RoleId != 4)  // Admin excluded from list
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))

@@ -33,7 +33,6 @@ namespace ERPDemo.Controllers
                     {
                         return role switch
                         {
-                            "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                             "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
                             "HOD"        => RedirectToAction("Dashboard", "Hod"),  
                             "Manager"    => RedirectToAction("Dashboard", "Manager"),
@@ -112,7 +111,6 @@ namespace ERPDemo.Controllers
 
             return roleName switch
             {
-                "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                 "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
                "Manager"    => RedirectToAction("Dashboard", "Manager"),
                "HOD"        => RedirectToAction("Dashboard", "Hod"),  

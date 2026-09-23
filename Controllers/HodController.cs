@@ -44,8 +44,7 @@ namespace ERPDemo.Controllers
             // HOD ke department ke saare Managers aur Employees
             var teamMembers = await _context.Users
                 .Include(u => u.Role)
-                .Where(u => u.OrganizationId == hod.OrganizationId
-                         && u.DepartmentId == hod.DepartmentId
+                .Where(u =>u.DepartmentId == hod.DepartmentId
                          && (u.RoleId == 1 || u.RoleId == 2))   // Employee + Manager
                 .OrderBy(u => u.RoleId).ThenBy(u => u.FullName)
                 .ToListAsync();
@@ -146,7 +145,6 @@ namespace ERPDemo.Controllers
                 PhoneNumber = model.PhoneNumber,
                 RoleId = model.RoleId,
                 DepartmentId = hod.DepartmentId,
-                OrganizationId = hod.OrganizationId,
                 IsActive = true,
                 CreatedAt = DateTime.Now,
 
@@ -181,7 +179,6 @@ namespace ERPDemo.Controllers
             // 🔒 HOD sirf apne dept ka Employee/Manager edit kare
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == id
-                                       && u.OrganizationId == hod.OrganizationId
                                        && u.DepartmentId == hod.DepartmentId
                                        && (u.RoleId == 1 || u.RoleId == 2));
 
@@ -236,7 +233,6 @@ namespace ERPDemo.Controllers
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == model.UserId
-                                       && u.OrganizationId == hod.OrganizationId
                                        && u.DepartmentId == hod.DepartmentId
                                        && (u.RoleId == 1 || u.RoleId == 2));
 
@@ -315,7 +311,6 @@ namespace ERPDemo.Controllers
 
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.UserId == id
-                                       && u.OrganizationId == hod.OrganizationId
                                        && u.DepartmentId == hod.DepartmentId
                                        && (u.RoleId == 1 || u.RoleId == 2));
 
@@ -341,7 +336,6 @@ public async Task<IActionResult> ResetPassword(int id)
 
     var user = await _context.Users
         .FirstOrDefaultAsync(u => u.UserId == id
-                               && u.OrganizationId == hod.OrganizationId
                                && u.DepartmentId == hod.DepartmentId
                                && (u.RoleId == 1 || u.RoleId == 2));
 
@@ -371,7 +365,6 @@ public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
 
     var user = await _context.Users
         .FirstOrDefaultAsync(u => u.UserId == model.UserId
-                               && u.OrganizationId == hod.OrganizationId
                                && u.DepartmentId == hod.DepartmentId
                                && (u.RoleId == 1 || u.RoleId == 2));
 
