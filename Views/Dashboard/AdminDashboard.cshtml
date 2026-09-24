@@ -100,7 +100,7 @@
                                 </td>
                                 <td>@user.Email</td>
                                 <td><span class="rt-tag rt-nodot">@user.Role.RoleName</span></td>
-                                <td>@(user.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "Never")</td>
+                                <td>@(user.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "--s")</td>
                                 <td>
                                     @if (user.IsActive)
                                     {

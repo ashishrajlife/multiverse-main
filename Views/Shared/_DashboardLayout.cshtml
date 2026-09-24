@@ -117,45 +117,51 @@
             <small class="text-muted d-block mt-1" style="font-size:11px;">Enterprise Resource Planning</small>
         </div>
 
-        <ul class="sidebar-nav">
-    @* Admin ke liye *@
-    else if (currentRole == "Admin")
+       <ul class="sidebar-nav">
+
+    @if (currentRole == "Admin")
     {
         <li>
             <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Dashboard" asp-action="Index">
-                <i class="bi bi-speedometer2"></i>Dashboard
+               asp-controller="Dashboard"
+               asp-action="Index">
+                <i class="bi bi-speedometer2"></i>
+                Dashboard
             </a>
         </li>
+
         <li>
             <a class="side-link @(controllerName.Equals("Team", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Team" asp-action="ManageAll">
-                <i class="bi bi-people"></i>My Team
+               asp-controller="Team"
+               asp-action="ManageAll">
+                <i class="bi bi-people"></i>
+                My Team
             </a>
         </li>
     }
-    
-    @*HOD configurations*@
     else if (currentRole == "HOD")
     {
         <li>
             <a class="side-link @(controllerName.Equals("Hod", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-            asp-controller="Hod" asp-action="Dashboard">
-                <i class="bi bi-speedometer2"></i>HOD Dashboard
+               asp-controller="Hod"
+               asp-action="Dashboard">
+                <i class="bi bi-speedometer2"></i>
+                HOD Dashboard
             </a>
         </li>
     }
-
-    @* Manager ke liye *@
     else if (currentRole == "Manager")
     {
         <li>
             <a class="side-link @(controllerName.Equals("Manager", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Manager" asp-action="Dashboard">
-                <i class="bi bi-speedometer2"></i>My Dashboard
+               asp-controller="Manager"
+               asp-action="Dashboard">
+                <i class="bi bi-speedometer2"></i>
+                My Dashboard
             </a>
         </li>
     }
+
 </ul>
         <div class="sidebar-foot p-3" style="font-size:11px; color:#8391ad; border-top:1px solid rgba(255,255,255,0.08);">&copy; @DateTime.Now.Year Multiverse</div>
     </aside>
