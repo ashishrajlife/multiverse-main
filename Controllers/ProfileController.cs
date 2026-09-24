@@ -27,7 +27,6 @@ namespace ERPDemo.Controllers
         {
             var user = await _context.Users
                 .Include(u => u.Role)
-                .Include(u => u.Organization)
                 .FirstOrDefaultAsync(u => u.UserId == CurrentUserId);
 
             if (user == null) return NotFound();
@@ -40,7 +39,6 @@ namespace ERPDemo.Controllers
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 RoleName = user.Role?.RoleName ?? "User",
-                OrganizationName = user.Organization?.Name,
                 LastLoginAt = user.LastLoginAt,
                 CreatedAt = user.CreatedAt
             };
@@ -55,14 +53,12 @@ namespace ERPDemo.Controllers
         {
             var user = await _context.Users
                 .Include(u => u.Role)
-                .Include(u => u.Organization)
                 .FirstOrDefaultAsync(u => u.UserId == CurrentUserId);
 
             if (user == null) return NotFound();
 
             // Readonly fields view ke liye refill
             model.RoleName = user.Role?.RoleName ?? "User";
-            model.OrganizationName = user.Organization?.Name;
             model.LastLoginAt = user.LastLoginAt;
             model.CreatedAt = user.CreatedAt;
 

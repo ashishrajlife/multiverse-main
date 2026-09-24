@@ -55,7 +55,7 @@ namespace ERPDemo.Migrations
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("Departments");
+                    b.ToTable("Departments", (string)null);
                 });
 
             modelBuilder.Entity("ERPDemo.Models.Organization", b =>
@@ -133,7 +133,7 @@ namespace ERPDemo.Migrations
 
                     b.HasKey("OrganizationId");
 
-                    b.ToTable("Organizations");
+                    b.ToTable("Organizations", (string)null);
 
                     b.HasData(
                         new
@@ -198,7 +198,7 @@ namespace ERPDemo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RefreshTokens");
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("ERPDemo.Models.Role", b =>
@@ -225,7 +225,7 @@ namespace ERPDemo.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
 
                     b.HasData(
                         new
@@ -369,7 +369,7 @@ namespace ERPDemo.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
 
                     b.HasData(
                         new

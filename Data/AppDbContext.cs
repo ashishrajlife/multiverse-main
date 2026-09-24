@@ -13,6 +13,8 @@ namespace ERPDemo.Data
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Requisition> Requisitions { get; set; }
+        public DbSet<RequisitionItem> RequisitionItems { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
