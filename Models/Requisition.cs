@@ -56,7 +56,15 @@ namespace ERPDemo.Models
 
         [StringLength(500)]
         public string? RejectionReason { get; set; }
+        // Admin Approval (Level 2)
+public int? AdminApprovedByUserId { get; set; }
+[ForeignKey("AdminApprovedByUserId")]
+public User? AdminApprovedByUser { get; set; }
 
+public DateTime? AdminApprovedAt { get; set; }
+
+[StringLength(500)]
+public string? AdminRemarks { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
 

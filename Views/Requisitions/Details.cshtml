@@ -1,0 +1,673 @@
+@model ERPDemo.ViewModels.RequisitionDetailsViewModel
+@{
+    ViewData["Title"] = $"Requisition {Model.RequisitionNumber}";
+    Layout = "_DashboardLayout";
+
+    var priorityClass = Model.Priority switch
+    {
+        "Urgent" => "rt-priority-urgent",
+        "High" => "rt-priority-high",
+        "Medium" => "rt-priority-medium",
+        _ => "rt-priority-low"
+    };
+    var statusClass = Model.Status switch
+    {
+        "Draft" => "rt-status-draft",
+        "PendingHOD" => "rt-status-pendinghod",
+       "PendingAdmin" => "rt-status-pendingadmin",  
+    "Approved" => "rt-status-approved",             
+    "ApprovedByHOD" => "rt-status-approvedbyhod",   
+        "Rejected" => "rt-status-rejected",
+        "Cancelled" => "rt-status-cancelled",
+        "Fulfilled" => "rt-status-fulfilled",
+        _ => "rt-status-draft"
+    };
+    var statusDisplay = Model.Status switch
+    {
+        "PendingHOD" => "Pending HOD Approval",
+    "PendingAdmin" => "Pending Admin Approval",   
+    "Approved" => "Approved",                   
+    "ApprovedByHOD" => "Approved by HOD",        
+    _ => Model.Status
+    };
+}
+
+<style>
+    .rt-priority-badge {
+        font-size: 11px; font-weight: 700; padding: 4px 10px;
+        border-radius: 4px; letter-spacing: 0.3px;
+    }
+    .rt-priority-urgent { background: #dc3545; color: #fff; }
+    .rt-priority-high   { background: #fd7e14; color: #fff; }
+    .rt-priority-medium { background: #0dcaf0; color: #fff; }
+    .rt-priority-low    { background: #6c757d; color: #fff; }
+
+    .rt-status-badge {
+        font-size: 12px; font-weight: 600; padding: 5px 14px;
+        border-radius: 14px; letter-spacing: 0.3px;
+    }
+    .rt-status-draft          { background: #e9ecef; color: #495057; }
+    .rt-status-pendinghod     { background: #fff3cd; color: #856404; }
+    .rt-status-approvedbyhod  { background: #d1e7dd; color: #0f5132; }
+    .rt-status-rejected       { background: #f8d7da; color: #842029; }
+    .rt-status-cancelled      { background: #e2e3e5; color: #41464b; }
+    .rt-status-fulfilled      { background: #cfe2ff; color: #084298; }
+    .rt-status-pendingadmin  { background: #ffe5cc; color: #8a4500; }
+.rt-status-approved      { background: #d1e7dd; color: #0f5132; }
+
+    .rt-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px 24px;
+    }
+    .rt-info-item .label {
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.4px; color: #8492a6; font-weight: 600;
+        margin-bottom: 4px; display: block;
+    }
+    .rt-info-item .value {
+        font-size: 14px; color: #2a2f3a; font-weight: 600;
+    }
+
+    .rt-items-table {
+        width: 100%; border-collapse: collapse; font-size: 13.5px;
+    }
+    .rt-items-table th {
+        background: #2f4a63; color: #fff; padding: 10px 12px;
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.4px; font-weight: 600; text-align: left;
+        white-space: nowrap;
+    }
+    .rt-items-table td {
+        padding: 10px 12px; border-bottom: 1px solid #e2ddd0;
+        vertical-align: top;
+    }
+    .rt-items-table tbody tr:last-child td { border-bottom: none; }
+    .rt-items-table tbody tr:hover { background: #f8f7f2; }
+
+    .rt-amount-box {
+        display: flex; justify-content: flex-end; align-items: center;
+        gap: 20px; padding: 16px 24px;
+        background: #2f4a63; color: #fff;
+        border-radius: 8px; margin-top: 12px;
+    }
+    .rt-amount-box .label {
+        font-size: 12px; text-transform: uppercase;
+        letter-spacing: 0.5px; opacity: 0.85;
+    }
+    .rt-amount-box .value {
+        font-size: 24px; font-weight: 700;
+    }
+
+    .rt-approval-banner {
+        padding: 16px 20px; border-radius: 10px;
+        display: flex; align-items: center; gap: 14px;
+        margin-bottom: 20px;
+    }
+    .rt-approval-approved {
+        background: #d1e7dd; color: #0f5132;
+        border-left: 5px solid #0f5132;
+    }
+    .rt-approval-rejected {
+        background: #f8d7da; color: #842029;
+        border-left: 5px solid #842029;
+    }
+    .rt-approval-pending {
+        background: #fff3cd; color: #856404;
+        border-left: 5px solid #856404;
+    }
+    .rt-approval-banner .icon {
+        font-size: 28px; line-height: 1;
+    }
+    .rt-approval-banner .title {
+        font-size: 15px; font-weight: 700; margin: 0;
+    }
+    .rt-approval-banner .meta {
+        font-size: 12.5px; margin: 4px 0 0; opacity: 0.85;
+    }
+</style>
+
+<!-- ============== HEAD ============== -->
+<div class="rt-head mb-4">
+    <div class="rt-head-left">
+        <a asp-action="Index" class="rt-btn rt-btn-back" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>@Model.RequisitionNumber</h1>
+            <p class="text-muted mb-0">@Model.Title</p>
+        </div>
+    </div>
+    <div class="rt-head-right d-flex align-items-center gap-2">
+        <span class="rt-priority-badge @priorityClass">@Model.Priority</span>
+        <span class="rt-status-badge @statusClass">@statusDisplay</span>
+    </div>
+</div>
+
+<!-- ============== APPROVAL BANNER ============== -->
+@if (Model.Status == "Rejected")
+{
+    <div class="rt-approval-banner rt-approval-rejected">
+        <div class="icon"><i class="bi bi-x-circle-fill"></i></div>
+        <div>
+            <p class="title">Requisition Rejected</p>
+            <p class="meta">
+                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                {
+                    <span>Reason: <strong>@Model.RejectionReason</strong></span>
+                }
+                @if (Model.HodApprovedAt.HasValue)
+                {
+                    <span> · @Model.HodApprovedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                }
+            </p>
+        </div>
+    </div>
+}
+else if (Model.Status == "PendingAdmin")
+{
+    <div class="rt-approval-banner rt-approval-pending">
+        <div class="icon"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+            <p class="title">Pending Admin Approval</p>
+            <p class="meta">
+                HOD approved
+                @if (!string.IsNullOrEmpty(Model.HodApprovedByName))
+                {
+                    <span>by <strong>@Model.HodApprovedByName</strong></span>
+                }
+                @if (Model.HodApprovedAt.HasValue)
+                {
+                    <span> · @Model.HodApprovedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                }
+                · Awaiting Admin's final approval
+            </p>
+        </div>
+    </div>
+}
+else if (Model.Status == "Approved")
+{
+    <div class="rt-approval-banner rt-approval-approved">
+        <div class="icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+            <p class="title">Approved</p>
+            <p class="meta">
+                @if (!string.IsNullOrEmpty(Model.HodApprovedByName))
+                {
+                    <span>HOD: <strong>@Model.HodApprovedByName</strong></span>
+                }
+                @if (Model.HodApprovedAt.HasValue)
+                {
+                    <span> · @Model.HodApprovedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                }
+                <br />
+                @if (!string.IsNullOrEmpty(Model.AdminApprovedByName))
+                {
+                    <span>Admin: <strong>@Model.AdminApprovedByName</strong></span>
+                }
+                @if (Model.AdminApprovedAt.HasValue)
+                {
+                    <span> · @Model.AdminApprovedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                }
+            </p>
+        </div>
+    </div>
+}
+else if (Model.Status == "ApprovedByHOD")
+{
+    <div class="rt-approval-banner rt-approval-approved">
+        <div class="icon"><i class="bi bi-check-circle-fill"></i></div>
+        <div>
+            <p class="title">Approved by HOD</p>
+            <p class="meta">
+                @if (!string.IsNullOrEmpty(Model.HodApprovedByName))
+                {
+                    <span>Approved by <strong>@Model.HodApprovedByName</strong></span>
+                }
+                @if (Model.HodApprovedAt.HasValue)
+                {
+                    <span> · @Model.HodApprovedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                }
+                @if (!string.IsNullOrEmpty(Model.HodRemarks))
+                {
+                    <span> · Remarks: <em>@Model.HodRemarks</em></span>
+                }
+            </p>
+        </div>
+    </div>
+}
+else if (Model.Status == "PendingHOD")
+{
+    <div class="rt-approval-banner rt-approval-pending">
+        <div class="icon"><i class="bi bi-hourglass-split"></i></div>
+        <div>
+            <p class="title">Pending HOD Approval</p>
+            <p class="meta">
+                Submitted on @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                · Awaiting HOD's review
+            </p>
+        </div>
+    </div>
+}
+
+<!-- ============== MAIN CONTENT ============== -->
+<div class="row g-3">
+    <!-- LEFT: Basic Info + Items -->
+    <div class="col-lg-8">
+        <!-- Basic Info -->
+        <div class="rt-window mb-3">
+            <div class="rt-titlebar"><span><i class="bi bi-info-circle me-2"></i>Requisition Details</span></div>
+            <div class="p-4">
+                <div class="rt-info-grid">
+                    <div class="rt-info-item">
+                        <span class="label">Requested By</span>
+                        <span class="value">@(Model.RequestedByName ?? "-")</span>
+                        @if (!string.IsNullOrEmpty(Model.RequestedByEmail))
+                        {
+                            <div class="text-muted small">@Model.RequestedByEmail</div>
+                        }
+                    </div>
+                    <div class="rt-info-item">
+                        <span class="label">Department</span>
+                        <span class="value">@(Model.DepartmentName ?? "Unassigned")</span>
+                    </div>
+                    <div class="rt-info-item">
+                        <span class="label">Priority</span>
+                        <span class="value"><span class="rt-priority-badge @priorityClass">@Model.Priority</span></span>
+                    </div>
+                    <div class="rt-info-item">
+                        <span class="label">Required By</span>
+                        <span class="value">@Model.RequiredByDate.ToString("dd MMM yyyy")</span>
+                    </div>
+                    <div class="rt-info-item">
+                        <span class="label">Created On</span>
+                        <span class="value">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</span>
+                    </div>
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="rt-info-item">
+                            <span class="label">Last Updated</span>
+                            <span class="value">@Model.UpdatedAt.Value.ToString("dd MMM yyyy, HH:mm")</span>
+                        </div>
+                    }
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <hr class="my-4" />
+                    <span class="label" style="font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:#8492a6;font-weight:600;">Description</span>
+                    <p class="mb-0 mt-2" style="font-size:14px;line-height:1.6;">@Model.Description</p>
+                }
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <div class="rt-window">
+            <div class="rt-titlebar"><span><i class="bi bi-list-ul me-2"></i>Items (@Model.Items.Count)</span></div>
+            <div class="table-responsive">
+                <table class="rt-items-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">#</th>
+                            <th style="width:25%;">Item Name</th>
+                            <th style="width:20%;">Description</th>
+                            <th style="width:12%;">Category</th>
+                            <th style="width:8%;" class="text-end">Qty</th>
+                            <th style="width:8%;">Unit</th>
+                            <th style="width:11%;" class="text-end">Rate (₹)</th>
+                            <th style="width:11%;" class="text-end">Amount (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            var i = 1;
+                        }
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="text-center fw-bold">@i</td>
+                                <td>
+                                    <div class="fw-semibold">@item.ItemName</div>
+                                    @if (!string.IsNullOrEmpty(item.Remarks))
+                                    {
+                                        <div class="text-muted small">@item.Remarks</div>
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.Description) ? "-" : item.Description)</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(item.Category))
+                                    {
+                                        <span class="badge bg-light text-dark border">@item.Category</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td class="text-end">@item.Quantity.ToString("0.###")</td>
+                                <td>@item.Unit</td>
+                                <td class="text-end">@item.EstimatedRate.ToString("N2")</td>
+                                <td class="text-end fw-bold">@item.EstimatedAmount.ToString("N2")</td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="p-3">
+                <div class="rt-amount-box">
+                    <span class="label">Total Estimated Amount</span>
+                    <span class="value">₹@Model.TotalEstimatedAmount.ToString("N2")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Actions + Status Timeline -->
+    <div class="col-lg-4">
+        <!-- Actions Panel -->
+        <div class="rt-window mb-3">
+            <div class="rt-titlebar"><span><i class="bi bi-lightning-charge me-2"></i>Actions</span></div>
+            <div class="p-3">
+                @if (Model.CanApprove)
+                {
+                    <div class="d-grid gap-2">
+                        <button type="button" class="rt-btn rt-btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
+                            <i class="bi bi-check2-circle me-1"></i> Approve
+                        </button>
+                        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                            <i class="bi bi-x-circle me-1"></i> Reject
+                        </button>
+                        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#returnModal">
+                            <i class="bi bi-arrow-return-left me-1"></i> Return to Manager
+                        </button>
+                    </div>
+                }
+
+                @if (Model.CanEdit)
+                {
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.RequisitionId" class="rt-btn">
+                            <i class="bi bi-pencil me-1"></i> Edit Draft
+                        </a>
+                    </div>
+                }
+
+                @if (Model.CanSubmit)
+                {
+                    <form asp-action="Submit" asp-route-id="@Model.RequisitionId" method="post"
+                          onsubmit="return confirm('Submit this requisition to HOD for approval?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="rt-btn rt-btn-primary w-100 mt-2">
+                            <i class="bi bi-send me-1"></i> Submit for Approval
+                        </button>
+                    </form>
+                }
+
+                @if (Model.CanDelete)
+                {
+                    <form asp-action="Delete" asp-route-id="@Model.RequisitionId" method="post"
+                          onsubmit="return confirm('Are you sure? This action cannot be undone.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="rt-btn text-danger w-100 mt-2">
+                            <i class="bi bi-trash me-1"></i> Delete Draft
+                        </button>
+                    </form>
+                }
+
+     @if (Model.CanApprove)
+{
+    <div class="d-grid gap-2">
+        <button type="button" class="rt-btn rt-btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
+            <i class="bi bi-check2-circle me-1"></i> Approve
+        </button>
+        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#rejectModal">
+            <i class="bi bi-x-circle me-1"></i> Reject
+        </button>
+        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#returnModal">
+            <i class="bi bi-arrow-return-left me-1"></i> Return to Manager
+        </button>
+    </div>
+}
+else if (Model.CanEdit)
+{
+    <div class="d-grid gap-2">
+        <a asp-action="Edit" asp-route-id="@Model.RequisitionId" class="rt-btn">
+            <i class="bi bi-pencil me-1"></i> Edit Draft
+        </a>
+    </div>
+}
+else if (Model.CanSubmit)
+{
+    <form asp-action="Submit" asp-route-id="@Model.RequisitionId" method="post"
+          onsubmit="return confirm('Submit this requisition to HOD for approval?');">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="rt-btn rt-btn-primary w-100">
+            <i class="bi bi-send me-1"></i> Submit for Approval
+        </button>
+    </form>
+}
+else if (Model.CanDelete)
+{
+    <form asp-action="Delete" asp-route-id="@Model.RequisitionId" method="post"
+          onsubmit="return confirm('Are you sure? This action cannot be undone.');">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="rt-btn text-danger w-100">
+            <i class="bi bi-trash me-1"></i> Delete Draft
+        </button>
+    </form>
+}
+else
+{
+    @* No actions — status-specific message dikhao *@
+    <div class="text-center py-3">
+        @if (Model.Status == "ApprovedByHOD")
+        {
+            <i class="bi bi-hourglass-split" style="font-size:28px;color:#feca57;"></i>
+            <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Approved by HOD</p>
+            <p class="small text-muted mb-0" style="font-size:12px;">
+                Waiting for vendor selection &amp; RFQ process
+            </p>
+        }
+        else if (Model.Status == "Rejected")
+        {
+            <i class="bi bi-x-circle" style="font-size:28px;color:#b3404a;"></i>
+            <p class="small mb-1 mt-2 fw-semibold" style="color:#842029;">Requisition Rejected</p>
+            @if (!string.IsNullOrEmpty(Model.RejectionReason))
+            {
+                <p class="small text-muted mb-0" style="font-size:12px;">
+                    @Model.RejectionReason
+                </p>
+            }
+        }
+        else if (Model.Status == "Draft")
+        {
+            <i class="bi bi-file-earmark" style="font-size:28px;color:#6c757d;"></i>
+            <p class="small mb-1 mt-2 fw-semibold">Draft</p>
+            <p class="small text-muted mb-0" style="font-size:12px;">
+                Only the requester can edit
+            </p>
+        }
+        else if (Model.Status == "PendingHOD")
+        {
+            <i class="bi bi-hourglass-split" style="font-size:28px;color:#856404;"></i>
+            <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Pending HOD Approval</p>
+            <p class="small text-muted mb-0" style="font-size:12px;">
+                Waiting for HOD action
+            </p>
+        }
+        else
+        {
+            <i class="bi bi-lock" style="font-size:24px;opacity:0.4;"></i>
+            <p class="small mb-0 mt-2">No actions available</p>
+        }
+    </div>
+}
+            </div>
+        </div>
+
+        <!-- Status Timeline -->
+        <div class="rt-window">
+            <div class="rt-titlebar"><span><i class="bi bi-clock-history me-2"></i>Status Timeline</span></div>
+            <div class="p-3">
+                <div class="rt-timeline">
+                    <div class="rt-timeline-item">
+                        <div class="rt-timeline-icon rt-timeline-icon-done"><i class="bi bi-check"></i></div>
+                        <div>
+                            <div class="fw-semibold small">Created</div>
+                            <div class="text-muted" style="font-size:11.5px;">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                        </div>
+                    </div>
+
+                    @if (Model.Status != "Draft")
+                    {
+                        <div class="rt-timeline-item">
+                            <div class="rt-timeline-icon rt-timeline-icon-done"><i class="bi bi-send"></i></div>
+                            <div>
+                                <div class="fw-semibold small">Submitted for Approval</div>
+                                <div class="text-muted" style="font-size:11.5px;">@Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == "PendingHOD")
+                    {
+                        <div class="rt-timeline-item">
+                            <div class="rt-timeline-icon rt-timeline-icon-pending"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <div class="fw-semibold small text-warning">Pending HOD Approval</div>
+                                <div class="text-muted" style="font-size:11.5px;">Awaiting review</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == "ApprovedByHOD")
+                    {
+                        <div class="rt-timeline-item">
+                            <div class="rt-timeline-icon rt-timeline-icon-done"><i class="bi bi-check-circle"></i></div>
+                            <div>
+                                <div class="fw-semibold small text-success">Approved by HOD</div>
+                                <div class="text-muted" style="font-size:11.5px;">
+                                    @(Model.HodApprovedAt?.ToString("dd MMM yyyy, HH:mm") ?? "-")
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.HodRemarks))
+                                {
+                                    <div class="text-muted fst-italic mt-1" style="font-size:11.5px;">"@Model.HodRemarks"</div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.Status == "Rejected")
+                    {
+                        <div class="rt-timeline-item">
+                            <div class="rt-timeline-icon rt-timeline-icon-rejected"><i class="bi bi-x-circle"></i></div>
+                            <div>
+                                <div class="fw-semibold small text-danger">Rejected</div>
+                                <div class="text-muted" style="font-size:11.5px;">
+                                    @(Model.HodApprovedAt?.ToString("dd MMM yyyy, HH:mm") ?? "-")
+                                </div>
+                                @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                                {
+                                    <div class="text-muted fst-italic mt-1" style="font-size:11.5px;">"@Model.RejectionReason"</div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============== APPROVE MODAL ============== -->
+<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px;border:none;">
+            <form asp-action="Approve" asp-route-id="@Model.RequisitionId" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-success text-white" style="border-top-left-radius:12px;border-top-right-radius:12px;">
+                    <h5 class="modal-title"><i class="bi bi-check2-circle me-2"></i>Approve Requisition</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Approve <strong>@Model.RequisitionNumber</strong> for
+                        <strong>₹@Model.TotalEstimatedAmount.ToString("N2")</strong>?
+                    </p>
+                    <label class="rt-label">Remarks (optional)</label>
+                    <textarea name="remarks" class="rt-field w-100" rows="3"
+                              placeholder="Any comments for the requester..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="rt-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="rt-btn rt-btn-primary">
+                        <i class="bi bi-check2 me-1"></i> Confirm Approval
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============== REJECT MODAL ============== -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px;border:none;">
+            <form asp-action="Reject" asp-route-id="@Model.RequisitionId" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-danger text-white" style="border-top-left-radius:12px;border-top-right-radius:12px;">
+                    <h5 class="modal-title"><i class="bi bi-x-circle me-2"></i>Reject Requisition</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Are you sure you want to reject <strong>@Model.RequisitionNumber</strong>?</p>
+                    <label class="rt-label">Reason for Rejection <span class="text-danger">*</span></label>
+                    <textarea name="reason" class="rt-field w-100" rows="3" required
+                              placeholder="Explain why this requisition is being rejected..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="rt-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="rt-btn rt-btn-primary" style="background:#dc3545;border-color:#dc3545;">
+                        <i class="bi bi-x-lg me-1"></i> Confirm Rejection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ============== RETURN MODAL ============== -->
+<div class="modal fade" id="returnModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:12px;border:none;">
+            <form asp-action="Return" asp-route-id="@Model.RequisitionId" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header bg-warning text-dark" style="border-top-left-radius:12px;border-top-right-radius:12px;">
+                    <h5 class="modal-title"><i class="bi bi-arrow-return-left me-2"></i>Return to Manager</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Return <strong>@Model.RequisitionNumber</strong> to the manager for revision?
+                        The requisition will go back to <strong>Draft</strong> status.
+                    </p>
+                    <label class="rt-label">Reason / Feedback <span class="text-danger">*</span></label>
+                    <textarea name="reason" class="rt-field w-100" rows="3" required
+                              placeholder="Explain what needs to be changed..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="rt-btn" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="rt-btn rt-btn-primary" style="background:#feca57;border-color:#feca57;color:#2a2f3a;">
+                        <i class="bi bi-arrow-return-left me-1"></i> Confirm Return
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

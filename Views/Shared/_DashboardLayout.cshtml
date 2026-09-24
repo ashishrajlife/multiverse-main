@@ -117,7 +117,7 @@
             <small class="text-muted d-block mt-1" style="font-size:11px;">Enterprise Resource Planning</small>
         </div>
 
-       <ul class="sidebar-nav">
+      <ul class="sidebar-nav">
 
     @if (currentRole == "Admin")
     {
@@ -138,6 +138,24 @@
                 My Team
             </a>
         </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("Vendors", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Vendors"
+               asp-action="Index">
+                <i class="bi bi-shop"></i>
+                Vendors
+            </a>
+        </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("Requisitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Requisitions"
+               asp-action="Index">
+                <i class="bi bi-file-earmark-text"></i>
+                Requisitions
+            </a>
+        </li>
     }
     else if (currentRole == "HOD")
     {
@@ -149,6 +167,24 @@
                 HOD Dashboard
             </a>
         </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("Vendors", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Vendors"
+               asp-action="Index">
+                <i class="bi bi-shop"></i>
+                Vendors
+            </a>
+        </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("Requisitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Requisitions"
+               asp-action="Index">
+                <i class="bi bi-file-earmark-text"></i>
+                Requisitions
+            </a>
+        </li>
     }
     else if (currentRole == "Manager")
     {
@@ -158,6 +194,15 @@
                asp-action="Dashboard">
                 <i class="bi bi-speedometer2"></i>
                 My Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a class="side-link @(controllerName.Equals("Requisitions", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+               asp-controller="Requisitions"
+               asp-action="Index">
+                <i class="bi bi-file-earmark-text"></i>
+                Requisitions
             </a>
         </li>
     }

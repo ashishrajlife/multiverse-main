@@ -54,6 +54,10 @@ public async Task<IActionResult> AdminDashboard()
                 .Take(5)
                 .ToListAsync();
 
+                ViewBag.PendingApprovalsCount = await _context.Requisitions
+                .Where(r => r.Status == "PendingHOD")
+                .CountAsync();
+
             return View();
         }
 

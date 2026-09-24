@@ -1,0 +1,153 @@
+@model ERPDemo.ViewModels.RequisitionListViewModel
+@{
+    ViewData["Title"] = "Pending Approvals";
+    Layout = "_DashboardLayout";
+    var currentRole = Context.Session.GetString("RoleName") ?? "";
+    var heading = currentRole == "HOD" ? "Pending HOD Approval" : "Pending Admin Approval";
+}
+
+<style>
+    .rt-priority-badge {
+        font-size: 10px; font-weight: 700; padding: 3px 8px;
+        border-radius: 4px; letter-spacing: 0.3px;
+    }
+    .rt-priority-urgent { background: #dc3545; color: #fff; }
+    .rt-priority-high   { background: #fd7e14; color: #fff; }
+    .rt-priority-medium { background: #0dcaf0; color: #fff; }
+    .rt-priority-low    { background: #6c757d; color: #fff; }
+</style>
+
+<div class="rt-head mb-4">
+    <div class="rt-head-left">
+        <a asp-action="Index" class="rt-btn rt-btn-back" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>Pending Approvals</h1>
+            <p class="text-muted mb-0">
+                Requisitions awaiting your review
+                @if (currentRole == "HOD")
+                {
+                    <span>(Department only)</span>
+                }
+            </p>
+        </div>
+    </div>
+    <div class="rt-head-right">
+        <a asp-action="Index" class="rt-btn">
+            <i class="bi bi-list-ul me-1"></i> All Requisitions
+        </a>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="rt-stats mb-4">
+    <div class="rt-stat rt-amber">
+        <span class="rt-stat-icon"><i class="bi bi-hourglass-split"></i></span>
+        <div>
+            <span class="rt-stat-label">Pending Approvals</span>
+            <span class="rt-stat-value">@Model.TotalRequisitions</span>
+        </div>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="rt-window">
+    <div class="rt-titlebar">
+        <span><i class="bi bi-clock-history me-2"></i>Pending Requisitions (@Model.TotalRequisitions)</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" style="font-size:14px;">
+            <thead class="table-dark text-uppercase text-center" style="font-size:12px; letter-spacing:0.5px;">
+                <tr>
+                    <th class="text-center">REQ #</th>
+                    <th class="text-center">Title</th>
+                    <th class="text-center">Requested By</th>
+                    <th class="text-center">Priority</th>
+                    <th class="text-center">Required By</th>
+                    <th class="text-center">Items</th>
+                    <th class="text-center">Amount (₹)</th>
+                    <th class="text-center">Waiting Since</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Requisitions.Any())
+                {
+                    foreach (var r in Model.Requisitions)
+                    {
+                        var priorityClass = r.Priority switch
+                        {
+                            "Urgent" => "rt-priority-urgent",
+                            "High" => "rt-priority-high",
+                            "Medium" => "rt-priority-medium",
+                            _ => "rt-priority-low"
+                        };
+                        var waitingDays = (DateTime.Now - r.CreatedAt).Days;
+                        var waitingDisplay = waitingDays == 0 ? "Today" :
+                                             waitingDays == 1 ? "1 day" :
+                                             $"{waitingDays} days";
+
+                        <tr>
+                            <td class="text-center">
+                                <div class="fw-bold">@r.RequisitionNumber</div>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-semibold">@r.Title</div>
+                            </td>
+                            <td class="text-center">
+                                <div>@(string.IsNullOrEmpty(r.RequestedByName) ? "-" : r.RequestedByName)</div>
+                                @if (!string.IsNullOrEmpty(r.DepartmentName))
+                                {
+                                    <div class="text-muted" style="font-size:11px;">@r.DepartmentName</div>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="rt-priority-badge @priorityClass">@r.Priority</span>
+                            </td>
+                            <td class="text-center">
+                                <div>@r.RequiredByDate.ToString("dd MMM yyyy")</div>
+                                @{
+                                    var daysLeft = (r.RequiredByDate.Date - DateTime.Now.Date).Days;
+                                }
+                                @if (daysLeft < 0)
+                                {
+                                    <div class="text-danger" style="font-size:11px;">Overdue</div>
+                                }
+                                else if (daysLeft <= 3)
+                                {
+                                    <div class="text-warning" style="font-size:11px;">@daysLeft days left</div>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-light text-dark border">@r.ItemCount</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="fw-bold">₹@r.TotalEstimatedAmount.ToString("N0")</div>
+                            </td>
+                            <td class="text-center">
+                                <div>@waitingDisplay</div>
+                                <div class="text-muted" style="font-size:11px;">@r.CreatedAt.ToString("dd MMM, HH:mm")</div>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Details" asp-route-id="@r.RequisitionId" class="rt-btn rt-btn-primary" title="Review & Approve">
+                                    <i class="bi bi-eye me-1"></i> Review
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="bi bi-check-circle" style="font-size:48px; opacity:0.3; color:#2e7d5e;"></i>
+                            <div class="mt-2" style="font-size:15px;">All caught up! 🎉</div>
+                            <div class="mt-1">No requisitions are pending your approval.</div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

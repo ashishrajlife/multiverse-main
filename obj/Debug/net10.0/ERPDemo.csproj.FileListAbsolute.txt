@@ -700,4 +700,4 @@ C:\mv-git\multiverse-main\obj\Debug\net10.0\ERPDemo.pdb
 C:\mv-git\multiverse-main\obj\Debug\net10.0\ERPDemo.genruntimeconfig.cache
 C:\mv-git\multiverse-main\obj\Debug\net10.0\ref\ERPDemo.dll
 C:\mv-git\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-zice6zmnqn-zice6zmnqn.gz
-E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-zice6zmnqn-zice6zmnqn.gz
+E:\git-mv\multiverse-main\obj\Debug\net10.0\compressed\vd9hi7rrv5-{0}-87f82ygb93-87f82ygb93.gz

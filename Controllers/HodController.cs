@@ -57,6 +57,13 @@ namespace ERPDemo.Controllers
             ViewBag.ActiveCount = teamMembers.Count(m => m.IsActive);
             ViewBag.TeamMembers = teamMembers;
 
+             ViewBag.PendingApprovalsCount = await _context.Requisitions
+        .Where(r => r.Status == "PendingHOD"
+                 && r.DepartmentId == hod.DepartmentId
+                 && r.RequestedByUserId != hod.UserId)  
+        .CountAsync();
+
+
             return View();
         }
 

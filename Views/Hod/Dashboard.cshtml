@@ -78,6 +78,39 @@
     </div>
 </div>
 
+<!-- Pending Approvals Widget -->
+@if (ViewBag.PendingApprovalsCount != null && (int)ViewBag.PendingApprovalsCount > 0)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <a asp-controller="Requisitions" asp-action="PendingApprovals" class="text-decoration-none">
+                <div class="rt-window" style="border-left: 5px solid #feca57; cursor: pointer; transition: all 0.15s;"
+                     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 20px rgba(0,0,0,0.08)';"
+                     onmouseout="this.style.transform='';this.style.boxShadow='';">
+                    <div class="p-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:48px;height:48px;border-radius:50%;background:#fff3cd;color:#856404;display:grid;place-items:center;font-size:22px;">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="font-size:16px;color:#2a2f3a;">
+                                    @ViewBag.PendingApprovalsCount Requisition(s) Pending Your Approval
+                                </div>
+                                <div class="text-muted" style="font-size:13px;">
+                                    Click to review and approve
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:24px;color:#feca57;">
+                            <i class="bi bi-arrow-right-circle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+}
+
 <!-- Team Table -->
 <div class="rt-window">
     <div class="rt-titlebar">

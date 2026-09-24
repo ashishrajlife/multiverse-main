@@ -95,6 +95,16 @@
     outline-offset: 2px;
 }
 
+.rt-stat.rt-amber {
+    --rt-stat-tone: #feca57;
+}
+.rt-stat.rt-violet {
+    --rt-stat-tone: #a29bfe;
+}
+.rt-stat.rt-pink {
+    --rt-stat-tone: #ff9ff3;
+}
+
 .rt-btn-primary {
     color: #fff;
     background: var(--rt-navy);
@@ -166,6 +176,41 @@
     box-shadow: var(--rt-shadow-sm);
 }
 .rt-filter-icon { padding: 0 2px; font-size: 14px; color: var(--rt-muted); }
+
+.rt-timeline {
+    position: relative;
+    padding-left: 4px;
+}
+.rt-timeline-item {
+    display: flex;
+    gap: 12px;
+    padding-bottom: 18px;
+    position: relative;
+}
+.rt-timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    top: 30px;
+    bottom: 0;
+    width: 2px;
+    background: #e2ddd0;
+}
+.rt-timeline-item:last-child { padding-bottom: 0; }
+.rt-timeline-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: #fff;
+    z-index: 1;
+}
+.rt-timeline-icon-done     { background: #2e7d5e; }
+.rt-timeline-icon-pending  { background: #feca57; color: #2a2f3a; }
+.rt-timeline-icon-rejected { background: #b3404a; }
 
 /* ============ SECTION TITLE ============ */
 .rt-section-title {

@@ -1,0 +1,365 @@
+@model ERPDemo.ViewModels.RequisitionFormViewModel
+@{
+    ViewData["Title"] = "Edit Requisition";
+    Layout = "_DashboardLayout";
+    var lockedDepartment = (bool)(ViewBag.LockedDepartment ?? false);
+    var departmentName = ViewBag.DepartmentName as string ?? "Unassigned";
+}
+<!-- Alpine.js CDN -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+<style>
+    .rt-item-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .rt-item-table th {
+        background: #2f4a63;
+        color: #fff;
+        padding: 8px 10px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-weight: 600;
+        text-align: left;
+        white-space: nowrap;
+    }
+    .rt-item-table td {
+        padding: 6px 8px;
+        border-bottom: 1px solid #e2ddd0;
+        vertical-align: middle;
+    }
+    .rt-item-table tr:last-child td {
+        border-bottom: none;
+    }
+    .rt-item-table input,
+    .rt-item-table select {
+        width: 100%;
+        padding: 7px 10px;
+        font-size: 13px;
+        border: 1px solid #d8d3c4;
+        border-radius: 6px;
+        background: #fff;
+        font-family: inherit;
+    }
+    .rt-item-table input:focus,
+    .rt-item-table select:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.12);
+    }
+    .rt-item-table input[readonly] {
+        background: #f4f6fb;
+        cursor: not-allowed;
+    }
+    .rt-item-remove {
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 6px;
+        background: #ffe5e5;
+        color: #c62828;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        transition: all 0.15s;
+    }
+    .rt-item-remove:hover {
+        background: #c62828;
+        color: #fff;
+    }
+    .rt-item-add {
+        padding: 8px 16px;
+        border: 1px dashed #4a90e2;
+        border-radius: 6px;
+        background: #f0f7ff;
+        color: #3b6fe0;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .rt-item-add:hover {
+        background: #4a90e2;
+        color: #fff;
+    }
+    .rt-total-box {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 20px;
+        padding: 14px 20px;
+        background: #2f4a63;
+        color: #fff;
+        border-radius: 8px;
+        margin-top: 12px;
+    }
+    .rt-total-box .label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+    }
+    .rt-total-box .value {
+        font-size: 22px;
+        font-weight: 700;
+    }
+    .rt-priority-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-left: 6px;
+    }
+</style>
+
+<div class="rt-head mb-4">
+    <div class="rt-head-left">
+        <a asp-action="Index" class="rt-btn rt-btn-back" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+          <h1>Edit Requisition</h1>
+<p>Update requisition details</p>
+        </div>
+    </div>
+</div>
+
+<div class="rt-window">
+    <div class="rt-titlebar"><span>Requisition Details</span></div>
+    <div class="p-4">
+      <form asp-action="Edit" method="post" asp-antiforgery="true" id="requisitionForm">
+    <input type="hidden" asp-for="RequisitionId" />
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <!-- ============== BASIC INFO ============== -->
+            <h6 class="rt-section-title"><i class="bi bi-info-circle me-1"></i> Basic Information</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-lg-6 col-md-12">
+                    <label asp-for="Title" class="rt-label">Title <span class="text-danger">*</span></label>
+                    <input asp-for="Title" class="rt-field w-100" placeholder="e.g. Hydraulic Pump HP-200 for Rolling Mill" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Priority" class="rt-label">Priority <span class="text-danger">*</span></label>
+                    <select asp-for="Priority" class="rt-field w-100">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="RequiredByDate" class="rt-label">Required By <span class="text-danger">*</span></label>
+                    <input asp-for="RequiredByDate" type="date" class="rt-field w-100" />
+                    <span asp-validation-for="RequiredByDate" class="text-danger small"></span>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <label class="rt-label">
+                        Department
+                        @if (lockedDepartment)
+                        {
+                            <i class="bi bi-lock-fill text-muted ms-1" style="font-size:10px;"></i>
+                        }
+                    </label>
+                    <input type="text" class="rt-field w-100" value="@departmentName"
+                           disabled="@(lockedDepartment ? "disabled" : null)"
+                           style="@(lockedDepartment ? "background:#e9ecef;cursor:not-allowed;" : "")" />
+                    <input type="hidden" asp-for="DepartmentId" />
+                </div>
+
+                <div class="col-lg-9 col-md-12">
+                    <label asp-for="Description" class="rt-label">Description</label>
+                    <textarea asp-for="Description" class="rt-field w-100" rows="2"
+                              placeholder="Explain why this requisition is needed..."></textarea>
+                </div>
+            </div>
+
+            <!-- ============== ITEMS GRID ============== -->
+            <h6 class="rt-section-title"><i class="bi bi-list-ul me-1"></i> Requisition Items</h6>
+
+            <div x-data="requisitionItems()" x-init="init()">
+                <div class="table-responsive">
+                    <table class="rt-item-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 22%;">Item Name *</th>
+                                <th style="width: 18%;">Description</th>
+                                <th style="width: 12%;">Category</th>
+                                <th style="width: 8%;">Qty *</th>
+                                <th style="width: 10%;">Unit *</th>
+                                <th style="width: 10%;">Rate (₹) *</th>
+                                <th style="width: 10%;">Amount (₹)</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(item, index) in items" :key="item.uid">
+                                <tr>
+                                    <td class="text-center fw-bold" x-text="index + 1"></td>
+                                    <td>
+                                        <input type="text"
+                                               :name="'Items[' + index + '].ItemName'"
+                                               x-model="item.ItemName"
+                                               placeholder="Item name" />
+                                    </td>
+                                    <td>
+                                        <input type="text"
+                                               :name="'Items[' + index + '].Description'"
+                                               x-model="item.Description"
+                                               placeholder="Specification" />
+                                    </td>
+                                    <td>
+                                        <select :name="'Items[' + index + '].Category'" x-model="item.Category">
+                                            <option value="">--</option>
+                                            <option value="Raw Material">Raw Material</option>
+                                            <option value="Spare">Spare</option>
+                                            <option value="Consumable">Consumable</option>
+                                            <option value="Service">Service</option>
+                                            <option value="Electrical">Electrical</option>
+                                            <option value="Scrap">Scrap</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.001" min="0.001"
+                                               :name="'Items[' + index + '].Quantity'"
+                                               x-model.number="item.Quantity"
+                                               @@input="recalc()" />
+                                    </td>
+                                    <td>
+                                        <select :name="'Items[' + index + '].Unit'" x-model="item.Unit">
+                                            <option value="Piece">Piece</option>
+                                            <option value="MT">MT</option>
+                                            <option value="KG">KG</option>
+                                            <option value="Litre">Litre</option>
+                                            <option value="Meter">Meter</option>
+                                            <option value="Box">Box</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.01" min="0"
+                                               :name="'Items[' + index + '].EstimatedRate'"
+                                               x-model.number="item.EstimatedRate"
+                                               @@input="recalc()" />
+                                    </td>
+                                    <td class="text-center fw-bold" style="background:#f4f6fb;">
+                                        <span x-text="formatCurrency(item.Quantity * item.EstimatedRate)"></span>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="rt-item-remove"
+                                                @@click="removeItem(index)"
+                                                :disabled="items.length === 1"
+                                                :style="items.length === 1 ? 'opacity:0.4;cursor:not-allowed;' : ''">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <button type="button" class="rt-item-add" @@click="addItem()">
+                        <i class="bi bi-plus-lg me-1"></i> Add Item Row
+                    </button>
+                    <div class="text-muted small">
+                        <span x-text="items.length"></span> item(s)
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="rt-total-box">
+                    <span class="label">Total Estimated Amount</span>
+                    <span class="value">₹<span x-text="formatCurrency(total)"></span></span>
+                </div>
+            </div>
+
+            <!-- ============== ACTIONS ============== -->
+           <div class="rt-form-actions mt-4">
+    <button type="submit" name="action" value="draft" class="rt-btn">
+        <i class="bi bi-file-earmark me-1"></i> Save Changes
+    </button>
+    <button type="submit" name="action" value="submit" class="rt-btn rt-btn-primary"
+            onclick="return confirm('Submit this requisition to HOD for approval?');">
+        <i class="bi bi-send me-1"></i> Update & Submit
+    </button>
+    <a asp-action="Index" class="rt-btn">Cancel</a>
+</div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function requisitionItems() {
+            return {
+                items: [],
+                total: 0,
+                uidCounter: 0,
+
+                init() {
+                    // Existing items (edit mode ke liye)
+                    const existingItems = @Html.Raw(Json.Serialize(Model.Items ?? new List<ERPDemo.ViewModels.RequisitionItemForm>()));
+                    if (existingItems && existingItems.length > 0) {
+                        existingItems.forEach(i => {
+                            this.items.push({
+                                uid: ++this.uidCounter,
+                                RequisitionItemId: i.RequisitionItemId || 0,
+                                ItemName: i.ItemName || '',
+                                Description: i.Description || '',
+                                Category: i.Category || '',
+                                Quantity: i.Quantity || 1,
+                                Unit: i.Unit || 'Piece',
+                                EstimatedRate: i.EstimatedRate || 0
+                            });
+                        });
+                    } else {
+                        this.addItem();
+                    }
+                    this.recalc();
+                },
+
+                addItem() {
+                    this.items.push({
+                        uid: ++this.uidCounter,
+                        RequisitionItemId: 0,
+                        ItemName: '',
+                        Description: '',
+                        Category: '',
+                        Quantity: 1,
+                        Unit: 'Piece',
+                        EstimatedRate: 0
+                    });
+                },
+
+                removeItem(index) {
+                    if (this.items.length > 1) {
+                        this.items.splice(index, 1);
+                        this.recalc();
+                    }
+                },
+
+                recalc() {
+                    this.total = this.items.reduce((sum, i) => {
+                        const qty = parseFloat(i.Quantity) || 0;
+                        const rate = parseFloat(i.EstimatedRate) || 0;
+                        return sum + (qty * rate);
+                    }, 0);
+                },
+
+                formatCurrency(num) {
+                    const n = parseFloat(num) || 0;
+                    return n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+                }
+            }
+        }
+    </script>
+}

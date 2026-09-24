@@ -4,6 +4,7 @@ using ERPDemo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ERPDemo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260924161104_AddRequisition")]
+    partial class AddRequisition
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,16 +101,6 @@ namespace ERPDemo.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequisitionId"));
 
-                    b.Property<DateTime?>("AdminApprovedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("AdminApprovedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AdminRemarks")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -165,8 +158,6 @@ namespace ERPDemo.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("RequisitionId");
-
-                    b.HasIndex("AdminApprovedByUserId");
 
                     b.HasIndex("DepartmentId");
 
@@ -436,10 +427,6 @@ namespace ERPDemo.Migrations
 
             modelBuilder.Entity("ERPDemo.Models.Requisition", b =>
                 {
-                    b.HasOne("ERPDemo.Models.User", "AdminApprovedByUser")
-                        .WithMany()
-                        .HasForeignKey("AdminApprovedByUserId");
-
                     b.HasOne("ERPDemo.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId");
@@ -453,8 +440,6 @@ namespace ERPDemo.Migrations
                         .HasForeignKey("RequestedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AdminApprovedByUser");
 
                     b.Navigation("Department");
 
