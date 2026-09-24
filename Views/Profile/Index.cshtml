@@ -1,0 +1,122 @@
+@model ERPDemo.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_DashboardLayout";
+}
+
+<div class="page-header">
+    <div>
+        <h1>My Profile</h1>
+        <p>Apni details dekho aur update karo</p>
+        <div class="page-accent"></div>
+    </div>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row g-3 g-lg-4">
+    <!-- Left: Info card -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4 text-center">
+                <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width: 90px; height: 90px; background: linear-gradient(135deg, #4A90E2, #7c5cff);">
+                    <span style="font-size: 34px; font-weight: 800; color: #fff;">
+                        @(Model.FullName?.Substring(0, 1).ToUpper() ?? Model.Username.Substring(0, 1).ToUpper())
+                    </span>
+                </div>
+                <h4 class="fw-bold mb-1">@(Model.FullName ?? Model.Username)</h4>
+                <p class="text-muted small mb-2">@@@Model.Username</p>
+                <span class="badge bg-primary">@Model.RoleName</span>
+
+                <hr class="my-3" />
+
+                <div class="text-start small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Organization</span>
+                        <strong>@(Model.OrganizationName ?? "—")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Last Login</span>
+                        <strong>@(Model.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "--")</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Member Since</span>
+                        <strong>@Model.CreatedAt.ToString("MMM dd, yyyy")</strong>
+                    </div>
+                </div>
+
+                <hr class="my-3" />
+
+                <a asp-action="ChangePassword" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-key me-1"></i> Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Edit form -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">
+                    <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Details
+                </h5>
+
+                <form asp-action="Index" method="post" asp-antiforgery="true">
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="Username" />
+                    <input type="hidden" asp-for="RoleName" />
+                    <input type="hidden" asp-for="OrganizationName" />
+                    <input type="hidden" asp-for="LastLoginAt" />
+                    <input type="hidden" asp-for="CreatedAt" />
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Username</label>
+                            <input value="@Model.Username" class="form-control" disabled />
+                            <small class="text-muted">Username change nahi ho sakta</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold">Full Name</label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold">Phone</label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2 me-1"></i> Save Changes
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

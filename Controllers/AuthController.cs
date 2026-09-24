@@ -18,20 +18,33 @@ namespace ERPDemo.Controllers
             _authService = authService;
         }
 
-        // ✅ GET: If already logged in, send them to their dashboard
         [HttpGet]
         public IActionResult Login()
         {
+            // Sirf tab redirect karo jab cookie AUTHENTIC ho
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-                return role switch
+                // Safety — agar role hi nahi mila toh login page dikhao
+                if (!string.IsNullOrEmpty(role))
                 {
-                    "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
-                    "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
-                    _            => RedirectToAction("UserDashboard", "Dashboard")
-                };
+                    try
+                    {
+                        return role switch
+                        {
+                            "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
+                            "HOD"        => RedirectToAction("Dashboard", "Hod"),  
+                            "Manager"    => RedirectToAction("Dashboard", "Manager"),
+                            _            => RedirectToAction("UserDashboard", "Dashboard")
+                        };
+                    }
+                    catch
+                    {
+                        // Fallback — redirect fail hone pe login page dikhao
+                        return View();
+                    }
+                }
             }
 
             return View();
@@ -41,14 +54,19 @@ namespace ERPDemo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
             var user = await _authService.ValidateUserAsync(model.UsernameOrEmail, model.Password);
 
             if (user == null)
             {
                 ModelState.AddModelError("", "Invalid username or password");
+                return View(model);
+            }
+
+            if (user.RoleId == 1)
+            {
+                ModelState.AddModelError("", "Login access is restricted to Managers and Administrators only.");
                 return View(model);
             }
 
@@ -88,13 +106,14 @@ namespace ERPDemo.Controllers
 
             HttpContext.Session.SetInt32("UserId", user.UserId);
             HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("RoleName", roleName);
+            HttpContext.Session.SetString("RoleName", roleName);        
             HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
 
             return roleName switch
             {
-                "SuperAdmin" => RedirectToAction("SuperAdminDashboard", "Dashboard"),
                 "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
+               "Manager"    => RedirectToAction("Dashboard", "Manager"),
+               "HOD"        => RedirectToAction("Dashboard", "Hod"),  
                 _            => RedirectToAction("UserDashboard", "Dashboard")
             };
         }

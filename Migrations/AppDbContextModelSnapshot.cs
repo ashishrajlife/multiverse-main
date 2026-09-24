@@ -22,6 +22,148 @@ namespace ERPDemo.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ERPDemo.Models.Department", b =>
+                {
+                    b.Property<int>("DepartmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DepartmentId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("DepartmentId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Organization", b =>
+                {
+                    b.Property<int>("OrganizationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrganizationId"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("GSTIN")
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<DateTime?>("GSTLastVerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GSTStatus")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LegalName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Plan")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TradeName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("OrganizationId");
+
+                    b.ToTable("Organizations");
+
+                    b.HasData(
+                        new
+                        {
+                            OrganizationId = 1,
+                            City = "Mumbai",
+                            Code = "MV-HQ",
+                            Country = "India",
+                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "hq@multiverse.io",
+                            IsActive = true,
+                            Name = "Multiverse HQ",
+                            Phone = "9999999990",
+                            Plan = "Enterprise"
+                        },
+                        new
+                        {
+                            OrganizationId = 2,
+                            City = "Bengaluru",
+                            Code = "ACME-001",
+                            Country = "India",
+                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "contact@acme.com",
+                            IsActive = true,
+                            Name = "Acme Pvt Ltd",
+                            Phone = "9999999911",
+                            Plan = "Pro"
+                        });
+                });
+
             modelBuilder.Entity("ERPDemo.Models.RefreshToken", b =>
                 {
                     b.Property<int>("TokenId")
@@ -97,15 +239,29 @@ namespace ERPDemo.Migrations
                         {
                             RoleId = 2,
                             CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Administrator with elevated privileges",
-                            RoleName = "Admin"
+                            Description = "Team lead / module manager",
+                            RoleName = "Manager"
                         },
                         new
                         {
                             RoleId = 3,
                             CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Administrator with elevated privileges",
+                            RoleName = "Admin"
+                        },
+                        new
+                        {
+                            RoleId = 4,
+                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "Full system access - super administrator",
                             RoleName = "SuperAdmin"
+                        },
+                        new
+                        {
+                            RoleId = 5,
+                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Description = "Full system access - specific department",
+                            RoleName = "HOD"
                         });
                 });
 
@@ -117,15 +273,33 @@ namespace ERPDemo.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<string>("AadhaarNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Designation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("EmploymentType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .HasMaxLength(150)
@@ -134,8 +308,17 @@ namespace ERPDemo.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("JoiningDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PanNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -146,8 +329,29 @@ namespace ERPDemo.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("Pincode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PlantLocation")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("SalaryAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("SalaryType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShiftEndTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShiftStartTime")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("State")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -158,6 +362,10 @@ namespace ERPDemo.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.HasIndex("RoleId");
 
@@ -171,9 +379,10 @@ namespace ERPDemo.Migrations
                             Email = "superadmin@erp.com",
                             FullName = "Super Admin",
                             IsActive = true,
+                            OrganizationId = 1,
                             Password = "super123",
                             PhoneNumber = "9999999991",
-                            RoleId = 3,
+                            RoleId = 4,
                             Username = "superadmin"
                         },
                         new
@@ -183,23 +392,45 @@ namespace ERPDemo.Migrations
                             Email = "admin@erp.com",
                             FullName = "Admin User",
                             IsActive = true,
+                            OrganizationId = 1,
                             Password = "admin123",
                             PhoneNumber = "9999999992",
-                            RoleId = 2,
+                            RoleId = 3,
                             Username = "admin"
                         },
                         new
                         {
                             UserId = 3,
                             CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Email = "manager@erp.com",
+                            FullName = "Team Manager",
+                            IsActive = true,
+                            OrganizationId = 1,
+                            Password = "manager123",
+                            PhoneNumber = "9999999995",
+                            RoleId = 2,
+                            Username = "manager"
+                        },
+                        new
+                        {
+                            UserId = 4,
+                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "john@erp.com",
                             FullName = "John Doe",
                             IsActive = true,
+                            OrganizationId = 2,
                             Password = "john123",
                             PhoneNumber = "9999999993",
                             RoleId = 1,
                             Username = "john"
                         });
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Department", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Organization", null)
+                        .WithMany("Departments")
+                        .HasForeignKey("OrganizationId");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.RefreshToken", b =>
@@ -215,13 +446,39 @@ namespace ERPDemo.Migrations
 
             modelBuilder.Entity("ERPDemo.Models.User", b =>
                 {
+                    b.HasOne("ERPDemo.Models.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("ERPDemo.Models.Organization", "Organization")
+                        .WithMany("Users")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ERPDemo.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Department");
+
+                    b.Navigation("Organization");
+
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Department", b =>
+                {
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Organization", b =>
+                {
+                    b.Navigation("Departments");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.Role", b =>

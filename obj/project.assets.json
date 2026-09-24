@@ -3249,19 +3249,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ashis\\.nuget\\packages\\": {}
+    "C:\\Users\\Owner\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj",
+      "projectUniqueName": "C:\\mv-git\\multiverse-main\\ERPDemo.csproj",
       "projectName": "ERPDemo",
-      "projectPath": "E:\\ERP-Demo\\ERPDemo\\ERPDemo.csproj",
-      "packagesPath": "C:\\Users\\ashis\\.nuget\\packages\\",
-      "outputPath": "E:\\ERP-Demo\\ERPDemo\\obj\\",
+      "projectPath": "C:\\mv-git\\multiverse-main\\ERPDemo.csproj",
+      "packagesPath": "C:\\Users\\Owner\\.nuget\\packages\\",
+      "outputPath": "C:\\mv-git\\multiverse-main\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\ashis\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Owner\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -3286,7 +3286,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "10.0.400"
     },
     "frameworks": {
       "net10.0": {
@@ -3331,7 +3331,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

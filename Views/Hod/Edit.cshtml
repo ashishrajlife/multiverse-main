@@ -1,0 +1,179 @@
+@model ERPDemo.ViewModels.EditTeamMemberViewModel
+@{
+    ViewData["Title"] = "Edit Member";
+    Layout = "_DashboardLayout";
+    var lockedDepartmentName = ViewBag.LockedDepartmentName as string ?? "N/A";
+}
+
+<div class="rt-head">
+    <div class="rt-head-left">
+        <a asp-action="Dashboard" class="rt-btn rt-btn-back" title="Back">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <div>
+            <h1>Edit Member</h1>
+            <p>Update employee or manager information</p>
+        </div>
+    </div>
+</div>
+
+<div class="rt-window">
+    <div class="rt-titlebar"><span>Edit Member Profile</span></div>
+    <div class="p-4">
+
+        <form asp-action="Edit" method="post" asp-antiforgery="true">
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="DepartmentId" />
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <!-- ============== BASIC INFO ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-person-badge me-1"></i> Basic Information
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Username" class="rt-label">Username <span class="text-danger">*</span></label>
+                    <input asp-for="Username" class="rt-field w-100" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Email" class="rt-label">Email Address <span class="text-danger">*</span></label>
+                    <input asp-for="Email" class="rt-field w-100" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="FullName" class="rt-label">Full Name</label>
+                    <input asp-for="FullName" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PhoneNumber" class="rt-label">Phone Number</label>
+                    <input asp-for="PhoneNumber" class="rt-field w-100" />
+                </div>
+
+                <!-- Role — Enabled (Employee / Manager) -->
+                <div class="col-lg-4 col-md-6">
+                    <label asp-for="RoleId" class="rt-label">System Role <span class="text-danger">*</span></label>
+                    <select asp-for="RoleId" class="rt-field w-100">
+                        <option value="1">Employee</option>
+                        <option value="2">Manager</option>
+                    </select>
+                    <span asp-validation-for="RoleId" class="text-danger small"></span>
+                </div>
+
+                <!-- 🔒 Department — Disabled -->
+                <div class="col-lg-4 col-md-6">
+                    <label class="rt-label">
+                        Department
+                        <i class="bi bi-lock-fill text-muted ms-1" style="font-size:10px;"></i>
+                    </label>
+                    <input type="text" class="rt-field w-100" value="@lockedDepartmentName" disabled
+                           style="background:#e9ecef; cursor:not-allowed;" />
+                </div>
+
+                <!-- IsActive Toggle -->
+                <div class="col-lg-4 col-md-12 d-flex align-items-end">
+                    <div class="form-check form-switch mb-2">
+                        <input asp-for="IsActive" class="form-check-input" type="checkbox" id="isActiveToggle" />
+                        <label asp-for="IsActive" class="form-check-label rt-label mb-0" style="cursor:pointer;">
+                            Active Account
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============== PERSONAL DETAILS ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-person-vcard me-1"></i> Personal & Contact Details
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label asp-for="Address" class="rt-label">Address</label>
+                    <input asp-for="Address" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="City" class="rt-label">City</label>
+                    <input asp-for="City" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="State" class="rt-label">State</label>
+                    <input asp-for="State" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Pincode" class="rt-label">Pincode</label>
+                    <input asp-for="Pincode" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="AadhaarNumber" class="rt-label">Aadhaar Number</label>
+                    <input asp-for="AadhaarNumber" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PanNumber" class="rt-label">PAN Number</label>
+                    <input asp-for="PanNumber" class="rt-field w-100" />
+                </div>
+            </div>
+
+            <!-- ============== EMPLOYMENT DETAILS ============== -->
+            <h6 class="rt-section-title">
+                <i class="bi bi-briefcase me-1"></i> Employment & Shift Details
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="EmploymentType" class="rt-label">Employment Type</label>
+                    <select asp-for="EmploymentType" class="rt-field w-100">
+                        <option value="">-- Select --</option>
+                        <option value="Permanent">Permanent</option>
+                        <option value="Contractual">Contractual</option>
+                        <option value="Vendor">Vendor</option>
+                        <option value="Apprentice">Apprentice</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="Designation" class="rt-label">Designation</label>
+                    <input asp-for="Designation" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="PlantLocation" class="rt-label">Plant Location</label>
+                    <input asp-for="PlantLocation" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="JoiningDate" class="rt-label">Joining Date</label>
+                    <input asp-for="JoiningDate" type="date" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="ShiftStartTime" class="rt-label">Shift Start Time</label>
+                    <input asp-for="ShiftStartTime" type="time" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="ShiftEndTime" class="rt-label">Shift End Time</label>
+                    <input asp-for="ShiftEndTime" type="time" class="rt-field w-100" />
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="SalaryType" class="rt-label">Salary Type</label>
+                    <select asp-for="SalaryType" class="rt-field w-100">
+                        <option value="">-- Select --</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Daily">Daily</option>
+                        <option value="Hourly">Hourly</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="SalaryAmount" class="rt-label">Salary Amount (₹)</label>
+                    <input asp-for="SalaryAmount" type="number" step="0.01" class="rt-field w-100" />
+                </div>
+            </div>
+
+            <!-- ============== ACTIONS ============== -->
+            <div class="rt-form-actions">
+                <button type="submit" class="rt-btn rt-btn-primary">
+                    <i class="bi bi-check2 me-1"></i> Update Changes
+                </button>
+                <a asp-action="Dashboard" class="rt-btn">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
