@@ -57,16 +57,25 @@ namespace ERPDemo.Models
         [StringLength(500)]
         public string? RejectionReason { get; set; }
         // Admin Approval (Level 2)
-public int? AdminApprovedByUserId { get; set; }
-[ForeignKey("AdminApprovedByUserId")]
-public User? AdminApprovedByUser { get; set; }
+        public int? AdminApprovedByUserId { get; set; }
+        [ForeignKey("AdminApprovedByUserId")]
+        public User? AdminApprovedByUser { get; set; }
 
-public DateTime? AdminApprovedAt { get; set; }
+        public DateTime? AdminApprovedAt { get; set; }
 
-[StringLength(500)]
-public string? AdminRemarks { get; set; }
+        [StringLength(500)]
+        public string? AdminRemarks { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime? UpdatedAt { get; set; }
+        // Edit Tracking
+        public int? LastEditedByUserId { get; set; }
+        [ForeignKey("LastEditedByUserId")]
+        public User? LastEditedByUser { get; set; }
+
+        public DateTime? LastEditedAt { get; set; }
+
+        [StringLength(500)]
+        public string? LastEditReason { get; set; }
 
         // Navigation
         public ICollection<RequisitionItem> Items { get; set; } = new List<RequisitionItem>();

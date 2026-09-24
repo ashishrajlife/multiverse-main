@@ -210,7 +210,7 @@ namespace ERPDemo.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // ============ EDIT ============
+       // ============ EDIT ============
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -220,21 +220,39 @@ namespace ERPDemo.Controllers
 
             if (requisition == null) return NotFound();
 
-            // Sirf Draft edit ho sakti hai
-            if (requisition.Status != "Draft")
-            {
-                TempData["Error"] = "Sirf Draft requisitions edit ho sakti hain.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            // Sirf owner edit kare
-            if (requisition.RequestedByUserId != CurrentUserId && CurrentRole != "Admin")
-            {
-                TempData["Error"] = "Aap is requisition ko edit nahi kar sakte.";
-                return RedirectToAction(nameof(Index));
-            }
-
             var user = await GetCurrentUserAsync();
+
+            // ============ PERMISSION LOGIC ============
+            bool canEdit = false;
+
+            // Manager: apni Draft edit kar sakta hai
+            if (CurrentRole == "Manager"
+                && requisition.Status == "Draft"
+                && requisition.RequestedByUserId == CurrentUserId)
+            {
+                canEdit = true;
+            }
+            // HOD: apne department ki PendingHOD edit kar sakta hai (approve karne se pehle)
+            else if (CurrentRole == "HOD"
+                && requisition.Status == "PendingHOD"
+                && requisition.DepartmentId == user?.DepartmentId)
+            {
+                canEdit = true;
+            }
+            // Admin: Draft aur PendingHOD dono edit kar sakta hai (any dept)
+            else if (CurrentRole == "Admin"
+                && (requisition.Status == "Draft" || requisition.Status == "PendingHOD"))
+            {
+                canEdit = true;
+            }
+
+            if (!canEdit)
+            {
+                TempData["Error"] = "Aap is requisition ko edit nahi kar sakte (ya status edit ke liye eligible nahi hai).";
+                return RedirectToAction(nameof(Index));
+            }
+            // ============ END PERMISSION ============
+
             var vm = new RequisitionFormViewModel
             {
                 RequisitionId = requisition.RequisitionId,
@@ -258,7 +276,7 @@ namespace ERPDemo.Controllers
                 }).ToList()
             };
 
-            ViewBag.DepartmentName = user?.Department?.Name ?? "Unassigned";
+            ViewBag.DepartmentName = user?.Department?.Name ?? requisition.Department?.Name ?? "Unassigned";
             ViewBag.LockedDepartment = (CurrentRole != "Admin");
             return View(vm);
         }
@@ -272,13 +290,42 @@ namespace ERPDemo.Controllers
                 .FirstOrDefaultAsync(r => r.RequisitionId == model.RequisitionId);
 
             if (requisition == null) return NotFound();
-            if (requisition.Status != "Draft") return RedirectToAction(nameof(Index));
 
             var user = await GetCurrentUserAsync();
 
-            if (CurrentRole != "Admin")
-                model.DepartmentId = user?.DepartmentId;
+            // ============ PERMISSION CHECK (same as GET) ============
+            bool canEdit = false;
 
+            if (CurrentRole == "Manager"
+                && requisition.Status == "Draft"
+                && requisition.RequestedByUserId == CurrentUserId)
+            {
+                canEdit = true;
+            }
+            else if (CurrentRole == "HOD"
+                && requisition.Status == "PendingHOD"
+                && requisition.DepartmentId == user?.DepartmentId)
+            {
+                canEdit = true;
+            }
+            else if (CurrentRole == "Admin"
+                && (requisition.Status == "Draft" || requisition.Status == "PendingHOD"))
+            {
+                canEdit = true;
+            }
+
+            if (!canEdit)
+            {
+                TempData["Error"] = "Aap is requisition ko edit nahi kar sakte.";
+                return RedirectToAction(nameof(Index));
+            }
+            // ============ END PERMISSION ============
+
+            // Force department for non-admin
+            if (CurrentRole != "Admin")
+                model.DepartmentId = requisition.DepartmentId;   // original dept preserve karo
+
+            // Remove empty rows
             model.Items = model.Items
                 .Where(i => !string.IsNullOrWhiteSpace(i.ItemName))
                 .ToList();
@@ -295,7 +342,7 @@ namespace ERPDemo.Controllers
                 return View(model);
             }
 
-            // Update
+            // ============ UPDATE FIELDS ============
             requisition.Title = model.Title;
             requisition.Description = model.Description;
             requisition.Priority = model.Priority;
@@ -303,7 +350,34 @@ namespace ERPDemo.Controllers
             requisition.DepartmentId = model.DepartmentId;
             requisition.TotalEstimatedAmount = model.TotalEstimatedAmount;
             requisition.UpdatedAt = DateTime.Now;
-            requisition.Status = (action == "submit") ? "PendingHOD" : "Draft";
+
+            // ============ EDIT TRACKING ============
+            requisition.LastEditedByUserId = CurrentUserId;
+            requisition.LastEditedAt = DateTime.Now;
+            // ============ END EDIT TRACKING ============
+
+            // ============ STATUS LOGIC (role-based) ============
+            if (CurrentRole == "Manager")
+            {
+                // Manager: Draft → Draft ya PendingHOD (action ke hisaab se)
+                requisition.Status = (action == "submit") ? "PendingHOD" : "Draft";
+            }
+            else if (CurrentRole == "HOD")
+            {
+                // HOD edit kare toh wapas Draft karo → Manager ko review ke liye
+                requisition.Status = "Draft";
+                requisition.HodRemarks = "HOD ne edit kiya — Manager ko review ke liye bheja gaya.";
+            }
+            else if (CurrentRole == "Admin")
+            {
+                // Admin edit kare toh status waise hi rakho (Draft ya PendingHOD)
+                // Ya admin chahe toh Draft/PendingHOD set kar sakta hai
+                if (action == "submit")
+                    requisition.Status = "PendingHOD";
+                else
+                    requisition.Status = "Draft";
+            }
+            // ============ END STATUS LOGIC ============
 
             // Remove old items
             _context.RequisitionItems.RemoveRange(requisition.Items);
@@ -325,8 +399,8 @@ namespace ERPDemo.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = action == "submit"
-                ? "Requisition HOD ko bhej di gayi."
-                : "Requisition update ho gayi.";
+                ? $"{requisition.RequisitionNumber} update ho gayi aur HOD ko bhej di gayi."
+                : $"{requisition.RequisitionNumber} update ho gayi.";
 
             return RedirectToAction(nameof(Index));
         }
@@ -340,7 +414,8 @@ namespace ERPDemo.Controllers
                 .Include(r => r.RequestedByUser)
                 .Include(r => r.Department)
                 .Include(r => r.HodApprovedByUser)
-                  .Include(r => r.AdminApprovedByUser)
+                .Include(r => r.AdminApprovedByUser)
+                .Include(r => r.LastEditedByUser)   // 👈 NAYA
                 .FirstOrDefaultAsync(r => r.RequisitionId == id);
 
             if (requisition == null) return NotFound();
@@ -359,6 +434,7 @@ namespace ERPDemo.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // VM build
             var vm = new RequisitionDetailsViewModel
             {
                 RequisitionId = requisition.RequisitionId,
@@ -392,30 +468,56 @@ namespace ERPDemo.Controllers
                 }).ToList()
             };
 
-           // Permissions
-vm.CanEdit = requisition.Status == "Draft"
-           && requisition.RequestedByUserId == CurrentUserId;
+            // ============ PERMISSIONS ============
+            var currentUser = await GetCurrentUserAsync();
 
-vm.CanSubmit = vm.CanEdit;
+            bool canEditNow = false;
 
-// HOD can approve ONLY if PendingHOD
-// Admin can approve ONLY if PendingAdmin
-vm.CanApprove = (CurrentRole == "HOD" && requisition.Status == "PendingHOD"
-                 || CurrentRole == "Admin" && requisition.Status == "PendingAdmin")
-             && requisition.RequestedByUserId != CurrentUserId;
+            if (CurrentRole == "Manager"
+                && requisition.Status == "Draft"
+                && requisition.RequestedByUserId == CurrentUserId)
+            {
+                canEditNow = true;
+            }
+            else if (CurrentRole == "HOD"
+                && requisition.Status == "PendingHOD"
+                && requisition.DepartmentId == currentUser?.DepartmentId)
+            {
+                canEditNow = true;
+            }
+            else if (CurrentRole == "Admin"
+                && (requisition.Status == "Draft" || requisition.Status == "PendingHOD"))
+            {
+                canEditNow = true;
+            }
 
-vm.CanReject = vm.CanApprove;
+            vm.CanEdit = canEditNow;
+            vm.CanSubmit = requisition.Status == "Draft"
+                        && requisition.RequestedByUserId == CurrentUserId;
 
-vm.CanDelete = requisition.Status == "Draft"
-            && requisition.RequestedByUserId == CurrentUserId;
+            vm.CanApprove = (CurrentRole == "HOD" && requisition.Status == "PendingHOD"
+                            || CurrentRole == "Admin" && requisition.Status == "PendingAdmin")
+                        && requisition.RequestedByUserId != CurrentUserId;
 
-// Naye fields VM mein
-vm.AdminApprovedByName = requisition.AdminApprovedByUser?.FullName ?? requisition.AdminApprovedByUser?.Username;
-vm.AdminApprovedAt = requisition.AdminApprovedAt;
-vm.AdminRemarks = requisition.AdminRemarks;
+            vm.CanReject = vm.CanApprove;
+
+            vm.CanDelete = requisition.Status == "Draft"
+                        && requisition.RequestedByUserId == CurrentUserId;
+            // ============ END PERMISSIONS ============
+
+            // Admin approval fields
+            vm.AdminApprovedByName = requisition.AdminApprovedByUser?.FullName ?? requisition.AdminApprovedByUser?.Username;
+            vm.AdminApprovedAt = requisition.AdminApprovedAt;
+            vm.AdminRemarks = requisition.AdminRemarks;
+
+            // Edit history
+            vm.LastEditedByName = requisition.LastEditedByUser?.FullName ?? requisition.LastEditedByUser?.Username;
+            vm.LastEditedAt = requisition.LastEditedAt;
+            vm.LastEditReason = requisition.LastEditReason;
 
             return View(vm);
         }
+      
 
         // ============ SUBMIT ============
         [HttpPost]

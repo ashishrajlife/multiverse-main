@@ -128,6 +128,16 @@ namespace ERPDemo.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("LastEditReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("LastEditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("LastEditedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Priority")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -171,6 +181,8 @@ namespace ERPDemo.Migrations
                     b.HasIndex("DepartmentId");
 
                     b.HasIndex("HodApprovedByUserId");
+
+                    b.HasIndex("LastEditedByUserId");
 
                     b.HasIndex("RequestedByUserId");
 
@@ -448,6 +460,10 @@ namespace ERPDemo.Migrations
                         .WithMany()
                         .HasForeignKey("HodApprovedByUserId");
 
+                    b.HasOne("ERPDemo.Models.User", "LastEditedByUser")
+                        .WithMany()
+                        .HasForeignKey("LastEditedByUserId");
+
                     b.HasOne("ERPDemo.Models.User", "RequestedByUser")
                         .WithMany()
                         .HasForeignKey("RequestedByUserId")
@@ -459,6 +475,8 @@ namespace ERPDemo.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("HodApprovedByUser");
+
+                    b.Navigation("LastEditedByUser");
 
                     b.Navigation("RequestedByUser");
                 });

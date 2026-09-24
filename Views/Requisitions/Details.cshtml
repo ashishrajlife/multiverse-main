@@ -370,140 +370,103 @@ else if (Model.Status == "PendingHOD")
         <div class="rt-window mb-3">
             <div class="rt-titlebar"><span><i class="bi bi-lightning-charge me-2"></i>Actions</span></div>
             <div class="p-3">
-                @if (Model.CanApprove)
-                {
-                    <div class="d-grid gap-2">
-                        <button type="button" class="rt-btn rt-btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
-                            <i class="bi bi-check2-circle me-1"></i> Approve
-                        </button>
-                        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#rejectModal">
-                            <i class="bi bi-x-circle me-1"></i> Reject
-                        </button>
-                        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#returnModal">
-                            <i class="bi bi-arrow-return-left me-1"></i> Return to Manager
-                        </button>
-                    </div>
-                }
-
-                @if (Model.CanEdit)
-                {
-                    <div class="d-grid gap-2">
-                        <a asp-action="Edit" asp-route-id="@Model.RequisitionId" class="rt-btn">
-                            <i class="bi bi-pencil me-1"></i> Edit Draft
-                        </a>
-                    </div>
-                }
-
-                @if (Model.CanSubmit)
-                {
-                    <form asp-action="Submit" asp-route-id="@Model.RequisitionId" method="post"
-                          onsubmit="return confirm('Submit this requisition to HOD for approval?');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="rt-btn rt-btn-primary w-100 mt-2">
-                            <i class="bi bi-send me-1"></i> Submit for Approval
-                        </button>
-                    </form>
-                }
-
-                @if (Model.CanDelete)
-                {
-                    <form asp-action="Delete" asp-route-id="@Model.RequisitionId" method="post"
-                          onsubmit="return confirm('Are you sure? This action cannot be undone.');">
-                        @Html.AntiForgeryToken()
-                        <button type="submit" class="rt-btn text-danger w-100 mt-2">
-                            <i class="bi bi-trash me-1"></i> Delete Draft
-                        </button>
-                    </form>
-                }
 
      @if (Model.CanApprove)
-{
-    <div class="d-grid gap-2">
-        <button type="button" class="rt-btn rt-btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
-            <i class="bi bi-check2-circle me-1"></i> Approve
-        </button>
-        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#rejectModal">
-            <i class="bi bi-x-circle me-1"></i> Reject
-        </button>
-        <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#returnModal">
-            <i class="bi bi-arrow-return-left me-1"></i> Return to Manager
-        </button>
-    </div>
-}
-else if (Model.CanEdit)
-{
-    <div class="d-grid gap-2">
-        <a asp-action="Edit" asp-route-id="@Model.RequisitionId" class="rt-btn">
-            <i class="bi bi-pencil me-1"></i> Edit Draft
-        </a>
-    </div>
-}
-else if (Model.CanSubmit)
-{
-    <form asp-action="Submit" asp-route-id="@Model.RequisitionId" method="post"
-          onsubmit="return confirm('Submit this requisition to HOD for approval?');">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="rt-btn rt-btn-primary w-100">
-            <i class="bi bi-send me-1"></i> Submit for Approval
-        </button>
-    </form>
-}
-else if (Model.CanDelete)
-{
-    <form asp-action="Delete" asp-route-id="@Model.RequisitionId" method="post"
-          onsubmit="return confirm('Are you sure? This action cannot be undone.');">
-        @Html.AntiForgeryToken()
-        <button type="submit" class="rt-btn text-danger w-100">
-            <i class="bi bi-trash me-1"></i> Delete Draft
-        </button>
-    </form>
-}
-else
-{
-    @* No actions — status-specific message dikhao *@
-    <div class="text-center py-3">
-        @if (Model.Status == "ApprovedByHOD")
         {
-            <i class="bi bi-hourglass-split" style="font-size:28px;color:#feca57;"></i>
-            <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Approved by HOD</p>
-            <p class="small text-muted mb-0" style="font-size:12px;">
-                Waiting for vendor selection &amp; RFQ process
-            </p>
+            <div class="d-grid gap-2">
+                <button type="button" class="rt-btn rt-btn-primary" data-bs-toggle="modal" data-bs-target="#approveModal">
+                    <i class="bi bi-check2-circle me-1"></i> Approve
+                </button>
+                <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                    <i class="bi bi-x-circle me-1"></i> Reject
+                </button>
+                <button type="button" class="rt-btn" data-bs-toggle="modal" data-bs-target="#returnModal">
+                    <i class="bi bi-arrow-return-left me-1"></i> Return to Manager
+                </button>
+            </div>
         }
-        else if (Model.Status == "Rejected")
+       @if (Model.CanEdit)
         {
-            <i class="bi bi-x-circle" style="font-size:28px;color:#b3404a;"></i>
-            <p class="small mb-1 mt-2 fw-semibold" style="color:#842029;">Requisition Rejected</p>
-            @if (!string.IsNullOrEmpty(Model.RejectionReason))
-            {
-                <p class="small text-muted mb-0" style="font-size:12px;">
-                    @Model.RejectionReason
-                </p>
-            }
+            <div class="d-grid gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.RequisitionId" class="rt-btn">
+                    <i class="bi bi-pencil me-1"></i>
+                    @if (Model.Status == "PendingHOD")
+                    {
+                        <span>Edit & Return to Manager</span>
+                    }
+                    else
+                    {
+                        <span>Edit Draft</span>
+                    }
+                </a>
+            </div>
         }
-        else if (Model.Status == "Draft")
+        else if (Model.CanSubmit)
         {
-            <i class="bi bi-file-earmark" style="font-size:28px;color:#6c757d;"></i>
-            <p class="small mb-1 mt-2 fw-semibold">Draft</p>
-            <p class="small text-muted mb-0" style="font-size:12px;">
-                Only the requester can edit
-            </p>
+            <form asp-action="Submit" asp-route-id="@Model.RequisitionId" method="post"
+                onsubmit="return confirm('Submit this requisition to HOD for approval?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="rt-btn rt-btn-primary w-100">
+                    <i class="bi bi-send me-1"></i> Submit for Approval
+                </button>
+            </form>
         }
-        else if (Model.Status == "PendingHOD")
+        else if (Model.CanDelete)
         {
-            <i class="bi bi-hourglass-split" style="font-size:28px;color:#856404;"></i>
-            <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Pending HOD Approval</p>
-            <p class="small text-muted mb-0" style="font-size:12px;">
-                Waiting for HOD action
-            </p>
+            <form asp-action="Delete" asp-route-id="@Model.RequisitionId" method="post"
+                onsubmit="return confirm('Are you sure? This action cannot be undone.');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="rt-btn text-danger w-100">
+                    <i class="bi bi-trash me-1"></i> Delete Draft
+                </button>
+            </form>
         }
         else
         {
-            <i class="bi bi-lock" style="font-size:24px;opacity:0.4;"></i>
-            <p class="small mb-0 mt-2">No actions available</p>
+            @* No actions — status-specific message dikhao *@
+            <div class="text-center py-3">
+                @if (Model.Status == "ApprovedByHOD")
+                {
+                    <i class="bi bi-hourglass-split" style="font-size:28px;color:#feca57;"></i>
+                    <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Approved by HOD</p>
+                    <p class="small text-muted mb-0" style="font-size:12px;">
+                        Waiting for vendor selection &amp; RFQ process
+                    </p>
+                }
+                else if (Model.Status == "Rejected")
+                {
+                    <i class="bi bi-x-circle" style="font-size:28px;color:#b3404a;"></i>
+                    <p class="small mb-1 mt-2 fw-semibold" style="color:#842029;">Requisition Rejected</p>
+                    @if (!string.IsNullOrEmpty(Model.RejectionReason))
+                    {
+                        <p class="small text-muted mb-0" style="font-size:12px;">
+                            @Model.RejectionReason
+                        </p>
+                    }
+                }
+                else if (Model.Status == "Draft")
+                {
+                    <i class="bi bi-file-earmark" style="font-size:28px;color:#6c757d;"></i>
+                    <p class="small mb-1 mt-2 fw-semibold">Draft</p>
+                    <p class="small text-muted mb-0" style="font-size:12px;">
+                        Only the requester can edit
+                    </p>
+                }
+                else if (Model.Status == "PendingHOD")
+                {
+                    <i class="bi bi-hourglass-split" style="font-size:28px;color:#856404;"></i>
+                    <p class="small mb-1 mt-2 fw-semibold" style="color:#856404;">Pending HOD Approval</p>
+                    <p class="small text-muted mb-0" style="font-size:12px;">
+                        Waiting for HOD action
+                    </p>
+                }
+                else
+                {
+                    <i class="bi bi-lock" style="font-size:24px;opacity:0.4;"></i>
+                    <p class="small mb-0 mt-2">No actions available</p>
+                }
+            </div>
         }
-    </div>
-}
             </div>
         </div>
 
@@ -578,6 +541,43 @@ else
                 </div>
             </div>
         </div>
+
+        <!-- ============== EDIT HISTORY ============== -->
+@if (Model.LastEditedAt.HasValue)
+{
+    <div class="rt-window mt-3">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-pencil-square me-2"></i>Edit History</span>
+        </div>
+        <div class="p-3">
+            <div class="rt-timeline">
+                <div class="rt-timeline-item">
+                    <div class="rt-timeline-icon" style="background:#4a90e2;color:#fff;">
+                        <i class="bi bi-pencil"></i>
+                    </div>
+                    <div>
+                        <div class="fw-semibold small">Last Edited</div>
+                        <div class="text-muted" style="font-size:11.5px;">
+                            @if (!string.IsNullOrEmpty(Model.LastEditedByName))
+                            {
+                                <span>by <strong>@Model.LastEditedByName</strong> · </span>
+                            }
+                            @Model.LastEditedAt.Value.ToString("dd MMM yyyy, HH:mm")
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.LastEditReason))
+                        {
+                            <div class="text-muted fst-italic mt-1" style="font-size:11.5px;">
+                                "@Model.LastEditReason"
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
     </div>
 </div>
 

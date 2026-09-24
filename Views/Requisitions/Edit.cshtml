@@ -305,27 +305,31 @@
                 total: 0,
                 uidCounter: 0,
 
-                init() {
-                    // Existing items (edit mode ke liye)
-                    const existingItems = @Html.Raw(Json.Serialize(Model.Items ?? new List<ERPDemo.ViewModels.RequisitionItemForm>()));
-                    if (existingItems && existingItems.length > 0) {
-                        existingItems.forEach(i => {
-                            this.items.push({
-                                uid: ++this.uidCounter,
-                                RequisitionItemId: i.RequisitionItemId || 0,
-                                ItemName: i.ItemName || '',
-                                Description: i.Description || '',
-                                Category: i.Category || '',
-                                Quantity: i.Quantity || 1,
-                                Unit: i.Unit || 'Piece',
-                                EstimatedRate: i.EstimatedRate || 0
-                            });
-                        });
-                    } else {
-                        this.addItem();
-                    }
-                    this.recalc();
-                },
+             init() {
+    // Existing items (edit mode ke liye) — case-insensitive (camelCase & PascalCase dono handle)
+    const existingItems = @Html.Raw(Json.Serialize(Model.Items ?? new List<ERPDemo.ViewModels.RequisitionItemForm>()));
+    
+    console.log('DEBUG — Existing items:', existingItems);   // F12 Console mein check karo
+    
+    if (existingItems && existingItems.length > 0) {
+        existingItems.forEach(i => {
+            this.items.push({
+                uid: ++this.uidCounter,
+                RequisitionItemId: i.requisitionItemId ?? i.RequisitionItemId ?? 0,
+                ItemName: i.itemName ?? i.ItemName ?? '',
+                Description: i.description ?? i.Description ?? '',
+                Category: i.category ?? i.Category ?? '',
+                Quantity: i.quantity ?? i.Quantity ?? 1,
+                Unit: i.unit ?? i.Unit ?? 'Piece',
+                EstimatedRate: i.estimatedRate ?? i.EstimatedRate ?? 0,
+                Remarks: i.remarks ?? i.Remarks ?? ''
+            });
+        });
+    } else {
+        this.addItem();
+    }
+    this.recalc();
+},
 
                 addItem() {
                     this.items.push({
@@ -336,7 +340,8 @@
                         Category: '',
                         Quantity: 1,
                         Unit: 'Piece',
-                        EstimatedRate: 0
+                        EstimatedRate: 0,
+                         Remarks: ''  
                     });
                 },
 

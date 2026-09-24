@@ -117,6 +117,10 @@ namespace ERPDemo.ViewModels
         public bool CanApprove { get; set; }
         public bool CanReject { get; set; }
         public bool CanDelete { get; set; }
+        // Edit History
+public string? LastEditedByName { get; set; }
+public DateTime? LastEditedAt { get; set; }
+public string? LastEditReason { get; set; }
 
         public string? AdminApprovedByName { get; set; }
 public DateTime? AdminApprovedAt { get; set; }
