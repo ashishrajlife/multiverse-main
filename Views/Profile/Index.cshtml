@@ -39,10 +39,6 @@
 
                 <div class="text-start small">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Organization</span>
-                        <strong>@(Model.OrganizationName ?? "—")</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Last Login</span>
                         <strong>@(Model.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "--")</strong>
                     </div>
@@ -73,7 +69,6 @@
                     <input type="hidden" asp-for="UserId" />
                     <input type="hidden" asp-for="Username" />
                     <input type="hidden" asp-for="RoleName" />
-                    <input type="hidden" asp-for="OrganizationName" />
                     <input type="hidden" asp-for="LastLoginAt" />
                     <input type="hidden" asp-for="CreatedAt" />
 

@@ -23,7 +23,6 @@ namespace ERPDemo.ViewModels
 
         // Read-only display info
         public string RoleName { get; set; } = string.Empty;
-        public string? OrganizationName { get; set; }
         public DateTime? LastLoginAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }

@@ -22,13 +22,6 @@ namespace ERPDemo.Controllers
 
         // ============ HELPERS ============
         private int CurrentUserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-        // private async Task<int?> GetAdminOrgIdAsync()
-        // {
-        //     var admin = await _context.Users.FirstOrDefaultAsync(u => u.UserId == CurrentUserId);
-        //     return admin?.OrganizationId;
-        // }
-
         private static readonly int[] AssignableRoleIds = { 1, 2, 5 };
 
         // ============ INDEX / FALLBACK ============
