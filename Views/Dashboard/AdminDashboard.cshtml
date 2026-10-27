@@ -345,43 +345,6 @@
         </div>
     </div>
 
-    <!-- ============ SECTION 8: RECENT USERS ============ -->
-    <section class="rt-window mt-4">
-        <div class="rt-titlebar">
-            <span><i class="bi bi-people me-2"></i>Recently Added Users</span>
-            <a asp-controller="Team" asp-action="ManageAll" class="rt-btn">Manage All</a>
-        </div>
-        <div class="rt-scroll">
-            <table class="rt-table">
-                <thead>
-                    <tr><th>User</th><th>Email</th><th>Role</th><th>Last Login</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                @foreach (var u in Model.RecentUsers)
-                {
-                    <tr>
-                        <td>
-                            <div class="rt-user">
-                                <span class="rt-avatar rt-sky"><i class="bi bi-person"></i></span>
-                                <span class="rt-user-name">@u.FullName</span>
-                            </div>
-                        </td>
-                        <td>@u.Email</td>
-                        <td><span class="rt-tag rt-nodot">@u.Role?.RoleName</span></td>
-                        <td>@(u.LastLoginAt?.ToString("MMM dd, HH:mm") ?? "—")</td>
-                        <td>
-                            @if (u.IsActive)
-                            { <span class="rt-tag rt-green">Active</span> }
-                            else
-                            { <span class="rt-tag rt-coral">Inactive</span> }
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
-        </div>
-    </section>
-
     <!-- ============ SECTION 9: QUICK ACTIONS ============ -->
     <section class="rt-window mt-4">
         <div class="rt-titlebar">

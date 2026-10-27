@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "_DashboardLayout";
+    var fromDate = (DateTime)ViewBag.From;
+    var toDate = (DateTime)ViewBag.To;
+    var vehicleSummary = ViewBag.VehicleSummary as System.Collections.IEnumerable;
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Reports</h1>
+            <p>Business overview · @fromDate.ToString("MMM dd") – @toDate.ToString("MMM dd, yyyy")</p>
+        </div>
+    </div>
+
+    <form method="get" class="rt-filter-bar mb-3">
+        <label class="rt-label me-2" style="margin:0;">From</label>
+        <input type="date" name="from" value="@fromDate.ToString("yyyy-MM-dd")" class="rt-input" style="max-width:160px;" />
+        <label class="rt-label me-2" style="margin:0;">To</label>
+        <input type="date" name="to" value="@toDate.ToString("yyyy-MM-dd")" class="rt-input" style="max-width:160px;" />
+        <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-search me-1"></i> Generate</button>
+        <a href="/Reports/Index" class="rt-btn">Reset</a>
+    </form>
+
+    <div class="rt-section-label"><i class="bi bi-graph-up me-2"></i>Business Summary</div>
+    <div class="rt-stats">
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-signpost-split"></i></span>
+            <div><span class="rt-stat-label">Total Trips</span><span class="rt-stat-value">@ViewBag.TotalTrips</span></div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-check-circle"></i></span>
+            <div><span class="rt-stat-label">Completed</span><span class="rt-stat-value">@ViewBag.CompletedTrips</span></div>
+        </div>
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-speedometer2"></i></span>
+            <div><span class="rt-stat-label">Distance</span><span class="rt-stat-value">@(((decimal)ViewBag.TotalDistance).ToString("N0")) <small>km</small></span></div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-graph-up-arrow"></i></span>
+            <div><span class="rt-stat-label">Revenue</span><span class="rt-stat-value">₹@(((decimal)ViewBag.TotalRevenue).ToString("N0"))</span></div>
+        </div>
+        <div class="rt-stat rt-coral">
+            <span class="rt-stat-icon"><i class="bi bi-fuel-pump"></i></span>
+            <div><span class="rt-stat-label">Fuel Cost</span><span class="rt-stat-value">₹@(((decimal)ViewBag.TotalFuelCost).ToString("N0"))</span></div>
+        </div>
+        <div class="rt-stat rt-amber">
+            <span class="rt-stat-icon"><i class="bi bi-wrench"></i></span>
+            <div><span class="rt-stat-label">Maintenance</span><span class="rt-stat-value">₹@(((decimal)ViewBag.TotalMaintCost).ToString("N0"))</span></div>
+        </div>
+    </div>
+
+    <div class="rt-stats">
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-cash-stack"></i></span>
+            <div>
+                <span class="rt-stat-label">Net Profit</span>
+                <span class="rt-stat-value">
+                    ₹@((((decimal)ViewBag.TotalRevenue) - ((decimal)ViewBag.TotalFuelCost) - ((decimal)ViewBag.TotalMaintCost)).ToString("N0"))
+                </span>
+            </div>
+        </div>
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-droplet-half"></i></span>
+            <div><span class="rt-stat-label">Fuel Liters</span><span class="rt-stat-value">@(((decimal)ViewBag.TotalFuelLiters).ToString("N0")) L</span></div>
+        </div>
+    </div>
+
+    <section class="rt-window mt-4">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-truck me-2"></i>Vehicle-wise Summary</span>
+        </div>
+        <div class="rt-scroll">
+            <table class="rt-table rt-table-vehicles" style="width:100%; table-layout:fixed;">
+                <colgroup>
+                    <col style="width: 22%;" />
+                    <col style="width: 15%;" />
+                    <col style="width: 18%;" />
+                    <col style="width: 18%;" />
+                    <col style="width: 15%;" />
+                    <col style="width: 12%;" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Trips</th>
+                        <th>Distance</th>
+                        <th>Revenue</th>
+                        <th>Fuel Cost</th>
+                        <th>Profit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (vehicleSummary != null)
+                {
+                    foreach (dynamic v in vehicleSummary)
+                    {
+                        decimal revenue = (decimal)v.Revenue;
+                        decimal fuelCost = (decimal)v.FuelCost;
+                        decimal profit = revenue - fuelCost;
+                        <tr>
+                            <td><strong>@v.RegistrationNumber</strong></td>
+                            <td>@v.Trips</td>
+                            <td>@(((decimal)v.Distance).ToString("N0")) km</td>
+                            <td>₹@revenue.ToString("N0")</td>
+                            <td>₹@fuelCost.ToString("N0")</td>
+                            <td class="@(profit >= 0 ? "text-success" : "text-danger")">
+                                <strong>₹@profit.ToString("N0")</strong>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">Koi data nahi hai iss range mein.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

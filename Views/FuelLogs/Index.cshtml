@@ -1,0 +1,103 @@
+@model List<ERPDemo.Models.FuelLog>
+@{
+    ViewData["Title"] = "Fuel Logs";
+    Layout = "_DashboardLayout";
+    var vehicles = ViewBag.Vehicles as List<ERPDemo.Models.Vehicle> ?? new();
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Fuel Logs</h1>
+            <p>@Model.Count entries · @(((decimal)ViewBag.TotalLiters).ToString("N1")) L total · ₹@(((decimal)ViewBag.TotalCost).ToString("N0"))</p>
+        </div>
+        <a asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Fuel Log
+        </a>
+    </div>
+
+    <form method="get" class="rt-filter-bar">
+        <input type="text" name="search" value="@ViewBag.Search"
+               placeholder="Vehicle reg no..." class="rt-input" style="max-width:200px;" />
+        <select name="vehicleId" class="rt-input" style="max-width:180px;">
+            <option value="">All Vehicles</option>
+            @foreach (var v in vehicles)
+            {
+                <option value="@v.VehicleId" selected="@(ViewBag.VehicleId == v.VehicleId)">@v.RegistrationNumber</option>
+            }
+        </select>
+        <input type="date" name="from" value="@(((DateTime?)ViewBag.From)?.ToString("yyyy-MM-dd"))" class="rt-input" style="max-width:160px;" />
+        <input type="date" name="to" value="@(((DateTime?)ViewBag.To)?.ToString("yyyy-MM-dd"))" class="rt-input" style="max-width:160px;" />
+        <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-search me-1"></i> Filter</button>
+        <a asp-action="Index" class="rt-btn">Clear</a>
+    </form>
+
+    <section class="rt-window mt-3">
+        <div class="rt-scroll">
+            <table class="rt-table rt-table-vehicles" style="width:100%; table-layout:fixed;">
+                <colgroup>
+                    <col style="width: 15%;" />
+                    <col style="width: 14%;" />
+                    <col style="width: 10%;" />
+                    <col style="width: 13%;" />
+                    <col style="width: 12%;" />
+                    <col style="width: 14%;" />
+                    <col style="width: 12%;" />
+                    <col style="width: 10%;" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Vehicle</th>
+                        <th>Liters</th>
+                        <th>Amount</th>
+                        <th>Rate/L</th>
+                        <th>Odometer</th>
+                        <th>Station</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var log in Model)
+                    {
+                        var rate = log.Liters > 0 ? log.Amount / log.Liters : 0;
+                        <tr>
+                            <td>@log.FilledAt.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td><strong>@(log.Vehicle?.RegistrationNumber ?? "—")</strong></td>
+                            <td>@log.Liters.ToString("N1") L</td>
+                            <td>₹@log.Amount.ToString("N0")</td>
+                            <td>₹@rate.ToString("N2")</td>
+                            <td>@(log.OdometerKm?.ToString("N0") ?? "—")</td>
+                            <td>@(log.FuelStation ?? "—")</td>
+                            <td>
+                                <div class="rt-action-group">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@log.FuelLogId" method="post"
+                                              onsubmit="return confirm('Delete fuel log?');" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="rt-btn rt-btn-sm rt-btn-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="8" class="text-center text-muted py-5">
+                        <i class="bi bi-fuel-pump fs-3 d-block mb-2"></i>
+                        Koi fuel log nahi. <a asp-action="Create" class="d-block mt-2">Add first fuel log →</a>
+                    </td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

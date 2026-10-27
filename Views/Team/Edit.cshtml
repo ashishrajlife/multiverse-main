@@ -1,0 +1,52 @@
+@model ERPDemo.ViewModels.TeamUserFormViewModel
+@{
+    ViewData["Title"] = "Edit User";
+    Layout = "_DashboardLayout";
+    var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
+    var depts = ViewBag.Departments as List<ERPDemo.Models.Department> ?? new();
+}
+
+<div class="rt-page">
+    <div class="rt-head">
+        <div><h1>Edit User</h1><p>@Model.FullName</p></div>
+        <a asp-action="ManageAll" class="rt-btn"><i class="bi bi-arrow-left me-1"></i> Back</a>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="Username" />
+        <input type="hidden" asp-for="Email" />
+        <div asp-validation-summary="ModelOnly" class="rt-alert rt-alert-error mb-3"></div>
+
+        <section class="rt-window">
+            <div class="rt-titlebar"><span><i class="bi bi-person me-2"></i>User Details</span></div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6"><label class="rt-label">Username</label><input asp-for="Username" class="rt-input" readonly /></div>
+                <div class="col-md-6"><label class="rt-label">Email</label><input asp-for="Email" class="rt-input" readonly /></div>
+                <div class="col-md-6"><label class="rt-label">Full Name *</label><input asp-for="FullName" class="rt-input" required /></div>
+                <div class="col-md-6"><label class="rt-label">Phone</label><input asp-for="PhoneNumber" class="rt-input" /></div>
+                <div class="col-md-6"><label class="rt-label">New Password (leave blank)</label><input asp-for="Password" type="password" class="rt-input" /></div>
+                <div class="col-md-6"><label class="rt-label">Role *</label>
+                    <select asp-for="RoleId" class="rt-input" required>
+                        @foreach (var r in roles) { <option value="@r.RoleId">@r.RoleName</option> }
+                    </select>
+                </div>
+                <div class="col-md-6"><label class="rt-label">Department</label>
+                    <select asp-for="DepartmentId" class="rt-input">
+                        <option value="">-- None --</option>
+                        @foreach (var d in depts) { <option value="@d.DepartmentId">@d.Name</option> }
+                    </select>
+                </div>
+                <div class="col-md-6"><label class="rt-label">Active</label>
+                    <div><input asp-for="IsActive" type="checkbox" /> <span class="ms-2">User can login</span></div>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-check-circle me-1"></i> Save Changes</button>
+            <a asp-action="ManageAll" class="rt-btn">Cancel</a>
+        </div>
+    </form>
+</div>
