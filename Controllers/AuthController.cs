@@ -34,8 +34,6 @@ namespace ERPDemo.Controllers
                         return role switch
                         {
                             "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
-                            "HOD"        => RedirectToAction("Dashboard", "Hod"),  
-                            "Manager"    => RedirectToAction("Dashboard", "Manager"),
                             _            => RedirectToAction("UserDashboard", "Dashboard")
                         };
                     }

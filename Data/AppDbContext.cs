@@ -13,8 +13,6 @@ namespace ERPDemo.Data
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Department> Departments { get; set; }
-        public DbSet<Requisition> Requisitions { get; set; }
-        public DbSet<RequisitionItem> RequisitionItems { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -43,17 +41,14 @@ namespace ERPDemo.Data
 
             // ---------- Seed Roles ----------
             modelBuilder.Entity<Role>().HasData(
-                new Role { RoleId = 1, RoleName = "User",       Description = "Standard application user",                CreatedAt = seedDate },
-                new Role { RoleId = 2, RoleName = "Manager",    Description = "Team lead / module manager",               CreatedAt = seedDate },
-                new Role { RoleId = 3, RoleName = "Admin",      Description = "Administrator with elevated privileges",   CreatedAt = seedDate },
-                new Role { RoleId = 5, RoleName = "HOD",        Description = "Full system access - specific department", CreatedAt = seedDate }
+                new Role { RoleId = 1, RoleName = "User",  Description = "Standard application user", CreatedAt = seedDate },
+                new Role { RoleId = 2, RoleName = "Admin", Description = "System administrator",     CreatedAt = seedDate }
             );
 
             // ---------- Seed Users ----------
             modelBuilder.Entity<User>().HasData(
-                new User { UserId = 2, Username = "admin",      Email = "admin@erp.com",      Password = "admin123",   FullName = "Admin User",    PhoneNumber = "9999999992", RoleId = 3, IsActive = true, CreatedAt = seedDate },
-                new User { UserId = 3, Username = "manager",    Email = "manager@erp.com",    Password = "manager123", FullName = "Team Manager",  PhoneNumber = "9999999995", RoleId = 2, IsActive = true, CreatedAt = seedDate },
-                new User { UserId = 4, Username = "john",       Email = "john@erp.com",       Password = "john123",    FullName = "John Doe",      PhoneNumber = "9999999993", RoleId = 1, IsActive = true, CreatedAt = seedDate }
+                new User { UserId = 2, Username = "admin", Email = "admin@erp.com", Password = "admin123", FullName = "Admin User", PhoneNumber = "9999999992", RoleId = 2, IsActive = true, CreatedAt = seedDate }, // Admin
+                new User { UserId = 4, Username = "john",  Email = "john@erp.com",  Password = "john123",  FullName = "John Doe",   PhoneNumber = "9999999993", RoleId = 1, IsActive = true, CreatedAt = seedDate }  // User
             );
         }
 

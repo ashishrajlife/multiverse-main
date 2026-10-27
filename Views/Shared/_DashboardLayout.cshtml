@@ -130,14 +130,14 @@
             </a>
         </li>
 
-        <li>
+        @* <li>
             <a class="side-link @(controllerName.Equals("Team", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
                asp-controller="Team"
                asp-action="ManageAll">
                 <i class="bi bi-people"></i>
                 My Team
             </a>
-        </li>
+        </li> *@
     }
     else if (currentRole == "HOD")
     {

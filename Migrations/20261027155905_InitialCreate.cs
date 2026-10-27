@@ -14,6 +14,23 @@ namespace ERPDemo.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Departments",
+                columns: table => new
+                {
+                    DepartmentId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Departments", x => x.DepartmentId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -43,11 +60,32 @@ namespace ERPDemo.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     LastLoginAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETDATE()"),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    State = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Pincode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AadhaarNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PanNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmploymentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Designation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlantLocation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JoiningDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ShiftStartTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShiftEndTime = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SalaryType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SalaryAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_Users_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "DepartmentId",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Users_Roles_RoleId",
                         column: x => x.RoleId,
@@ -86,24 +124,27 @@ namespace ERPDemo.Migrations
                 values: new object[,]
                 {
                     { 1, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Standard application user", "User" },
-                    { 2, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Administrator with elevated privileges", "Admin" },
-                    { 3, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "Full system access - super administrator", "SuperAdmin" }
+                    { 2, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "System administrator", "Admin" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "CreatedAt", "Email", "FullName", "IsActive", "LastLoginAt", "Password", "PhoneNumber", "RoleId", "UpdatedAt", "Username" },
+                columns: new[] { "UserId", "AadhaarNumber", "Address", "City", "CreatedAt", "DepartmentId", "Designation", "Email", "EmploymentType", "FullName", "IsActive", "JoiningDate", "LastLoginAt", "PanNumber", "Password", "PhoneNumber", "Pincode", "PlantLocation", "RoleId", "SalaryAmount", "SalaryType", "ShiftEndTime", "ShiftStartTime", "State", "UpdatedAt", "Username" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "superadmin@erp.com", "Super Admin", true, null, "super123", "9999999991", 3, null, "superadmin" },
-                    { 2, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "admin@erp.com", "Admin User", true, null, "admin123", "9999999992", 2, null, "admin" },
-                    { 3, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), "john@erp.com", "John Doe", true, null, "john123", "9999999993", 1, null, "john" }
+                    { 2, null, null, null, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), null, null, "admin@erp.com", null, "Admin User", true, null, null, null, "admin123", "9999999992", null, null, 2, null, null, null, null, null, null, "admin" },
+                    { 4, null, null, null, new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified), null, null, "john@erp.com", null, "John Doe", true, null, null, null, "john123", "9999999993", null, null, 1, null, null, null, null, null, null, "john" }
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
                 table: "RefreshTokens",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_DepartmentId",
+                table: "Users",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
@@ -119,6 +160,9 @@ namespace ERPDemo.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Departments");
 
             migrationBuilder.DropTable(
                 name: "Roles");
