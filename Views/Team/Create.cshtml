@@ -1,47 +1,176 @@
-@model ERPDemo.ViewModels.TeamUserFormViewModel
+@model ERPDemo.ViewModels.TripFormViewModel
 @{
-    ViewData["Title"] = "Add User";
+    ViewData["Title"] = "Create Trip";
     Layout = "_DashboardLayout";
-    var roles = ViewBag.Roles as List<ERPDemo.Models.Role> ?? new();
-    var depts = ViewBag.Departments as List<ERPDemo.Models.Department> ?? new();
 }
 
 <div class="rt-page">
+
     <div class="rt-head">
-        <div><h1>Add User</h1><p>New team member</p></div>
-        <a asp-action="ManageAll" class="rt-btn"><i class="bi bi-arrow-left me-1"></i> Back</a>
+        <div>
+            <h1>Create Trip / Challan</h1>
+            <p>All India Fleet Operations</p>
+        </div>
+        <a asp-action="Index" class="rt-btn">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
     </div>
 
     <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="rt-alert rt-alert-error mb-3"></div>
 
+        <!-- Section 1: Challan Details -->
         <section class="rt-window">
-            <div class="rt-titlebar"><span><i class="bi bi-person-plus me-2"></i>User Details</span></div>
+            <div class="rt-titlebar">
+                <span><i class="bi bi-file-earmark-text me-2"></i>Challan & Dispatch Details</span>
+            </div>
             <div class="p-3 row g-3">
-                <div class="col-md-6"><label class="rt-label">Username *</label><input asp-for="Username" class="rt-input" required /></div>
-                <div class="col-md-6"><label class="rt-label">Email *</label><input asp-for="Email" type="email" class="rt-input" required /></div>
-                <div class="col-md-6"><label class="rt-label">Full Name *</label><input asp-for="FullName" class="rt-input" required /></div>
-                <div class="col-md-6"><label class="rt-label">Phone</label><input asp-for="PhoneNumber" class="rt-input" /></div>
-                <div class="col-md-6"><label class="rt-label">Password *</label><input asp-for="Password" type="password" class="rt-input" required /></div>
-                <div class="col-md-6"><label class="rt-label">Role *</label>
-                    <select asp-for="RoleId" class="rt-input" required>
-                        <option value="">-- Select Role --</option>
-                        @foreach (var r in roles) { <option value="@r.RoleId">@r.RoleName</option> }
+                <div class="col-md-4">
+                    <label asp-for="PartyId" class="rt-label"></label>
+                    <select asp-for="PartyId" asp-items="Model.AvailableParties" class="rt-input">
+                        <option value="">-- Select Party --</option>
                     </select>
                 </div>
-                <div class="col-md-6"><label class="rt-label">Department</label>
-                    <select asp-for="DepartmentId" class="rt-input">
-                        <option value="">-- None --</option>
-                        @foreach (var d in depts) { <option value="@d.DepartmentId">@d.Name</option> }
+                <div class="col-md-4">
+                    <label asp-for="LrNumber" class="rt-label"></label>
+                    <input asp-for="LrNumber" class="rt-input" placeholder="e.g. LR-1024" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="VehicleType" class="rt-label"></label>
+                    <select asp-for="VehicleType" class="rt-input">
+                        @foreach(var opt in Model.OwnershipOptions) {
+                            <option value="@opt">@opt</option>
+                        }
                     </select>
+                </div>
+                
+                <div class="col-md-4">
+                    <label asp-for="MaterialName" class="rt-label"></label>
+                    <select asp-for="MaterialName" class="rt-input">
+                        <option value="">-- Select Material --</option>
+                        @foreach(var mat in Model.MaterialOptions) {
+                            <option value="@mat">@mat</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="GrossWeight" class="rt-label"></label>
+                    <div class="input-group">
+                        <input asp-for="GrossWeight" type="number" step="0.001" class="rt-input" />
+                        <span class="input-group-text bg-light">MTS</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="TareWeight" class="rt-label"></label>
+                    <div class="input-group">
+                        <input asp-for="TareWeight" type="number" step="0.001" class="rt-input" />
+                        <span class="input-group-text bg-light">MTS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Vehicle & Driver -->
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-truck me-2"></i>Assign Vehicle & Driver</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6">
+                    <label asp-for="VehicleId" class="rt-label"></label>
+                    <select asp-for="VehicleId" class="rt-input">
+                        <option value="">-- Select Vehicle --</option>
+                        @foreach (var v in Model.AvailableVehicles)
+                        {
+                            <option value="@v.VehicleId">@v.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="VehicleId" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DriverId" class="rt-label"></label>
+                    <select asp-for="DriverId" class="rt-input">
+                        <option value="">-- Select Driver --</option>
+                        @foreach (var d in Model.AvailableDrivers)
+                        {
+                            <option value="@d.DriverId">@d.Label</option>
+                        }
+                    </select>
+                    <span asp-validation-for="DriverId" class="text-danger small"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Route -->
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-geo-alt me-2"></i>Route</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6">
+                    <label asp-for="OriginCity" class="rt-label"></label>
+                    <input asp-for="OriginCity" class="rt-input" list="cityList" placeholder="e.g. Delhi" />
+                    <span asp-validation-for="OriginCity" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DestinationCity" class="rt-label"></label>
+                    <input asp-for="DestinationCity" class="rt-input" list="cityList" placeholder="e.g. Mumbai" />
+                    <span asp-validation-for="DestinationCity" class="text-danger small"></span>
+                </div>
+                <datalist id="cityList">
+                    @foreach(var city in Model.HaryanaCities) {
+                        <option value="@city"></option>
+                    }
+                </datalist>
+            </div>
+        </section>
+
+        <!-- Section 4: Timing & Financials -->
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-currency-rupee me-2"></i>Timing & Financials</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6">
+                    <label asp-for="PlannedStart" class="rt-label"></label>
+                    <input asp-for="PlannedStart" class="rt-input" type="datetime-local"
+                           value="@(Model.PlannedStart?.ToString("yyyy-MM-ddTHH:mm"))" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PlannedEnd" class="rt-label"></label>
+                    <input asp-for="PlannedEnd" class="rt-input" type="datetime-local"
+                           value="@(Model.PlannedEnd?.ToString("yyyy-MM-ddTHH:mm"))" />
+                </div>
+                
+                <div class="col-md-3">
+                    <label asp-for="DistanceKm" class="rt-label"></label>
+                    <input asp-for="DistanceKm" class="rt-input" type="number" step="0.1" placeholder="e.g. 250" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FreightAmount" class="rt-label"></label>
+                    <input asp-for="FreightAmount" class="rt-input" type="number" step="1" placeholder="Bilty Amount" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FuelCost" class="rt-label"></label>
+                    <input asp-for="FuelCost" class="rt-input" type="number" step="1" placeholder="Est. Fuel Cost" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="AdvanceAmount" class="rt-label"></label>
+                    <input asp-for="AdvanceAmount" class="rt-input" type="number" step="1" placeholder="Given to driver" />
                 </div>
             </div>
         </section>
 
         <div class="mt-3 d-flex gap-2">
-            <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-check-circle me-1"></i> Create User</button>
-            <a asp-action="ManageAll" class="rt-btn">Cancel</a>
+            <button type="submit" class="rt-btn rt-btn-primary">
+                <i class="bi bi-check-circle me-1"></i> Create Trip / Challan
+            </button>
+            <a asp-action="Index" class="rt-btn">Cancel</a>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

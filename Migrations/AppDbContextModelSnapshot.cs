@@ -276,6 +276,46 @@ namespace ERPDemo.Migrations
                     b.ToTable("MaintenanceLogs");
                 });
 
+            modelBuilder.Entity("ERPDemo.Models.Party", b =>
+                {
+                    b.Property<int>("PartyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PartyId"));
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Gstin")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PartyName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("PartyId");
+
+                    b.ToTable("Parties");
+                });
+
             modelBuilder.Entity("ERPDemo.Models.RefreshToken", b =>
                 {
                     b.Property<int>("TokenId")
@@ -354,6 +394,9 @@ namespace ERPDemo.Migrations
                     b.Property<DateTime?>("ActualStart")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal?>("AdvanceAmount")
+                        .HasColumnType("decimal(12,2)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -373,6 +416,9 @@ namespace ERPDemo.Migrations
                     b.Property<int?>("EndOdometerKm")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("FreightAmount")
+                        .HasColumnType("decimal(12,2)");
+
                     b.Property<decimal?>("FuelCost")
                         .HasColumnType("decimal(10,2)");
 
@@ -385,9 +431,23 @@ namespace ERPDemo.Migrations
                     b.Property<int?>("GpsMaxSpeedKmph")
                         .HasColumnType("int");
 
+                    b.Property<decimal?>("GrossWeight")
+                        .HasColumnType("decimal(10,3)");
+
+                    b.Property<string>("LrNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MaterialName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("OriginCity")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<int?>("PartyId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("PlannedEnd")
                         .HasColumnType("datetime2");
@@ -409,6 +469,9 @@ namespace ERPDemo.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<decimal?>("TareWeight")
+                        .HasColumnType("decimal(10,3)");
+
                     b.Property<string>("TripNumber")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -417,9 +480,15 @@ namespace ERPDemo.Migrations
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
 
+                    b.Property<string>("VehicleType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.HasKey("TripId");
 
                     b.HasIndex("DriverId");
+
+                    b.HasIndex("PartyId");
 
                     b.HasIndex("VehicleId");
 
@@ -719,6 +788,10 @@ namespace ERPDemo.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("ERPDemo.Models.Party", "Party")
+                        .WithMany()
+                        .HasForeignKey("PartyId");
+
                     b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
                         .WithMany()
                         .HasForeignKey("VehicleId")
@@ -726,6 +799,8 @@ namespace ERPDemo.Migrations
                         .IsRequired();
 
                     b.Navigation("Driver");
+
+                    b.Navigation("Party");
 
                     b.Navigation("Vehicle");
                 });

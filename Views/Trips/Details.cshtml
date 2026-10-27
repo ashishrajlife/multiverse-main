@@ -131,6 +131,62 @@
                     </small>
                 }
             </div>
+
+            <!-- ═══ TRIP P&L SUMMARY ═══ -->
+<div class="rt-section-label mt-4"><i class="bi bi-cash-stack me-2"></i>Challan Summary & P&L</div>
+<div class="rt-stats">
+    <div class="rt-stat rt-sky">
+        <span class="rt-stat-icon"><i class="bi bi-box-seam"></i></span>
+        <div>
+            <span class="rt-stat-label">Net Weight</span>
+            <span class="rt-stat-value">
+                @{ var netWeight = (Model.GrossWeight ?? 0) - (Model.TareWeight ?? 0); }
+                @netWeight.ToString("N3") <small>MTS</small>
+            </span>
+        </div>
+    </div>
+    
+    <div class="rt-stat rt-sky">
+        <span class="rt-stat-icon"><i class="bi bi-shop"></i></span>
+        <div>
+            <span class="rt-stat-label">Party</span>
+            <span class="rt-stat-value" style="font-size:14px;">@(Model.Party?.PartyName ?? "—")</span>
+        </div>
+    </div>
+
+    <div class="rt-stat rt-sky">
+        <span class="rt-stat-icon"><i class="bi bi-file-earmark-text"></i></span>
+        <div>
+            <span class="rt-stat-label">LR No / Type</span>
+            <span class="rt-stat-value" style="font-size:14px;">@(Model.LrNumber ?? "—") (@(Model.VehicleType ?? "Own"))</span>
+        </div>
+    </div>
+    
+    <div class="rt-stat rt-green">
+        <span class="rt-stat-icon"><i class="bi bi-graph-up-arrow"></i></span>
+        <div>
+            <span class="rt-stat-label">Freight (Revenue)</span>
+            <span class="rt-stat-value">₹@((Model.FreightAmount ?? Model.Revenue ?? 0).ToString("N0"))</span>
+        </div>
+    </div>
+    
+    <div class="rt-stat rt-coral">
+        <span class="rt-stat-icon"><i class="bi bi-wallet2"></i></span>
+        <div>
+            <span class="rt-stat-label">Driver Advance</span>
+            <span class="rt-stat-value">₹@((Model.AdvanceAmount ?? 0).ToString("N0"))</span>
+        </div>
+    </div>
+
+    <div class="rt-stat rt-amber">
+        <span class="rt-stat-icon"><i class="bi bi-droplet-half"></i></span>
+        <div>
+            <span class="rt-stat-label">Fuel Cost</span>
+            <span class="rt-stat-value">₹@((Model.FuelCost ?? 0).ToString("N0"))</span>
+        </div>
+    </div>
+</div>
+
             <div id="map" style="height: 550px; border-radius: 8px;"></div>
         </section>
     }

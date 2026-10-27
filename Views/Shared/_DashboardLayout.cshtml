@@ -167,6 +167,14 @@
         Trips
     </a>
 </li>
+<li>
+    <a class="side-link @(controllerName.Equals("Parties", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+       asp-controller="Parties"
+       asp-action="Index">
+        <i class="bi bi-shop"></i>
+        Parties
+    </a>
+</li>
     }
     else if (currentRole == "User")
 {

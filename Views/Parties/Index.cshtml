@@ -1,0 +1,95 @@
+@model List<ERPDemo.Models.Party>
+@{
+    ViewData["Title"] = "Parties / Customers";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Parties / Customers</h1>
+            <p>@Model.Count party(s) registered</p>
+        </div>
+        <a asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Party
+        </a>
+    </div>
+
+    <form method="get" class="rt-filter-bar">
+        <input type="text" name="search" value="@ViewBag.Search" 
+               placeholder="Search by name / phone / GSTIN..." class="rt-input" style="max-width:340px;" />
+        <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-search me-1"></i> Search</button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+        {
+            <a asp-action="Index" class="rt-btn">Clear</a>
+        }
+    </form>
+
+    <section class="rt-window mt-3">
+        <div class="rt-scroll">
+            <table class="rt-table rt-table-vehicles" style="width:100%; table-layout:fixed;">
+                <colgroup>
+                    <col style="width: 25%;" />
+                    <col style="width: 15%;" />
+                    <col style="width: 15%;" />
+                    <col style="width: 15%;" />
+                    <col style="width: 10%;" />
+                    <col style="width: 20%;" />
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Party Name</th>
+                        <th>Phone</th>
+                        <th>GSTIN</th>
+                        <th>City</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><strong>@p.PartyName</strong></td>
+                            <td>@(p.PhoneNumber ?? "—")</td>
+                            <td>@(p.Gstin ?? "—")</td>
+                            <td>@(p.City ?? "—")</td>
+                            <td>
+                                @if (p.IsActive) { <span class="rt-tag rt-green">Active</span> }
+                                else { <span class="rt-tag rt-coral">Inactive</span> }
+                            </td>
+                            <td>
+                                <div class="rt-action-group">
+                                    <form asp-action="ToggleActive" asp-route-id="@p.PartyId" method="post"
+                                          onsubmit="return confirm('@(p.IsActive ? "Deactivate" : "Activate") @p.PartyName?');" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="rt-btn rt-btn-sm @(p.IsActive ? "rt-btn-warn" : "rt-btn-success")" title="Toggle Status">
+                                            <i class="bi @(p.IsActive ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                        </button>
+                                    </form>
+                                    <a asp-action="Edit" asp-route-id="@p.PartyId" class="rt-btn rt-btn-sm" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-shop fs-3 d-block mb-2"></i>
+                            Koi party nahi mili.
+                            <a asp-action="Create" class="d-block mt-2">Add your first party →</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

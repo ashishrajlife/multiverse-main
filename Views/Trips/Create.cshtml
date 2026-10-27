@@ -8,8 +8,8 @@
 
     <div class="rt-head">
         <div>
-            <h1>Create Trip</h1>
-            <p>Naya trip plan karo — vehicle + driver assign</p>
+            <h1>Create Trip / Challan</h1>
+            <p>All India Fleet Operations</p>
         </div>
         <a asp-action="Index" class="rt-btn">
             <i class="bi bi-arrow-left me-1"></i> Back
@@ -20,7 +20,55 @@
         @Html.AntiForgeryToken()
         <div asp-validation-summary="ModelOnly" class="rt-alert rt-alert-error mb-3"></div>
 
+        <!-- ================== SECTION 1: CHALLAN DETAILS ================== -->
         <section class="rt-window">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-file-earmark-text me-2"></i>Challan & Dispatch Details</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-4">
+                    <label asp-for="PartyId" class="rt-label"></label>
+                    <select asp-for="PartyId" asp-items="Model.AvailableParties" class="rt-input">
+                        <option value="">-- Select Party --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="LrNumber" class="rt-label"></label>
+                    <input asp-for="LrNumber" class="rt-input" placeholder="e.g. LR-1024" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="VehicleType" class="rt-label"></label>
+                    <select asp-for="VehicleType" class="rt-input">
+                        @foreach(var opt in Model.OwnershipOptions) {
+                            <option value="@opt">@opt</option>
+                        }
+                    </select>
+                </div>
+                
+             <div class="col-md-4">
+                <label asp-for="MaterialName" class="rt-label"></label>
+                <input asp-for="MaterialName" class="rt-input" placeholder="e.g. Cement, Steel, Sariya..." />
+            </div>
+            
+                <div class="col-md-4">
+                    <label asp-for="GrossWeight" class="rt-label"></label>
+                    <div class="input-group">
+                        <input asp-for="GrossWeight" type="number" step="0.001" class="rt-input" />
+                        <span class="input-group-text bg-light">MTS</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="TareWeight" class="rt-label"></label>
+                    <div class="input-group">
+                        <input asp-for="TareWeight" type="number" step="0.001" class="rt-input" />
+                        <span class="input-group-text bg-light">MTS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================== SECTION 2: VEHICLE & DRIVER ================== -->
+        <section class="rt-window mt-3">
             <div class="rt-titlebar">
                 <span><i class="bi bi-truck me-2"></i>Assign Vehicle & Driver</span>
             </div>
@@ -35,13 +83,6 @@
                         }
                     </select>
                     <span asp-validation-for="VehicleId" class="text-danger small"></span>
-                    @if (!Model.AvailableVehicles.Any())
-                    {
-                        <small class="text-warning d-block mt-1" style="font-size:11.5px;">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
-                            Koi available vehicle nahi. Pehle Vehicles module se add karo.
-                        </small>
-                    }
                 </div>
                 <div class="col-md-6">
                     <label asp-for="DriverId" class="rt-label"></label>
@@ -53,17 +94,11 @@
                         }
                     </select>
                     <span asp-validation-for="DriverId" class="text-danger small"></span>
-                    @if (!Model.AvailableDrivers.Any())
-                    {
-                        <small class="text-warning d-block mt-1" style="font-size:11.5px;">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
-                            Koi available driver nahi. Pehle Drivers module se add karo.
-                        </small>
-                    }
                 </div>
             </div>
         </section>
 
+        <!-- ================== SECTION 3: ROUTE (All India) ================== -->
         <section class="rt-window mt-3">
             <div class="rt-titlebar">
                 <span><i class="bi bi-geo-alt me-2"></i>Route</span>
@@ -71,66 +106,72 @@
             <div class="p-3 row g-3">
                 <div class="col-md-6">
                     <label asp-for="OriginCity" class="rt-label"></label>
-                    <input asp-for="OriginCity" class="rt-input" list="cityList" placeholder="e.g. Gurugram" />
+                    <input asp-for="OriginCity" class="rt-input" list="cityList" placeholder="e.g. Delhi" />
                     <span asp-validation-for="OriginCity" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="DestinationCity" class="rt-label"></label>
-                    <input asp-for="DestinationCity" class="rt-input" list="cityList" placeholder="e.g. Jaipur" />
+                    <input asp-for="DestinationCity" class="rt-input" list="cityList" placeholder="e.g. Mumbai" />
                     <span asp-validation-for="DestinationCity" class="text-danger small"></span>
                 </div>
+                <!-- datalist mein humne Haryana ki cities rakhi thi, ab all India common cities daal do -->
                 <datalist id="cityList">
-                    @foreach (var c in Model.HaryanaCities)
-                    {
-                        <option value="@c"></option>
-                    }
+                    <option value="Delhi"></option>
+                    <option value="Mumbai"></option>
+                    <option value="Gurugram"></option>
+                    <option value="Faridabad"></option>
+                    <option value="Jaipur"></option>
+                    <option value="Ahmedabad"></option>
+                    <option value="Pune"></option>
+                    <option value="Bengaluru"></option>
+                    <option value="Chennai"></option>
+                    <option value="Hyderabad"></option>
+                    <option value="Kolkata"></option>
+                    <option value="Lucknow"></option>
+                    <option value="Chandigarh"></option>
                 </datalist>
             </div>
         </section>
 
+        <!-- ================== SECTION 4: TIMING & FINANCIALS ================== -->
         <section class="rt-window mt-3">
             <div class="rt-titlebar">
-                <span><i class="bi bi-calendar-range me-2"></i>Timing</span>
+                <span><i class="bi bi-currency-rupee me-2"></i>Timing & Financials</span>
             </div>
             <div class="p-3 row g-3">
                 <div class="col-md-6">
                     <label asp-for="PlannedStart" class="rt-label"></label>
                     <input asp-for="PlannedStart" class="rt-input" type="datetime-local"
                            value="@(Model.PlannedStart?.ToString("yyyy-MM-ddTHH:mm"))" />
-                    <span asp-validation-for="PlannedStart" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6">
                     <label asp-for="PlannedEnd" class="rt-label"></label>
                     <input asp-for="PlannedEnd" class="rt-input" type="datetime-local"
                            value="@(Model.PlannedEnd?.ToString("yyyy-MM-ddTHH:mm"))" />
-                    <span asp-validation-for="PlannedEnd" class="text-danger small"></span>
                 </div>
-            </div>
-        </section>
-
-        <section class="rt-window mt-3">
-            <div class="rt-titlebar">
-                <span><i class="bi bi-currency-rupee me-2"></i>Financials (Optional)</span>
-            </div>
-            <div class="p-3 row g-3">
-                <div class="col-md-4">
+                
+                <div class="col-md-3">
                     <label asp-for="DistanceKm" class="rt-label"></label>
                     <input asp-for="DistanceKm" class="rt-input" type="number" step="0.1" placeholder="e.g. 250" />
                 </div>
-                <div class="col-md-4">
-                    <label asp-for="Revenue" class="rt-label"></label>
-                    <input asp-for="Revenue" class="rt-input" type="number" step="1" placeholder="₹" />
+                <div class="col-md-3">
+                    <label asp-for="FreightAmount" class="rt-label"></label>
+                    <input asp-for="FreightAmount" class="rt-input" type="number" step="1" placeholder="Bilty Amount" />
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label asp-for="FuelCost" class="rt-label"></label>
-                    <input asp-for="FuelCost" class="rt-input" type="number" step="1" placeholder="₹" />
+                    <input asp-for="FuelCost" class="rt-input" type="number" step="1" placeholder="Est. Fuel Cost" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="AdvanceAmount" class="rt-label"></label>
+                    <input asp-for="AdvanceAmount" class="rt-input" type="number" step="1" placeholder="Given to driver" />
                 </div>
             </div>
         </section>
 
         <div class="mt-3 d-flex gap-2">
             <button type="submit" class="rt-btn rt-btn-primary">
-                <i class="bi bi-check-circle me-1"></i> Create Trip
+                <i class="bi bi-check-circle me-1"></i> Create Trip / Challan
             </button>
             <a asp-action="Index" class="rt-btn">Cancel</a>
         </div>

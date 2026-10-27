@@ -1,0 +1,51 @@
+@model ERPDemo.Models.Party
+@{
+    ViewData["Title"] = "Edit Party";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-page">
+    <div class="rt-head">
+        <div><h1>Edit Party</h1><p>@Model.PartyName</p></div>
+        <a asp-action="Index" class="rt-btn"><i class="bi bi-arrow-left me-1"></i> Back</a>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="PartyId" />
+        <input type="hidden" asp-for="CreatedAt" />
+        <div asp-validation-summary="ModelOnly" class="rt-alert rt-alert-error mb-3"></div>
+
+        <section class="rt-window">
+            <div class="rt-titlebar"><span><i class="bi bi-pencil me-2"></i>Party Details</span></div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6">
+                    <label asp-for="PartyName" class="rt-label"></label>
+                    <input asp-for="PartyName" class="rt-input" required />
+                    <span asp-validation-for="PartyName" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="PhoneNumber" class="rt-label"></label>
+                    <input asp-for="PhoneNumber" class="rt-input" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Gstin" class="rt-label"></label>
+                    <input asp-for="Gstin" class="rt-input" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="City" class="rt-label"></label>
+                    <input asp-for="City" class="rt-input" />
+                </div>
+                <div class="col-md-12">
+                    <label asp-for="Address" class="rt-label"></label>
+                    <textarea asp-for="Address" class="rt-input" rows="2"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-check-circle me-1"></i> Save Changes</button>
+            <a asp-action="Index" class="rt-btn">Cancel</a>
+        </div>
+    </form>
+</div>

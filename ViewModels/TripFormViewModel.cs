@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace ERPDemo.ViewModels
 {
@@ -46,16 +47,53 @@ namespace ERPDemo.ViewModels
         [Range(0, 1000000)]
         public decimal? FuelCost { get; set; }
 
+        // ═══ REAL TRANSPORT ERP FIELDS ═══
+
+        [Display(Name = "Party / Customer")]
+        public int? PartyId { get; set; }
+
+        [StringLength(50)]
+        [Display(Name = "LR Number")]
+        public string? LrNumber { get; set; }
+
+        [Display(Name = "Vehicle Ownership")]
+        public string? VehicleType { get; set; }
+
+        [StringLength(100)]
+        [Display(Name = "Material")]
+        public string? MaterialName { get; set; }
+
+        [Display(Name = "Gross Weight (MTS)")]
+        public decimal? GrossWeight { get; set; }
+
+        [Display(Name = "Tare Weight (MTS)")]
+        public decimal? TareWeight { get; set; }
+
+        [Display(Name = "Freight Amount (₹)")]
+        public decimal? FreightAmount { get; set; }
+
+        [Display(Name = "Driver Advance (₹)")]
+        public decimal? AdvanceAmount { get; set; }
+
         // Dropdowns
         public List<TripVehicleOption> AvailableVehicles { get; set; } = new();
         public List<TripDriverOption> AvailableDrivers { get; set; } = new();
+        public List<SelectListItem> AvailableParties { get; set; } = new();
 
+        public List<string> OwnershipOptions { get; set; } = new() { "Own", "Attached", "Market" };
+
+        public List<string> MaterialOptions { get; set; } = new() 
+        { 
+            "Cement", "Steel", "Coal", "FMCG", "Electronics", "Machinery", "Textile", "Chemicals", "Other" 
+        };
+
+        // All India Cities
         public List<string> HaryanaCities { get; set; } = new()
         {
-            "Gurugram", "Faridabad", "Panipat", "Karnal", "Hisar", "Rohtak",
-            "Sonipat", "Ambala", "Yamunanagar", "Rewari", "Sirsa", "Bhiwani",
-            "Palwal", "Jind", "Kaithal", "Kurukshetra", "Fatehabad", "Narnaul",
-            "Delhi", "Noida", "Chandigarh", "Jaipur", "Ludhiana", "Dehradun"
+            "Delhi", "Mumbai", "Gurugram", "Faridabad", "Jaipur", "Ahmedabad", 
+            "Pune", "Bengaluru", "Chennai", "Hyderabad", "Kolkata", "Lucknow", 
+            "Chandigarh", "Panipat", "Karnal", "Hisar", "Rohtak", "Sonipat", 
+            "Ambala", "Yamunanagar", "Rewari"
         };
     }
 
