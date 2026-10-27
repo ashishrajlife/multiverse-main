@@ -1,0 +1,149 @@
+@model ERPDemo.ViewModels.VehicleFormViewModel
+@{
+    ViewData["Title"] = "Edit Vehicle";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Edit Vehicle</h1>
+            <p>Update vehicle details</p>
+        </div>
+        <a asp-action="Index" class="rt-btn">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="VehicleId" />
+
+        <div asp-validation-summary="ModelOnly" class="rt-alert rt-alert-error mb-3"></div>
+
+        <!-- Section 1: Basic -->
+        <section class="rt-window">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-truck-front me-2"></i>Vehicle Details</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-4">
+                    <label asp-for="RegistrationNumber" class="rt-label"></label>
+                    <input asp-for="RegistrationNumber" class="rt-input" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="VehicleType" class="rt-label"></label>
+                    <select asp-for="VehicleType" class="rt-input">
+                        @foreach (var t in Model.VehicleTypes)
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Status" class="rt-label"></label>
+                    <select asp-for="Status" class="rt-input">
+                        @foreach (var s in Model.StatusOptions)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Make" class="rt-label"></label>
+                    <input asp-for="Make" class="rt-input" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Model" class="rt-label"></label>
+                    <input asp-for="Model" class="rt-input" />
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="Year" class="rt-label"></label>
+                    <input asp-for="Year" class="rt-input" type="number" />
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="CapacityTons" class="rt-label"></label>
+                    <input asp-for="CapacityTons" class="rt-input" type="number" step="0.1" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="FuelType" class="rt-label"></label>
+                    <select asp-for="FuelType" class="rt-input">
+                        <option value="">-- Select --</option>
+                        @foreach (var f in Model.FuelTypes)
+                        {
+                            <option value="@f">@f</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="CurrentOdometerKm" class="rt-label"></label>
+                    <input asp-for="CurrentOdometerKm" class="rt-input" type="number" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="PlantLocation" class="rt-label"></label>
+                    <select asp-for="PlantLocation" class="rt-input">
+                        <option value="">-- Select Depot --</option>
+                        @foreach (var p in Model.HaryanaDepots)
+                        {
+                            <option value="@p">@p</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Compliance -->
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-shield-check me-2"></i>Compliance & RTO</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-3">
+                    <label asp-for="InsuranceExpiry" class="rt-label"></label>
+                    <input asp-for="InsuranceExpiry" class="rt-input" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FitnessExpiry" class="rt-label"></label>
+                    <input asp-for="FitnessExpiry" class="rt-input" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PermitExpiry" class="rt-label"></label>
+                    <input asp-for="PermitExpiry" class="rt-input" type="date" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="PucExpiry" class="rt-label"></label>
+                    <input asp-for="PucExpiry" class="rt-input" type="date" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Service -->
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-wrench me-2"></i>Service</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-4">
+                    <label asp-for="LastServiceDate" class="rt-label"></label>
+                    <input asp-for="LastServiceDate" class="rt-input" type="date" />
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="NextServiceDue" class="rt-label"></label>
+                    <input asp-for="NextServiceDue" class="rt-input" type="date" />
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="rt-btn rt-btn-primary">
+                <i class="bi bi-check-circle me-1"></i> Update Vehicle
+            </button>
+            <a asp-action="Index" class="rt-btn">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

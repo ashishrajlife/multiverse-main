@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using ERPDemo.Filters;
 using ERPDemo.Services;
 using ERPDemo.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -8,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ERPDemo.Controllers
 {
-    [NoCache]   // apply to entire AuthController too
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
@@ -33,8 +31,10 @@ namespace ERPDemo.Controllers
                     {
                         return role switch
                         {
-                            "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
-                            _            => RedirectToAction("UserDashboard", "Dashboard")
+                            "Admin"   => RedirectToAction("AdminDashboard", "Dashboard"),
+                            "Manager" => RedirectToAction("Dashboard", "Manager"),
+                            "HOD"     => RedirectToAction("Dashboard", "Hod"),
+                            _         => RedirectToAction("UserDashboard", "Dashboard")
                         };
                     }
                     catch
@@ -49,72 +49,68 @@ namespace ERPDemo.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Login(LoginViewModel model)
+{
+    if (!ModelState.IsValid) return View(model);
+
+    var user = await _authService.ValidateUserAsync(model.UsernameOrEmail, model.Password);
+
+    if (user == null)
+    {
+        ModelState.AddModelError("", "Invalid username or password");
+        return View(model);
+    }
+
+    // ❌ Removed: RoleId == 1 block — all roles can log in now
+
+    await _authService.UpdateLastLoginAsync(user.UserId);
+
+    var roleName = user.Role?.RoleName ?? "User";
+
+    var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, roleName),
+        new Claim("FullName", user.FullName ?? user.Username)
+    };
+
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new ClaimsPrincipal(identity);
+
+    await HttpContext.SignInAsync(
+        CookieAuthenticationDefaults.AuthenticationScheme,
+        principal,
+        new AuthenticationProperties
         {
-            if (!ModelState.IsValid) return View(model);
+            IsPersistent = model.RememberMe,
+            ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
+        });
 
-            var user = await _authService.ValidateUserAsync(model.UsernameOrEmail, model.Password);
+    var token = _authService.GenerateJwtToken(user);
+    Response.Cookies.Append("JWToken", token, new CookieOptions
+    {
+        HttpOnly = true,
+        Secure = false,
+        SameSite = SameSiteMode.Lax,
+        Expires = DateTime.Now.AddMinutes(60)
+    });
 
-            if (user == null)
-            {
-                ModelState.AddModelError("", "Invalid username or password");
-                return View(model);
-            }
+    HttpContext.Session.SetInt32("UserId", user.UserId);
+    HttpContext.Session.SetString("Username", user.Username);
+    HttpContext.Session.SetString("RoleName", roleName);
+    HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
 
-            if (user.RoleId == 1)
-            {
-                ModelState.AddModelError("", "Login access is restricted to Managers and Administrators only.");
-                return View(model);
-            }
-
-            await _authService.UpdateLastLoginAsync(user.UserId);
-
-            var roleName = user.Role?.RoleName ?? "User";
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, roleName),
-                new Claim("FullName", user.FullName ?? user.Username)
-            };
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                principal,
-                new AuthenticationProperties
-                {
-                    IsPersistent = model.RememberMe,
-                    ExpiresUtc = DateTime.UtcNow.AddMinutes(60)
-                });
-
-            var token = _authService.GenerateJwtToken(user);
-            Response.Cookies.Append("JWToken", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTime.Now.AddMinutes(60)
-            });
-
-            HttpContext.Session.SetInt32("UserId", user.UserId);
-            HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("RoleName", roleName);        
-            HttpContext.Session.SetString("FullName", user.FullName ?? user.Username);
-
-            return roleName switch
-            {
-                "Admin"      => RedirectToAction("AdminDashboard", "Dashboard"),
-               "Manager"    => RedirectToAction("Dashboard", "Manager"),
-               "HOD"        => RedirectToAction("Dashboard", "Hod"),  
-                _            => RedirectToAction("UserDashboard", "Dashboard")
-            };
-        }
+    return roleName switch
+    {
+        "Admin"   => RedirectToAction("AdminDashboard", "Dashboard"),
+        "Manager" => RedirectToAction("Dashboard", "Manager"),
+        "HOD"     => RedirectToAction("Dashboard", "Hod"),
+        _         => RedirectToAction("UserDashboard", "Dashboard")
+    };
+}
 
         [HttpPost]
         [ValidateAntiForgeryToken]

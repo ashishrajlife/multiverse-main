@@ -53,6 +53,128 @@ namespace ERPDemo.Migrations
                     b.ToTable("Departments");
                 });
 
+            modelBuilder.Entity("ERPDemo.Models.Driver", b =>
+                {
+                    b.Property<int>("DriverId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DriverId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DepotLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("LicenseExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LicenseNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DriverId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("Drivers");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.FuelLog", b =>
+                {
+                    b.Property<int>("FuelLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FuelLogId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("FilledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FuelStation")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Liters")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("OdometerKm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FuelLogId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("FuelLogs");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.MaintenanceLog", b =>
+                {
+                    b.Property<int>("MaintenanceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaintenanceId"));
+
+                    b.Property<decimal?>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime>("ServiceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ServiceType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MaintenanceId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("MaintenanceLogs");
+                });
+
             modelBuilder.Entity("ERPDemo.Models.RefreshToken", b =>
                 {
                     b.Property<int>("TokenId")
@@ -115,22 +237,71 @@ namespace ERPDemo.Migrations
                     b.HasKey("RoleId");
 
                     b.ToTable("Roles");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Standard application user",
-                            RoleName = "User"
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "System administrator",
-                            RoleName = "Admin"
-                        });
+            modelBuilder.Entity("ERPDemo.Models.Trip", b =>
+                {
+                    b.Property<int>("TripId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TripId"));
+
+                    b.Property<DateTime?>("ActualEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ActualStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DestinationCity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal?>("DistanceKm")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("DriverId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("FuelCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("OriginCity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("PlannedEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PlannedStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Revenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TripNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TripId");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("Trips");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.User", b =>
@@ -233,32 +404,119 @@ namespace ERPDemo.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("Users");
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            UserId = 2,
-                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "admin@erp.com",
-                            FullName = "Admin User",
-                            IsActive = true,
-                            Password = "admin123",
-                            PhoneNumber = "9999999992",
-                            RoleId = 2,
-                            Username = "admin"
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            CreatedAt = new DateTime(2026, 1, 1, 12, 0, 0, 0, DateTimeKind.Unspecified),
-                            Email = "john@erp.com",
-                            FullName = "John Doe",
-                            IsActive = true,
-                            Password = "john123",
-                            PhoneNumber = "9999999993",
-                            RoleId = 1,
-                            Username = "john"
-                        });
+            modelBuilder.Entity("ERPDemo.Models.Vehicle", b =>
+                {
+                    b.Property<int>("VehicleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VehicleId"));
+
+                    b.Property<decimal?>("CapacityTons")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CurrentOdometerKm")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FitnessExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FuelType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("InsuranceExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastServiceDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Make")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Model")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("NextServiceDue")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PermitExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PlantLocation")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PucExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VehicleType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("VehicleId");
+
+                    b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Driver", b =>
+                {
+                    b.HasOne("ERPDemo.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.FuelLog", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.MaintenanceLog", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.RefreshToken", b =>
@@ -270,6 +528,25 @@ namespace ERPDemo.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.Trip", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.User", b =>

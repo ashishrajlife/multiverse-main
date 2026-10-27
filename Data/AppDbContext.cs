@@ -13,6 +13,11 @@ namespace ERPDemo.Data
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<Trip> Trips { get; set; }
+        public DbSet<MaintenanceLog> MaintenanceLogs { get; set; }
+        public DbSet<FuelLog> FuelLogs { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -38,18 +43,6 @@ namespace ERPDemo.Data
                 .WithMany(d => d.Users)
                 .HasForeignKey(u => u.DepartmentId)
                 .OnDelete(DeleteBehavior.SetNull);    
-
-            // ---------- Seed Roles ----------
-            modelBuilder.Entity<Role>().HasData(
-                new Role { RoleId = 1, RoleName = "User",  Description = "Standard application user", CreatedAt = seedDate },
-                new Role { RoleId = 2, RoleName = "Admin", Description = "System administrator",     CreatedAt = seedDate }
-            );
-
-            // ---------- Seed Users ----------
-            modelBuilder.Entity<User>().HasData(
-                new User { UserId = 2, Username = "admin", Email = "admin@erp.com", Password = "admin123", FullName = "Admin User", PhoneNumber = "9999999992", RoleId = 2, IsActive = true, CreatedAt = seedDate }, // Admin
-                new User { UserId = 4, Username = "john",  Email = "john@erp.com",  Password = "john123",  FullName = "John Doe",   PhoneNumber = "9999999993", RoleId = 1, IsActive = true, CreatedAt = seedDate }  // User
-            );
         }
 
         public override int SaveChanges()

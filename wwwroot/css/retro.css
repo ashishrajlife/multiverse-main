@@ -499,3 +499,591 @@ select.rt-field { flex: 0 1 150px; padding: 0 6px; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) {
     .rt-page *, .role-toggle .knob { transition: none !important; animation: none !important; }
 }
+/* ========== Admin Dashboard Extensions ========== */
+
+.rt-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink-mute, #6b7280);
+    margin: 22px 0 10px 2px;
+}
+
+.rt-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.rt-stat {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fdfcf7;
+    border: 1px solid #e2ddd0;
+    border-radius: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.rt-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(42, 47, 58, 0.06);
+}
+
+.rt-stat-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    font-size: 20px;
+    background: #eef4fb;
+    color: #2f4a63;
+    flex-shrink: 0;
+}
+.rt-stat-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.rt-stat-value {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: #2a2f3a;
+    line-height: 1.1;
+    margin-top: 2px;
+}
+
+/* Color themes per stat */
+.rt-stat.rt-sky    .rt-stat-icon { background:#e6f1fb; color:#2f4a63; }
+.rt-stat.rt-green  .rt-stat-icon { background:#e4f6ec; color:#2e7d5e; }
+.rt-stat.rt-amber  .rt-stat-icon { background:#fdf3de; color:#b8760f; }
+.rt-stat.rt-coral  .rt-stat-icon { background:#fde9e6; color:#b3404a; }
+.rt-stat.rt-violet .rt-stat-icon { background:#eeebfc; color:#5b4fcf; }
+.rt-stat.rt-pink   .rt-stat-icon { background:#fce9f3; color:#b63a86; }
+
+/* Compliance alerts */
+.rt-alert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+}
+.rt-alert-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: #fdfcf7;
+    border: 1px solid #e2ddd0;
+    border-left: 4px solid #2e7d5e;
+    border-radius: 10px;
+}
+.rt-alert-card.urgent {
+    border-left-color: #b3404a;
+    background: #fff6f5;
+}
+.rt-alert-card > i {
+    font-size: 22px;
+    color: #2e7d5e;
+}
+.rt-alert-card.urgent > i {
+    color: #b3404a;
+}
+.rt-alert-num {
+    display: block;
+    font-size: 20px;
+    font-weight: 800;
+    color: #2a2f3a;
+    line-height: 1;
+}
+.rt-alert-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 3px;
+}
+
+/* Rank badges */
+.rt-rank {
+    display: inline-grid;
+    place-items: center;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #f0ede4;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #2f4a63;
+}
+.rt-table tbody tr:nth-child(1) .rt-rank { background:#fff4c7; color:#b8760f; }
+.rt-table tbody tr:nth-child(2) .rt-rank { background:#eef0f3; color:#4a5160; }
+.rt-table tbody tr:nth-child(3) .rt-rank { background:#fbe6d4; color:#b3450f; }
+
+/* Ensure tag colors */
+.rt-tag.rt-sky   { background:#e6f1fb; color:#2f4a63; }
+.rt-tag.rt-green { background:#e4f6ec; color:#2e7d5e; }
+.rt-tag.rt-amber { background:#fdf3de; color:#b8760f; }
+.rt-tag.rt-coral { background:#fde9e6; color:#b3404a; }
+.rt-tag.rt-nodot { background:#eef0f3; color:#4a5160; }
+
+/* ═══════ Vehicle Form & Filters ═══════ */
+.rt-filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.rt-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft, #4a5160);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.rt-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #d8d3c4;
+    border-radius: 8px;
+    background: #fdfcf7;
+    color: #2a2f3a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rt-input:focus {
+    outline: none;
+    border-color: #2f4a63;
+    box-shadow: 0 0 0 3px rgba(47, 74, 99, 0.08);
+}
+
+.rt-btn-sm {
+    padding: 5px 10px;
+    font-size: 12.5px;
+}
+.rt-btn-danger {
+    background: #fde9e6;
+    color: #b3404a;
+    border: 1px solid #f5c6c2;
+}
+.rt-btn-danger:hover {
+    background: #b3404a;
+    color: #fff;
+    border-color: #b3404a;
+}
+
+.rt-alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.rt-alert-error {
+    background: #fde9e6;
+    color: #b3404a;
+    border-left: 4px solid #b3404a;
+}
+/* ═══════ Toggle Button Variants ═══════ */
+.rt-btn-success {
+    background: #e4f6ec;
+    color: #2e7d5e;
+    border: 1px solid #b9e0cb;
+}
+.rt-btn-success:hover:not(:disabled) {
+    background: #2e7d5e;
+    color: #fff;
+    border-color: #2e7d5e;
+}
+
+.rt-btn-warn {
+    background: #fdf3de;
+    color: #b8760f;
+    border: 1px solid #f0dca8;
+}
+.rt-btn-warn:hover:not(:disabled) {
+    background: #b8760f;
+    color: #fff;
+    border-color: #b8760f;
+}
+
+.rt-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+/* ═══════ Vehicles Table — Center Headers + Bigger Font ═══════ */
+.rt-table-vehicles thead th {
+    text-align: center;
+    font-size: 13px;          /* header font 13px */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 14px 12px;       /* thoda zyada breathing room */
+}
+
+.rt-table-vehicles tbody td {
+    text-align: center;       /* body cells bhi center — symmetric dikhega */
+    font-size: 14.5px;        /* body font 14.5px */
+    padding: 14px 12px;
+    vertical-align: middle;
+}
+
+/* Action buttons column ko center align rakho but flex preserve */
+.rt-table-vehicles tbody td:last-child {
+    text-align: center;
+}
+.rt-table-vehicles tbody td:last-child > div {
+    justify-content: center;   /* buttons group center */
+}
+
+/* Search/Filter row ke baad spacing thoda sa */
+.rt-table-vehicles td strong {
+    font-size: 15px;           /* reg number slightly bigger */
+    color: #2f4a63;
+}
+/* ═══════════════════════════════════════════════════════════
+   VEHICLES TABLE — Center headers, bigger fonts, action group
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Table header: center aligned, bold, bigger ── */
+.rt-table-vehicles thead th {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 14px 12px;
+    color: #4a5160;
+    background: #f4f1e8;
+}
+
+/* ── Table body: center aligned, bigger ── */
+.rt-table-vehicles tbody td {
+    text-align: center;
+    font-size: 14.5px;
+    padding: 14px 12px;
+    vertical-align: middle;
+    color: #2a2f3a;
+}
+
+/* ── Registration number: slightly bigger, navy ── */
+.rt-table-vehicles td strong {
+    font-size: 15px;
+    color: #2f4a63;
+    letter-spacing: 0.2px;
+}
+
+/* ── Row hover highlight ── */
+.rt-table-vehicles tbody tr {
+    transition: background 0.15s ease;
+}
+.rt-table-vehicles tbody tr:hover {
+    background: #f8f6ef;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION GROUP — spaced, centered, square buttons
+   ═══════════════════════════════════════════════════════════ */
+.rt-action-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.rt-action-group form {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+}
+
+.rt-action-group .rt-btn-sm {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    border-radius: 8px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.rt-action-group .rt-btn-sm:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(42, 47, 58, 0.12);
+}
+
+.rt-action-group .rt-btn-sm i       { color: #4a5160; }
+.rt-action-group .rt-btn-danger i   { color: #b3404a; }
+.rt-action-group .rt-btn-warn i     { color: #b8760f; }
+.rt-action-group .rt-btn-success i  { color: #2e7d5e; }
+
+.rt-action-group .rt-btn-sm:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTON VARIANTS — success / warn / danger
+   ═══════════════════════════════════════════════════════════ */
+.rt-btn-success {
+    background: #e4f6ec;
+    color: #2e7d5e;
+    border: 1px solid #b9e0cb;
+}
+.rt-btn-success:hover:not(:disabled) {
+    background: #2e7d5e;
+    color: #fff;
+    border-color: #2e7d5e;
+}
+.rt-btn-success:hover:not(:disabled) i { color: #fff; }
+
+.rt-btn-warn {
+    background: #fdf3de;
+    color: #b8760f;
+    border: 1px solid #f0dca8;
+}
+.rt-btn-warn:hover:not(:disabled) {
+    background: #b8760f;
+    color: #fff;
+    border-color: #b8760f;
+}
+.rt-btn-warn:hover:not(:disabled) i { color: #fff; }
+
+.rt-btn-danger {
+    background: #fde9e6;
+    color: #b3404a;
+    border: 1px solid #f5c6c2;
+}
+.rt-btn-danger:hover:not(:disabled) {
+    background: #b3404a;
+    color: #fff;
+    border-color: #b3404a;
+}
+.rt-btn-danger:hover:not(:disabled) i { color: #fff; }
+
+.rt-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORMS / FILTERS / INPUTS
+   ═══════════════════════════════════════════════════════════ */
+.rt-filter-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 8px;
+}
+
+.rt-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #4a5160;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.rt-input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #d8d3c4;
+    border-radius: 8px;
+    background: #fdfcf7;
+    color: #2a2f3a;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.rt-input:focus {
+    outline: none;
+    border-color: #2f4a63;
+    box-shadow: 0 0 0 3px rgba(47, 74, 99, 0.08);
+}
+
+.rt-btn-sm {
+    padding: 5px 10px;
+    font-size: 12.5px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ALERTS
+   ═══════════════════════════════════════════════════════════ */
+.rt-alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+.rt-alert-error {
+    background: #fde9e6;
+    color: #b3404a;
+    border-left: 4px solid #b3404a;
+}
+/* ═══════════════════════════════════════════════════════════
+   VEHICLES TABLE — Full width responsive layout
+   ═══════════════════════════════════════════════════════════ */
+
+/* Table container full width, allows horizontal scroll on tiny screens */
+.rt-table-vehicles {
+    width: 100%;
+    table-layout: fixed;         /* respect colgroup widths */
+    min-width: 900px;            /* small screens pe horizontal scroll */
+}
+
+/* Header — center, bold, uppercase */
+.rt-table-vehicles thead th {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 14px 8px;
+    color: #4a5160;
+    background: #f4f1e8;
+    border-bottom: 1px solid #d8d3c4;
+    white-space: nowrap;
+}
+
+/* Body — center aligned, comfortable font */
+.rt-table-vehicles tbody td {
+    text-align: center;
+    font-size: 14.5px;
+    padding: 14px 8px;
+    vertical-align: middle;
+    color: #2a2f3a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Registration number — bigger, navy */
+.rt-table-vehicles td strong {
+    font-size: 15px;
+    color: #2f4a63;
+    letter-spacing: 0.2px;
+}
+
+/* Row hover */
+.rt-table-vehicles tbody tr {
+    transition: background 0.15s ease;
+}
+.rt-table-vehicles tbody tr:hover {
+    background: #f8f6ef;
+}
+
+/* Allow wrapping for the Actions cell only */
+.rt-table-vehicles tbody td.rt-actions-cell {
+    overflow: visible;
+    white-space: normal;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACTION GROUP — properly spaced, fits inside its own column
+   ═══════════════════════════════════════════════════════════ */
+.rt-action-group {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 2px 0;
+}
+
+.rt-action-group form {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+}
+
+.rt-action-group .rt-btn-sm {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 6px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    flex-shrink: 0;
+}
+
+.rt-action-group .rt-btn-sm:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(42, 47, 58, 0.12);
+}
+
+.rt-action-group .rt-btn-sm i       { color: #4a5160; }
+.rt-action-group .rt-btn-danger i   { color: #b3404a; }
+.rt-action-group .rt-btn-warn i     { color: #b8760f; }
+.rt-action-group .rt-btn-success i  { color: #2e7d5e; }
+
+.rt-action-group .rt-btn-sm:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — Small screens pe table scrollable
+   ═══════════════════════════════════════════════════════════ */
+.rt-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar aur content bada na ho */
+@media (max-width: 1200px) {
+    .rt-table-vehicles {
+        font-size: 13px;
+    }
+    .rt-table-vehicles thead th {
+        font-size: 12px;
+        padding: 10px 6px;
+    }
+    .rt-table-vehicles tbody td {
+        font-size: 13.5px;
+        padding: 10px 6px;
+    }
+    .rt-action-group .rt-btn-sm {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .rt-table-vehicles {
+        min-width: 800px;
+    }
+    .rt-table-vehicles thead th {
+        font-size: 11px;
+        padding: 8px 5px;
+    }
+    .rt-table-vehicles tbody td {
+        font-size: 12.5px;
+        padding: 8px 5px;
+    }
+    .rt-action-group {
+        gap: 4px;
+    }
+    .rt-action-group .rt-btn-sm {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+}

@@ -8,14 +8,29 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
+// ═══════════════════════════════════════════════════════════
+//  MVC  (REQUIRED — enables controllers + Razor views)
+// ═══════════════════════════════════════════════════════════
+builder.Services.AddControllersWithViews();
+
+// ═══════════════════════════════════════════════════════════
+//  DATABASE
+// ═══════════════════════════════════════════════════════════
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Services
+// ═══════════════════════════════════════════════════════════
+//  SERVICES
+// ═══════════════════════════════════════════════════════════
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient<GstLookupService>();
+
+// ═══════════════════════════════════════════════════════════
+//  CACHE + SESSION  (AddDistributedMemoryCache is REQUIRED in .NET 10)
+// ═══════════════════════════════════════════════════════════
+builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(60);
@@ -23,7 +38,9 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// ✅ Authentication: Cookie (for MVC views) + JWT (for API calls)
+// ═══════════════════════════════════════════════════════════
+//  AUTHENTICATION  (Cookie for MVC + JWT for API)
+// ═══════════════════════════════════════════════════════════
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -32,13 +49,12 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie(options =>
 {
-     options.LoginPath = "/Auth/Login";
+    options.LoginPath = "/Auth/Login";
     options.AccessDeniedPath = "/Auth/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;   // Localhost pe HTTP ke liye
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     options.Cookie.SameSite = SameSiteMode.Lax;
-
 })
 .AddJwtBearer(options =>
 {
@@ -55,32 +71,53 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add(new ERPDemo.Filters.NoCacheAttribute());
-});
 builder.Services.AddAuthorization();
 
+// ═══════════════════════════════════════════════════════════
+//  BUILD
+// ═══════════════════════════════════════════════════════════
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// ═══════════════════════════════════════════════════════════
+//  MIDDLEWARE PIPELINE
+// ═══════════════════════════════════════════════════════════
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
-    app.UseHttpsRedirection();
 }
 
 app.UseHttpsRedirection();
+
+// Static files BEFORE no-cache middleware so css/js/img keep their caching
 app.UseStaticFiles();
+
 app.UseRouting();
+
+// Global no-cache for HTML responses (replaces the deleted [NoCache] filter)
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
+
 app.UseSession();
-app.UseAuthentication();   // ⚠️ Must come before UseAuthorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
 
+// ═══════════════════════════════════════════════════════════
+//  AUTO-CREATE DB (dev only — EnsureCreated)
+// ═══════════════════════════════════════════════════════════
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

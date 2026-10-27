@@ -1,0 +1,190 @@
+@model ERPDemo.Models.Vehicle
+@{
+    ViewData["Title"] = "Vehicle — " + Model.RegistrationNumber;
+    Layout = "_DashboardLayout";
+    var today = DateTime.Today;
+    var in30 = today.AddDays(30);
+
+    var recentTrips = ViewBag.RecentTrips as List<ERPDemo.Models.Trip> ?? new();
+    var maintenanceLogs = ViewBag.MaintenanceLogs as List<ERPDemo.Models.MaintenanceLog> ?? new();
+    var fuelLogs = ViewBag.FuelLogs as List<ERPDemo.Models.FuelLog> ?? new();
+
+    string DocTag(DateTime? dt)
+    {
+        if (!dt.HasValue) return "rt-nodot";
+        if (dt.Value < today) return "rt-coral";
+        if (dt.Value <= in30) return "rt-amber";
+        return "rt-green";
+    }
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>@Model.RegistrationNumber</h1>
+            <p>@(Model.Make ?? "—") @(Model.Model != null ? "· " + Model.Model : "") · @Model.VehicleType</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.VehicleId" class="rt-btn rt-btn-primary">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+            <a asp-action="Index" class="rt-btn">Back</a>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="rt-stats">
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-truck"></i></span>
+            <div>
+                <span class="rt-stat-label">Status</span>
+                <span class="rt-stat-value" style="font-size:16px;">@Model.Status</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-speedometer2"></i></span>
+            <div>
+                <span class="rt-stat-label">Odometer</span>
+                <span class="rt-stat-value" style="font-size:16px;">@((Model.CurrentOdometerKm ?? 0).ToString("N0")) km</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-amber">
+            <span class="rt-stat-icon"><i class="bi bi-fuel-pump"></i></span>
+            <div>
+                <span class="rt-stat-label">Fuel</span>
+                <span class="rt-stat-value" style="font-size:16px;">@(Model.FuelType ?? "—")</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-violet">
+            <span class="rt-stat-icon"><i class="bi bi-geo-alt"></i></span>
+            <div>
+                <span class="rt-stat-label">Depot</span>
+                <span class="rt-stat-value" style="font-size:16px;">@(Model.PlantLocation ?? "—")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compliance -->
+    <section class="rt-window mt-3">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-shield-check me-2"></i>Compliance</span>
+        </div>
+        <div class="p-3 row g-3">
+            <div class="col-md-3">
+                <div class="rt-label">Insurance</div>
+                <span class="rt-tag @DocTag(Model.InsuranceExpiry)">
+                    @(Model.InsuranceExpiry?.ToString("MMM dd, yyyy") ?? "Not set")
+                </span>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">Fitness</div>
+                <span class="rt-tag @DocTag(Model.FitnessExpiry)">
+                    @(Model.FitnessExpiry?.ToString("MMM dd, yyyy") ?? "Not set")
+                </span>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">Permit</div>
+                <span class="rt-tag @DocTag(Model.PermitExpiry)">
+                    @(Model.PermitExpiry?.ToString("MMM dd, yyyy") ?? "Not set")
+                </span>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">PUC</div>
+                <span class="rt-tag @DocTag(Model.PucExpiry)">
+                    @(Model.PucExpiry?.ToString("MMM dd, yyyy") ?? "Not set")
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Trips -->
+    <section class="rt-window mt-3">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-signpost-split me-2"></i>Recent Trips</span>
+        </div>
+        <div class="rt-scroll">
+            <table class="rt-table">
+                <thead><tr><th>Trip #</th><th>Route</th><th>Driver</th><th>Status</th><th class="text-end">Revenue</th></tr></thead>
+                <tbody>
+                @if (recentTrips.Any())
+                {
+                    foreach (var t in recentTrips)
+                    {
+                        <tr>
+                            <td><strong>@t.TripNumber</strong></td>
+                            <td>@(t.OriginCity ?? "—") → @(t.DestinationCity ?? "—")</td>
+                            <td>@(t.Driver?.FullName ?? "—")</td>
+                            <td><span class="rt-tag rt-nodot">@t.Status</span></td>
+                            <td class="text-end">₹@((t.Revenue ?? 0).ToString("N0"))</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-4">No trips yet.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Maintenance + Fuel side by side -->
+    <div class="row g-3 mt-3">
+        <div class="col-lg-6">
+            <section class="rt-window h-100">
+                <div class="rt-titlebar"><span><i class="bi bi-wrench me-2"></i>Maintenance</span></div>
+                <div class="rt-scroll">
+                    <table class="rt-table">
+                        <thead><tr><th>Type</th><th>Date</th><th class="text-end">Cost</th></tr></thead>
+                        <tbody>
+                        @if (maintenanceLogs.Any())
+                        {
+                            foreach (var m in maintenanceLogs)
+                            {
+                                <tr>
+                                    <td>@m.ServiceType</td>
+                                    <td>@m.ServiceDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="text-end">₹@((m.Cost ?? 0).ToString("N0"))</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">No maintenance records.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+        <div class="col-lg-6">
+            <section class="rt-window h-100">
+                <div class="rt-titlebar"><span><i class="bi bi-fuel-pump me-2"></i>Fuel Logs</span></div>
+                <div class="rt-scroll">
+                    <table class="rt-table">
+                        <thead><tr><th>Date</th><th>Liters</th><th class="text-end">Amount</th></tr></thead>
+                        <tbody>
+                        @if (fuelLogs.Any())
+                        {
+                            foreach (var f in fuelLogs)
+                            {
+                                <tr>
+                                    <td>@f.FilledAt.ToString("MMM dd, yyyy")</td>
+                                    <td>@f.Liters.ToString("N1") L</td>
+                                    <td class="text-end">₹@f.Amount.ToString("N0")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">No fuel records.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
