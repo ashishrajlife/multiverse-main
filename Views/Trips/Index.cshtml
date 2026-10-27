@@ -1,0 +1,115 @@
+@model List<ERPDemo.Models.Trip>
+@{
+    ViewData["Title"] = "Trips";
+    Layout = "_DashboardLayout";
+    var now = DateTime.Now;
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Trips</h1>
+            <p>@Model.Count trip(s) — GPS-tracked fleet operations</p>
+        </div>
+        <a asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create Trip
+        </a>
+    </div>
+
+    <form method="get" class="rt-filter-bar">
+        <input type="text" name="search" value="@ViewBag.Search"
+               placeholder="Search trip # / route..."
+               class="rt-input" style="max-width:340px;" />
+        <select name="status" class="rt-input" style="max-width:180px;">
+            @foreach (var s in (List<string>)ViewBag.StatusOptions)
+            {
+                <option value="@s" selected="@(s == ViewBag.Status)">@s</option>
+            }
+        </select>
+        <button type="submit" class="rt-btn rt-btn-primary">
+            <i class="bi bi-search me-1"></i> Filter
+        </button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string) || (ViewBag.Status as string) != "All")
+        {
+            <a asp-action="Index" class="rt-btn">Clear</a>
+        }
+    </form>
+
+    <section class="rt-window mt-3">
+        <div class="rt-scroll">
+            <table class="rt-table rt-table-vehicles" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 13%;" />   @* Trip # *@
+                    <col style="width: 12%;" />   @* Vehicle *@
+                    <col style="width: 14%;" />   @* Driver *@
+                    <col style="width: 18%;" />   @* Route *@
+                    <col style="width: 11%;" />   @* Planned End *@
+                    <col style="width: 10%;" />   @* Distance *@
+                    <col style="width: 10%;" />   @* Status *@
+                    <col style="width: 12%;" />   @* Actions *@
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Trip #</th>
+                        <th>Vehicle</th>
+                        <th>Driver</th>
+                        <th>Route</th>
+                        <th>Planned End</th>
+                        <th>Distance</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var t in Model)
+                    {
+                        var statusClass = t.Status switch
+                        {
+                            "Planned"    => "rt-sky",
+                            "InProgress" => "rt-amber",
+                            "Completed"  => "rt-green",
+                            "Delayed"    => "rt-coral",
+                            "Cancelled"  => "rt-nodot",
+                            _            => "rt-nodot"
+                        };
+
+                        var distKm = t.GpsDistanceKm ?? t.DistanceKm ?? 0;
+
+                        <tr>
+                            <td><strong>@t.TripNumber</strong></td>
+                            <td>@(t.Vehicle?.RegistrationNumber ?? "—")</td>
+                            <td>@(t.Driver?.FullName ?? "—")</td>
+                            <td>@(t.OriginCity ?? "—") → @(t.DestinationCity ?? "—")</td>
+                            <td>@(t.PlannedEnd?.ToString("MMM dd, HH:mm") ?? "—")</td>
+                            <td>@(distKm > 0 ? distKm.ToString("N0") + " km" : "—")</td>
+                            <td><span class="rt-tag @statusClass">@t.Status</span></td>
+                            <td class="rt-actions-cell">
+                                <div class="rt-action-group">
+                                    <a asp-action="Details" asp-route-id="@t.TripId"
+                                       class="rt-btn rt-btn-sm" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi bi-signpost-split fs-3 d-block mb-2"></i>
+                            Koi trip nahi mila.
+                            <a asp-action="Create" class="d-block mt-2">Create your first trip →</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>

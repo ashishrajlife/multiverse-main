@@ -112,7 +112,7 @@ namespace ERPDemo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FuelLogId"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime>("FilledAt")
                         .HasColumnType("datetime2");
@@ -122,10 +122,10 @@ namespace ERPDemo.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("Liters")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<decimal?>("OdometerKm")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int");
@@ -137,6 +137,107 @@ namespace ERPDemo.Migrations
                     b.ToTable("FuelLogs");
                 });
 
+            modelBuilder.Entity("ERPDemo.Models.GpsDevice", b =>
+                {
+                    b.Property<int>("GpsDeviceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GpsDeviceId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeviceModel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Imei")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("InstalledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastPingAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("SimNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GpsDeviceId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("GpsDevices");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.GpsLog", b =>
+                {
+                    b.Property<long>("GpsLogId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("GpsLogId"));
+
+                    b.Property<decimal?>("FuelLevelPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("GpsDeviceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("HeadingDegrees")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int?>("Ignition")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Latitude")
+                        .HasColumnType("decimal(10,7)");
+
+                    b.Property<decimal>("Longitude")
+                        .HasColumnType("decimal(10,7)");
+
+                    b.Property<decimal?>("OdometerKm")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<decimal?>("SpeedKmph")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int?>("TripId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GpsLogId");
+
+                    b.HasIndex("GpsDeviceId");
+
+                    b.ToTable("GpsLogs");
+                });
+
             modelBuilder.Entity("ERPDemo.Models.MaintenanceLog", b =>
                 {
                     b.Property<int>("MaintenanceId")
@@ -146,7 +247,7 @@ namespace ERPDemo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaintenanceId"));
 
                     b.Property<decimal?>("Cost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(250)
@@ -261,13 +362,28 @@ namespace ERPDemo.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal?>("DistanceKm")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<int>("DriverId")
                         .HasColumnType("int");
 
+                    b.Property<string>("EndAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("EndOdometerKm")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("FuelCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("GpsDistanceKm")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("GpsIdleMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("GpsMaxSpeedKmph")
+                        .HasColumnType("int");
 
                     b.Property<string>("OriginCity")
                         .HasMaxLength(100)
@@ -280,7 +396,13 @@ namespace ERPDemo.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("Revenue")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("StartAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StartOdometerKm")
+                        .HasColumnType("int");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -415,7 +537,7 @@ namespace ERPDemo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VehicleId"));
 
                     b.Property<decimal?>("CapacityTons")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -482,6 +604,43 @@ namespace ERPDemo.Migrations
                     b.ToTable("Vehicles");
                 });
 
+            modelBuilder.Entity("ERPDemo.Models.VehicleLocation", b =>
+                {
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CurrentTripId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("HeadingDegrees")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.Property<int?>("Ignition")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Latitude")
+                        .HasColumnType("decimal(10,7)");
+
+                    b.Property<decimal>("Longitude")
+                        .HasColumnType("decimal(10,7)");
+
+                    b.Property<decimal?>("OdometerKm")
+                        .HasColumnType("decimal(12,2)");
+
+                    b.Property<decimal?>("SpeedKmph")
+                        .HasColumnType("decimal(6,2)");
+
+                    b.HasKey("VehicleId");
+
+                    b.ToTable("VehicleLocations");
+                });
+
             modelBuilder.Entity("ERPDemo.Models.Driver", b =>
                 {
                     b.HasOne("ERPDemo.Models.User", "User")
@@ -506,6 +665,28 @@ namespace ERPDemo.Migrations
                         .IsRequired();
 
                     b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.GpsDevice", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.GpsLog", b =>
+                {
+                    b.HasOne("ERPDemo.Models.GpsDevice", "GpsDevice")
+                        .WithMany()
+                        .HasForeignKey("GpsDeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GpsDevice");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.MaintenanceLog", b =>
@@ -565,6 +746,17 @@ namespace ERPDemo.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("ERPDemo.Models.VehicleLocation", b =>
+                {
+                    b.HasOne("ERPDemo.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("ERPDemo.Models.Department", b =>

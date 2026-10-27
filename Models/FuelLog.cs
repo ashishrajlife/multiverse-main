@@ -13,9 +13,11 @@ namespace ERPDemo.Models
         public Vehicle? Vehicle { get; set; }
 
         public DateTime FilledAt { get; set; } = DateTime.Now;
-
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Liters { get; set; }
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Amount { get; set; }
+        [Column(TypeName = "decimal(10,2)")]
         public decimal? OdometerKm { get; set; }
 
         [StringLength(100)]

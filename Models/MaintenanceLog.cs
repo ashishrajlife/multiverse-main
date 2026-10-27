@@ -16,6 +16,7 @@ namespace ERPDemo.Models
         public string ServiceType { get; set; } = string.Empty;   // Oil Change, Tyre, Brake
 
         public DateTime ServiceDate { get; set; } = DateTime.Now;
+        [Column(TypeName = "decimal(10,2)")]
         public decimal? Cost { get; set; }
 
         [StringLength(250)]

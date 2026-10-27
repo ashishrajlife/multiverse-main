@@ -1,0 +1,90 @@
+@{
+    ViewData["Title"] = "Simulate Trip GPS";
+    Layout = "_DashboardLayout";
+    var vehicleId = (int)ViewBag.VehicleId;
+    var tripId = (int)ViewBag.TripId;
+    var tripNumber = ViewBag.TripNumber as string ?? "";
+    var origin = ViewBag.Origin as string ?? "Gurugram";
+    var destination = ViewBag.Destination as string ?? "Jaipur";
+
+    var coords = new Dictionary<string, (decimal lat, decimal lng)>
+    {
+        ["Gurugram"]    = (28.4595m, 77.0266m),
+        ["Faridabad"]   = (28.4089m, 77.3178m),
+        ["Panipat"]     = (29.3909m, 76.9635m),
+        ["Karnal"]      = (29.6857m, 76.9905m),
+        ["Hisar"]       = (29.1492m, 75.7217m),
+        ["Rohtak"]      = (28.8955m, 76.6066m),
+        ["Sonipat"]     = (28.9931m, 77.0151m),
+        ["Ambala"]      = (30.3782m, 76.7767m),
+        ["Jaipur"]      = (26.9124m, 75.7873m),
+        ["Delhi"]       = (28.7041m, 77.1025m),
+        ["Noida"]       = (28.5355m, 77.3910m),
+        ["Chandigarh"]  = (30.7333m, 76.7794m),
+    };
+
+    var fromCoord = coords.ContainsKey(origin)
+        ? coords[origin]
+        : (lat: 28.4595m, lng: 77.0266m);
+
+    var toCoord = coords.ContainsKey(destination)
+        ? coords[destination]
+        : (lat: 26.9124m, lng: 75.7873m);
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Simulate Route</h1>
+            <p>@tripNumber · @origin → @destination</p>
+        </div>
+        <a asp-action="Index" class="rt-btn">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <form asp-action="RunSimulation" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="vehicleId" value="@vehicleId" />
+        <input type="hidden" name="tripId" value="@tripId" />
+
+        <section class="rt-window">
+            <div class="rt-titlebar">
+                <span><i class="bi bi-geo me-2"></i>Route Coordinates</span>
+            </div>
+            <div class="p-3 row g-3">
+                <div class="col-md-6">
+                    <label class="rt-label">From — @origin</label>
+                    <input type="number" step="0.0001" name="fromLat" value="@fromCoord.lat"
+                           class="rt-input mb-2" placeholder="Latitude" />
+                    <input type="number" step="0.0001" name="fromLng" value="@fromCoord.lng"
+                           class="rt-input" placeholder="Longitude" />
+                </div>
+                <div class="col-md-6">
+                    <label class="rt-label">To — @destination</label>
+                    <input type="number" step="0.0001" name="toLat" value="@toCoord.lat"
+                           class="rt-input mb-2" placeholder="Latitude" />
+                    <input type="number" step="0.0001" name="toLng" value="@toCoord.lng"
+                           class="rt-input" placeholder="Longitude" />
+                </div>
+                <div class="col-md-6">
+                    <label class="rt-label">Number of GPS Points</label>
+                    <input type="number" name="points" value="30" min="2" max="200"
+                           class="rt-input" />
+                    <small class="text-muted d-block mt-1">
+                        20-50 achha hai. Zyada = smoother polyline.
+                    </small>
+                </div>
+            </div>
+        </section>
+
+        <div class="mt-3 d-flex gap-2">
+            <button type="submit" class="rt-btn rt-btn-primary">
+                <i class="bi bi-play-fill me-1"></i> Run Simulation
+            </button>
+            <a asp-action="Index" class="rt-btn">Cancel</a>
+        </div>
+    </form>
+
+</div>

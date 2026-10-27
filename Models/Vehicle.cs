@@ -22,6 +22,7 @@ namespace ERPDemo.Models
 
         public int? Year { get; set; }
 
+        [Column(TypeName = "decimal(6,2)")]
         public decimal? CapacityTons { get; set; }
 
         [StringLength(50)]

@@ -97,7 +97,7 @@
             font-size: 12.5px; font-weight: 700; color: #fff; background: #2f4a63;
         }
         .content-area { flex: 1; width: 100%; max-width: none; padding: 24px 32px; background: #f0ede4; }
-        
+
         @@media (max-width: 991.98px) {
             .sidebar { width: min(280px, 86vw); transform: translateX(-100%); }
             .sidebar.show { transform: none; }
@@ -119,6 +119,19 @@
 
        <ul class="sidebar-nav">
 
+            @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+{
+    <li>
+        <a class="side-link @(controllerName.Equals("DevGpsSimulator", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+           asp-controller="DevGpsSimulator"
+           asp-action="Index">
+            <i class="bi bi-bug"></i>
+            GPS Simulator
+            <span class="badge bg-warning text-dark ms-auto" style="font-size:9px;">DEV</span>
+        </a>
+    </li>
+}
+
     @if (currentRole == "Admin")
     {
         <li>
@@ -131,13 +144,29 @@
         </li>
 
          <li>
-        <a class="side-link @(controllerName.Equals("Vehicles", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-        asp-controller="Vehicles"
-        asp-action="Index">
-            <i class="bi bi-truck-front"></i>
-            Vehicles
-        </a>
-    </li>
+            <a class="side-link @(controllerName.Equals("Vehicles", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+            asp-controller="Vehicles"
+            asp-action="Index">
+                <i class="bi bi-truck-front"></i>
+                Vehicles
+            </a>
+        </li>
+        <li>
+            <a class="side-link @(controllerName.Equals("Drivers", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+            asp-controller="Drivers"
+            asp-action="Index">
+                <i class="bi bi-person-badge"></i>
+                Drivers
+            </a>
+        </li>
+        <li>
+    <a class="side-link @(controllerName.Equals("Trips", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+       asp-controller="Trips"
+       asp-action="Index">
+        <i class="bi bi-signpost-split"></i>
+        Trips
+    </a>
+</li>
     }
     else if (currentRole == "User")
 {
@@ -190,6 +219,22 @@
                 My Dashboard
             </a>
         </li>
+        <li>
+    <a class="side-link @(controllerName.Equals("Manager", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+       asp-controller="Manager"
+       asp-action="Dashboard">
+        <i class="bi bi-speedometer2"></i>
+        My Dashboard
+    </a>
+</li>
+<li>
+    <a class="side-link @(controllerName.Equals("Drivers", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+       asp-controller="Drivers"
+       asp-action="Index">
+        <i class="bi bi-person-badge"></i>
+        Drivers
+    </a>
+</li>
     }
 
 </ul>

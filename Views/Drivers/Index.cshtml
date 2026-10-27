@@ -1,0 +1,161 @@
+@model List<ERPDemo.Models.Driver>
+@{
+    ViewData["Title"] = "Drivers";
+    Layout = "_DashboardLayout";
+    var today = DateTime.Today;
+    var in30 = today.AddDays(30);
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>Drivers</h1>
+            <p>@Model.Count driver(s) registered — Haryana fleet</p>
+        </div>
+        <a asp-action="Create" class="rt-btn rt-btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Add Driver
+        </a>
+    </div>
+
+    <form method="get" class="rt-filter-bar">
+        <input type="text" name="search" value="@ViewBag.Search"
+               placeholder="Search by name / phone / license..."
+               class="rt-input" style="max-width:340px;" />
+        <select name="status" class="rt-input" style="max-width:160px;">
+            @foreach (var s in (List<string>)ViewBag.StatusOptions)
+            {
+                <option value="@s" selected="@(s == ViewBag.Status)">@s</option>
+            }
+        </select>
+        <button type="submit" class="rt-btn rt-btn-primary">
+            <i class="bi bi-search me-1"></i> Filter
+        </button>
+        @if (!string.IsNullOrEmpty(ViewBag.Search as string) || (ViewBag.Status as string) != "All")
+        {
+            <a asp-action="Index" class="rt-btn">Clear</a>
+        }
+    </form>
+
+    <section class="rt-window mt-3">
+        <div class="rt-scroll">
+            <table class="rt-table rt-table-vehicles" style="width: 100%; table-layout: fixed;">
+                <colgroup>
+                    <col style="width: 20%;" />   @* Driver *@
+                    <col style="width: 13%;" />   @* Phone *@
+                    <col style="width: 15%;" />   @* License *@
+                    <col style="width: 12%;" />   @* Expiry *@
+                    <col style="width: 11%;" />   @* Status *@
+                    <col style="width: 12%;" />   @* Vehicle *@
+                    <col style="width: 17%;" />   @* Actions *@
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Driver</th>
+                        <th>Phone</th>
+                        <th>License</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Vehicle</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var d in Model)
+                    {
+                        var statusClass = d.Status switch
+                        {
+                            "Available" => "rt-green",
+                            "OnTrip"    => "rt-sky",
+                            "OffDuty"   => "rt-amber",
+                            "Leave"     => "rt-coral",
+                            _           => "rt-nodot"
+                        };
+
+                        string DocTag(DateTime? dt)
+                        {
+                            if (!dt.HasValue) return "rt-nodot";
+                            if (dt.Value < today) return "rt-coral";
+                            if (dt.Value <= in30) return "rt-amber";
+                            return "rt-green";
+                        }
+
+                        <tr>
+                            <td>
+                                <div class="rt-user" style="justify-content:center;">
+                                    <span class="rt-avatar rt-sky"><i class="bi bi-person"></i></span>
+                                    <span class="rt-user-name">@d.FullName</span>
+                                </div>
+                            </td>
+                            <td>@(d.PhoneNumber ?? "—")</td>
+                            <td><strong>@(d.LicenseNumber ?? "—")</strong></td>
+                            <td>
+                                <span class="rt-tag @DocTag(d.LicenseExpiry)">
+                                    @(d.LicenseExpiry?.ToString("MMM dd, yy") ?? "—")
+                                </span>
+                            </td>
+                            <td><span class="rt-tag @statusClass">@d.Status</span></td>
+                            <td>@(d.Vehicle?.RegistrationNumber ?? "—")</td>
+                            <td class="rt-actions-cell">
+                                <div class="rt-action-group">
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        var isOnTrip = d.Status == "OnTrip";
+                                        var isLeave  = d.Status == "Leave";
+                                        var isAvail  = d.Status == "Available";
+                                        var isLocked = isOnTrip || isLeave;
+
+                                        <form asp-action="ToggleStatus" asp-route-id="@d.DriverId" method="post"
+                                              class="d-inline"
+                                              onsubmit="return confirm('@(isAvail ? "Mark Off Duty" : "Mark Available") — @d.FullName?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="rt-btn rt-btn-sm @(isAvail ? "rt-btn-warn" : "rt-btn-success")"
+                                                    title="@(isLocked ? "Locked — " + d.Status : (isAvail ? "Mark Off Duty" : "Mark Available"))"
+                                                    @(isLocked ? "disabled" : "")>
+                                                <i class="bi @(isAvail ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <a asp-action="Details" asp-route-id="@d.DriverId"
+                                       class="rt-btn rt-btn-sm" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@d.DriverId"
+                                       class="rt-btn rt-btn-sm" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <form asp-action="Delete" asp-route-id="@d.DriverId" method="post"
+                                              onsubmit="return confirm('Delete @d.FullName?');" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="rt-btn rt-btn-sm rt-btn-danger" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-person-badge fs-3 d-block mb-2"></i>
+                            Koi driver nahi mila.
+                            <a asp-action="Create" class="d-block mt-2">Add your first driver →</a>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>

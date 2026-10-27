@@ -1,0 +1,281 @@
+@model ERPDemo.Models.Trip
+@{
+    ViewData["Title"] = "Trip — " + Model.TripNumber;
+    Layout = "_DashboardLayout";
+
+    var gpsPoints = ViewBag.GpsPoints as System.Collections.IEnumerable;
+    var latestLocation = ViewBag.LatestLocation as ERPDemo.Models.VehicleLocation;
+
+    var statusClass = Model.Status switch
+    {
+        "Planned"    => "rt-sky",
+        "InProgress" => "rt-amber",
+        "Completed"  => "rt-green",
+        "Delayed"    => "rt-coral",
+        "Cancelled"  => "rt-nodot",
+        _            => "rt-nodot"
+    };
+
+    var gpsDist = Model.GpsDistanceKm ?? Model.DistanceKm ?? 0;
+    var durationHrs = 0m;
+    if (Model.ActualStart.HasValue)
+    {
+        var end = Model.ActualEnd ?? DateTime.Now;
+        durationHrs = (decimal)(end - Model.ActualStart.Value).TotalHours;
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+}
+
+<div class="rt-page">
+
+    <div class="rt-head">
+        <div>
+            <h1>@Model.TripNumber</h1>
+            <p>@(Model.OriginCity ?? "—") → @(Model.DestinationCity ?? "—") · @Model.Status</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            @if (Model.Status == "Planned")
+            {
+                <form asp-action="Start" asp-route-id="@Model.TripId" method="post" class="d-inline"
+                      onsubmit="return confirm('Start trip @Model.TripNumber? GPS tracking live ho jayega.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="rt-btn rt-btn-success">
+                        <i class="bi bi-play-circle me-1"></i> Start Trip
+                    </button>
+                </form>
+            }
+            @if (Model.Status == "InProgress" || Model.Status == "Delayed")
+            {
+                <form asp-action="Complete" asp-route-id="@Model.TripId" method="post" class="d-inline"
+                      onsubmit="return confirm('Complete trip @Model.TripNumber? GPS data save hoga.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="rt-btn rt-btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Complete Trip
+                    </button>
+                </form>
+            }
+            @if (User.IsInRole("Admin") && Model.Status != "Completed" && Model.Status != "Cancelled")
+            {
+                <form asp-action="Cancel" asp-route-id="@Model.TripId" method="post" class="d-inline"
+                      onsubmit="return confirm('Cancel trip @Model.TripNumber?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="rt-btn rt-btn-danger">
+                        <i class="bi bi-x-circle me-1"></i> Cancel
+                    </button>
+                </form>
+            }
+            <a asp-action="Index" class="rt-btn">Back</a>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="rt-stats">
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-truck-front"></i></span>
+            <div>
+                <span class="rt-stat-label">Vehicle</span>
+                <span class="rt-stat-value" style="font-size:15px;">@(Model.Vehicle?.RegistrationNumber ?? "—")</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-person-badge"></i></span>
+            <div>
+                <span class="rt-stat-label">Driver</span>
+                <span class="rt-stat-value" style="font-size:15px;">@(Model.Driver?.FullName ?? "—")</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-amber">
+            <span class="rt-stat-icon"><i class="bi bi-signpost-split"></i></span>
+            <div>
+                <span class="rt-stat-label">Distance</span>
+                <span class="rt-stat-value">@gpsDist.ToString("N0") <small style="font-size:12px;">km</small></span>
+            </div>
+        </div>
+        <div class="rt-stat rt-violet">
+            <span class="rt-stat-icon"><i class="bi bi-clock-history"></i></span>
+            <div>
+                <span class="rt-stat-label">Duration</span>
+                <span class="rt-stat-value">@durationHrs.ToString("N1") <small style="font-size:12px;">hrs</small></span>
+            </div>
+        </div>
+        <div class="rt-stat rt-coral">
+            <span class="rt-stat-icon"><i class="bi bi-currency-rupee"></i></span>
+            <div>
+                <span class="rt-stat-label">Revenue</span>
+                <span class="rt-stat-value">₹@((Model.Revenue ?? 0).ToString("N0"))</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Map (only if InProgress or has GPS points) -->
+    @if (Model.Status == "InProgress" || Model.Status == "Delayed" || Model.Status == "Completed")
+    {
+        <section class="rt-window mt-3">
+            <div class="rt-titlebar">
+                <span>
+                    <i class="bi bi-geo-alt me-2"></i>Live GPS Tracking
+                    @if (Model.Status == "InProgress" || Model.Status == "Delayed")
+                    {
+                        <span class="rt-tag rt-green ms-2" style="font-size:10.5px;">
+                            <i class="bi bi-circle-fill me-1" style="font-size:6px;"></i> LIVE
+                        </span>
+                    }
+                </span>
+                @if (latestLocation != null)
+                {
+                    <small class="text-muted">
+                        Last ping: @latestLocation.LastUpdatedAt.ToString("HH:mm:ss")
+                    </small>
+                }
+            </div>
+            <div id="map" style="height: 550px; border-radius: 8px;"></div>
+        </section>
+    }
+
+    <!-- GPS Metrics (only for completed trips) -->
+    @if (Model.Status == "Completed")
+    {
+        <div class="rt-section-label mt-4"><i class="bi bi-graph-up me-2"></i>GPS Analytics</div>
+        <div class="rt-stats">
+            <div class="rt-stat rt-sky">
+                <span class="rt-stat-icon"><i class="bi bi-speedometer2"></i></span>
+                <div>
+                    <span class="rt-stat-label">Max Speed</span>
+                    <span class="rt-stat-value">@(Model.GpsMaxSpeedKmph ?? 0) <small style="font-size:12px;">km/h</small></span>
+                </div>
+            </div>
+            <div class="rt-stat rt-amber">
+                <span class="rt-stat-icon"><i class="bi bi-hourglass-split"></i></span>
+                <div>
+                    <span class="rt-stat-label">Idle Time</span>
+                    <span class="rt-stat-value">@((Model.GpsIdleMinutes ?? 0) / 60) <small style="font-size:12px;">hr</small> @((Model.GpsIdleMinutes ?? 0) % 60) <small style="font-size:12px;">min</small></span>
+                </div>
+            </div>
+            <div class="rt-stat rt-green">
+                <span class="rt-stat-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                <div>
+                    <span class="rt-stat-label">Start Odometer</span>
+                    <span class="rt-stat-value">@((Model.StartOdometerKm ?? 0).ToString("N0")) <small style="font-size:12px;">km</small></span>
+                </div>
+            </div>
+            <div class="rt-stat rt-coral">
+                <span class="rt-stat-icon"><i class="bi bi-flag"></i></span>
+                <div>
+                    <span class="rt-stat-label">End Odometer</span>
+                    <span class="rt-stat-value">@((Model.EndOdometerKm ?? 0).ToString("N0")) <small style="font-size:12px;">km</small></span>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Trip timeline -->
+    <section class="rt-window mt-3">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-clock-history me-2"></i>Trip Timeline</span>
+        </div>
+        <div class="p-3 row g-3">
+            <div class="col-md-3">
+                <div class="rt-label">Planned Start</div>
+                <div>@(Model.PlannedStart?.ToString("MMM dd, HH:mm") ?? "—")</div>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">Actual Start</div>
+                <div class="fw-bold" style="color: #2e7d5e;">
+                    @(Model.ActualStart?.ToString("MMM dd, HH:mm") ?? "—")
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">Planned End</div>
+                <div>@(Model.PlannedEnd?.ToString("MMM dd, HH:mm") ?? "—")</div>
+            </div>
+            <div class="col-md-3">
+                <div class="rt-label">Actual End</div>
+                <div class="fw-bold" style="color: #2f4a63;">
+                    @(Model.ActualEnd?.ToString("MMM dd, HH:mm") ?? "—")
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.StartAddress))
+            {
+                <div class="col-md-6">
+                    <div class="rt-label">Start Address</div>
+                    <div style="font-size: 13px;">@Model.StartAddress</div>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.EndAddress))
+            {
+                <div class="col-md-6">
+                    <div class="rt-label">End Address</div>
+                    <div style="font-size: 13px;">@Model.EndAddress</div>
+                </div>
+            }
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        (function() {
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+
+            // Default center: Haryana
+            const map = L.map('map').setView([28.4595, 77.0266], 9);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Latest vehicle location
+            @if (latestLocation != null)
+            {
+                <text>
+                const latest = [@latestLocation.Latitude, @latestLocation.Longitude];
+                L.marker(latest).addTo(map)
+                    .bindPopup(`<strong>@Model.Vehicle?.RegistrationNumber</strong><br>
+                                Speed: @latestLocation.SpeedKmph km/h<br>
+                                @latestLocation.LastUpdatedAt.ToString("HH:mm:ss")`)
+                    .openPopup();
+                map.setView(latest, 13);
+                </text>
+            }
+
+            // GPS log points (polyline)
+            @if (gpsPoints != null)
+            {
+                <text>
+              const points = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(gpsPoints));
+                if (points.length > 1) {
+                    const coords = points.map(p => [p.Latitude, p.Longitude]);
+                    const polyline = L.polyline(coords, { color: '#2f4a63', weight: 4, opacity: 0.7 }).addTo(map);
+
+                    // Start marker
+                    L.marker(coords[0], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#2e7d5e;color:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-weight:700;font-size:11px;">S</div>',
+                            iconSize: [24, 24]
+                        })
+                    }).addTo(map).bindPopup('Start');
+
+                    // End marker
+                    L.marker(coords[coords.length - 1], {
+                        icon: L.divIcon({
+                            className: 'custom-marker',
+                            html: '<div style="background:#b3404a;color:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center;font-weight:700;font-size:11px;">E</div>',
+                            iconSize: [24, 24]
+                        })
+                    }).addTo(map).bindPopup('End');
+
+                    map.fitBounds(polyline.getBounds());
+                }
+                </text>
+            }
+        })();
+    </script>
+}
