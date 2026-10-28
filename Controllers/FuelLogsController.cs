@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ERPDemo.Controllers
 {
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize]
     public class FuelLogsController : Controller
     {
         private readonly AppDbContext _context;

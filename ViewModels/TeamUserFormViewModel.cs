@@ -35,5 +35,8 @@ namespace ERPDemo.ViewModels
 
         [Display(Name = "Active")]
         public bool IsActive { get; set; } = true;
+        
+        public List<string> SelectedPermissions { get; set; } = new();
+
     }
 }

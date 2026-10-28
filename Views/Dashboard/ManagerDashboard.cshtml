@@ -1,0 +1,85 @@
+@model ERPDemo.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Manager Dashboard";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-page">
+    <div class="rt-head">
+        <div>
+            <h1>Manager Dashboard</h1>
+            <p>Daily Operations Overview</p>
+        </div>
+        <span class="rt-badge"><i class="bi bi-person-badge"></i> Manager</span>
+    </div>
+
+    <div class="rt-stats">
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-truck-front"></i></span>
+            <div>
+                <span class="rt-stat-label">Total Vehicles</span>
+                <span class="rt-stat-value">@Model.TotalVehicles</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-activity"></i></span>
+            <div>
+                <span class="rt-stat-label">Active Vehicles</span>
+                <span class="rt-stat-value">@Model.ActiveVehicles</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-amber">
+            <span class="rt-stat-icon"><i class="bi bi-calendar-check"></i></span>
+            <div>
+                <span class="rt-stat-label">Trips Today</span>
+                <span class="rt-stat-value">@Model.TripsToday</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-green">
+            <span class="rt-stat-icon"><i class="bi bi-cash"></i></span>
+            <div>
+                <span class="rt-stat-label">Revenue Today</span>
+                <span class="rt-stat-value">₹@Model.RevenueToday.ToString("N0")</span>
+            </div>
+        </div>
+    </div>
+
+    <section class="rt-window mt-4">
+        <div class="rt-titlebar">
+            <span><i class="bi bi-broadcast me-2"></i>My Active Trips</span>
+            <a asp-controller="Trips" asp-action="Index" class="rt-btn">View All</a>
+        </div>
+        <div class="rt-scroll">
+            <table class="rt-table">
+                <thead>
+                    <tr>
+                        <th>Trip #</th>
+                        <th>Vehicle</th>
+                        <th>Driver</th>
+                        <th>Route</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.ActiveTrips.Any())
+                    {
+                        foreach (var t in Model.ActiveTrips)
+                        {
+                            <tr>
+                                <td><strong>@t.TripNumber</strong></td>
+                                <td>@t.VehicleReg</td>
+                                <td>@t.DriverName</td>
+                                <td>@t.Route</td>
+                                <td><span class="rt-tag rt-amber">@t.Status</span></td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-4">No active trips currently.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

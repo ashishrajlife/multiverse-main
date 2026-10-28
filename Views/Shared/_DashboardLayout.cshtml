@@ -16,6 +16,13 @@
     var currentRole = Context.Session.GetString("RoleName")
                       ?? User.FindFirst(ClaimTypes.Role)?.Value
                       ?? "User";
+
+    // Permissions fetch from Session
+    var permissionsString = Context.Session.GetString("UserPermissions") ?? "";
+    var userPermissions = permissionsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+    
+    // Admin ke paas sab access hota hai
+    bool HasAccess(string module) => currentRole == "Admin" || userPermissions.Contains(module);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -29,14 +36,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Retro UI Theme Stylesheet -->
     <link href="~/css/retro.css" rel="stylesheet" asp-append-version="true" />
 
     <style>
         :root {
             --navy-900: #080d1c;
             --navy-800: #0d1530;
-            --page: #f0ede4; /* Retro warm paper face background to match reference */
+            --page: #f0ede4;
             --card: #fdfcf7;
             --card-border: #e2ddd0;
             --ink: #2a2f3a;
@@ -59,7 +65,6 @@
         }
         body.nav-open { overflow: hidden; }
 
-        /* Sidebar styling */
         .sidebar {
             position: fixed; top: 0; bottom: 0; left: 0; width: var(--sidebar-w); z-index: 1040;
             display: flex; flex-direction: column; overflow-y: auto; color: #fff;
@@ -82,7 +87,6 @@
         .side-link:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
         .side-link.active { color: #fff; font-weight: 600; background: rgba(255, 255, 255, 0.09); }
         
-        /* Main layout structure */
         .main { display: flex; flex-direction: column; min-width: 0; min-height: 100vh; margin-left: var(--sidebar-w); }
         .topbar {
             position: sticky; top: 0; z-index: 900; display: flex; align-items: center; justify-content: space-between;
@@ -117,135 +121,108 @@
             <small class="text-muted d-block mt-1" style="font-size:11px;">Enterprise Resource Planning</small>
         </div>
 
-       <ul class="sidebar-nav">
-
+        <ul class="sidebar-nav">
             @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
-{
-    <li>
-        <a class="side-link @(controllerName.Equals("DevGpsSimulator", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-           asp-controller="DevGpsSimulator"
-           asp-action="Index">
-            <i class="bi bi-bug"></i>
-            GPS Simulator
-            <span class="badge bg-warning text-dark ms-auto" style="font-size:9px;">DEV</span>
-        </a>
-    </li>
-}
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("DevGpsSimulator", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="DevGpsSimulator" asp-action="Index">
+                        <i class="bi bi-bug"></i> GPS Simulator
+                        <span class="badge bg-warning text-dark ms-auto" style="font-size:9px;">DEV</span>
+                    </a>
+                </li>
+            }
 
-    @if (currentRole == "Admin")
-    {
-        <li>
-            <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Dashboard"
-               asp-action="Index">
-                <i class="bi bi-speedometer2"></i>
-                Dashboard
-            </a>
-        </li>
+            @if (HasAccess("Dashboard"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Dashboard" asp-action="Index">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </li>
+            }
 
-         <li>
-            <a class="side-link @(controllerName.Equals("Vehicles", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-            asp-controller="Vehicles"
-            asp-action="Index">
-                <i class="bi bi-truck-front"></i>
-                Vehicles
-            </a>
-        </li>
-        <li>
-            <a class="side-link @(controllerName.Equals("Drivers", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-            asp-controller="Drivers"
-            asp-action="Index">
-                <i class="bi bi-person-badge"></i>
-                Drivers
-            </a>
-        </li>
-        <li>
-    <a class="side-link @(controllerName.Equals("Trips", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-       asp-controller="Trips"
-       asp-action="Index">
-        <i class="bi bi-signpost-split"></i>
-        Trips
-    </a>
-</li>
-<li>
-    <a class="side-link @(controllerName.Equals("Parties", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-       asp-controller="Parties"
-       asp-action="Index">
-        <i class="bi bi-shop"></i>
-        Parties
-    </a>
-</li>
-    }
-    else if (currentRole == "User")
-{
-    <li>
-        <a class="side-link @(controllerName.Equals("Dashboard", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-           asp-controller="Dashboard" asp-action="UserDashboard">
-            <i class="bi bi-speedometer2"></i>
-            My Dashboard
-        </a>
-    </li>
-    <li>
-        <a class="side-link" asp-controller="Trips" asp-action="MyTrips">
-            <i class="bi bi-truck"></i>
-            My Trips
-        </a>
-    </li>
-    <li>
-        <a class="side-link" asp-controller="Profile" asp-action="Index">
-            <i class="bi bi-person"></i>
-            My Profile
-        </a>
-    </li>
-        <li>
-        <a class="side-link @(controllerName.Equals("Vehicles", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-        asp-controller="Vehicles"
-        asp-action="Index">
-            <i class="bi bi-truck-front"></i>
-            Vehicles
-        </a>
-    </li>
-}
-    else if (currentRole == "HOD")
-    {
-        <li>
-            <a class="side-link @(controllerName.Equals("Hod", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Hod"
-               asp-action="Dashboard">
-                <i class="bi bi-speedometer2"></i>
-                HOD Dashboard
-            </a>
-        </li>
-    }
-    else if (currentRole == "Manager")
-    {
-        <li>
-            <a class="side-link @(controllerName.Equals("Manager", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-               asp-controller="Manager"
-               asp-action="Dashboard">
-                <i class="bi bi-speedometer2"></i>
-                My Dashboard
-            </a>
-        </li>
-        <li>
-    <a class="side-link @(controllerName.Equals("Manager", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-       asp-controller="Manager"
-       asp-action="Dashboard">
-        <i class="bi bi-speedometer2"></i>
-        My Dashboard
-    </a>
-</li>
-<li>
-    <a class="side-link @(controllerName.Equals("Drivers", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
-       asp-controller="Drivers"
-       asp-action="Index">
-        <i class="bi bi-person-badge"></i>
-        Drivers
-    </a>
-</li>
-    }
+            @if (HasAccess("Vehicles"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Vehicles", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Vehicles" asp-action="Index">
+                        <i class="bi bi-truck-front"></i> Vehicles
+                    </a>
+                </li>
+            }
 
-</ul>
+            @if (HasAccess("Drivers"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Drivers", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Drivers" asp-action="Index">
+                        <i class="bi bi-person-badge"></i> Drivers
+                    </a>
+                </li>
+            }
+
+            @if (HasAccess("Trips"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Trips", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Trips" asp-action="Index">
+                        <i class="bi bi-signpost-split"></i> Trips
+                    </a>
+                </li>
+            }
+
+            @if (HasAccess("Parties"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Parties", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Parties" asp-action="Index">
+                        <i class="bi bi-shop"></i> Parties
+                    </a>
+                </li>
+            }
+
+            @if (HasAccess("FuelLogs"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("FuelLogs", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="FuelLogs" asp-action="Index">
+                        <i class="bi bi-fuel-pump"></i> Fuel Logs
+                    </a>
+                </li>
+            }
+
+            @if (HasAccess("Maintenance"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Maintenance", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Maintenance" asp-action="Index">
+                        <i class="bi bi-tools"></i> Maintenance
+                    </a>
+                </li>
+            }
+
+            @if (HasAccess("Reports"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Reports", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Reports" asp-action="Index">
+                        <i class="bi bi-graph-up"></i> Reports
+                    </a>
+                </li>
+            }
+            
+            @if (currentRole == "Admin" || HasAccess("Team"))
+            {
+                <li>
+                    <a class="side-link @(controllerName.Equals("Team", StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+                       asp-controller="Team" asp-action="ManageAll">
+                        <i class="bi bi-people"></i> Manage Team
+                    </a>
+                </li>
+            }
+        </ul>
         <div class="sidebar-foot p-3" style="font-size:11px; color:#8391ad; border-top:1px solid rgba(255,255,255,0.08);">&copy; @DateTime.Now.Year Multiverse</div>
     </aside>
 
@@ -282,52 +259,44 @@
         </main>
     </div>
 
-    <!-- Toast Container -->
-<div aria-live="polite" aria-atomic="true" class="position-relative">
-    <div class="toast-container-custom" id="globalToastContainer"></div>
-</div>
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container-custom" id="globalToastContainer"></div>
+    </div>
 
-<script>
-    (function () {
-        const AUTO_HIDE_DELAY = 3000;
+    <script>
+        (function () {
+            const AUTO_HIDE_DELAY = 3000;
 
-        function showToast(type, message) {
-            const container = document.getElementById('globalToastContainer');
-            if (!container) return;
+            function showToast(type, message) {
+                const container = document.getElementById('globalToastContainer');
+                if (!container) return;
 
-            const isSuccess = type === 'success';
-            const toastEl = document.createElement('div');
-            toastEl.className = `toast custom-toast ${isSuccess ? 'custom-success-toast' : 'custom-error-toast'}`;
-            toastEl.setAttribute('role', 'alert');
-            toastEl.innerHTML = `
-                <div class="toast-header">
-                    <i class="bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"
-                       style="color:${isSuccess ? '#2e7d5e' : '#b3404a'};"></i>
-                    <strong class="me-auto">${isSuccess ? 'Success' : 'Error'}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                </div>
-                <div class="toast-body">${message}</div>
-            `;
-            container.appendChild(toastEl);
-            new bootstrap.Toast(toastEl, { delay: AUTO_HIDE_DELAY }).show();
+                const isSuccess = type === 'success';
+                const toastEl = document.createElement('div');
+                toastEl.className = `toast custom-toast ${isSuccess ? 'custom-success-toast' : 'custom-error-toast'}`;
+                toastEl.setAttribute('role', 'alert');
+                toastEl.innerHTML = `
+                    <div class="toast-header">
+                        <i class="bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2" style="color:${isSuccess ? '#2e7d5e' : '#b3404a'};"></i>
+                        <strong class="me-auto">${isSuccess ? 'Success' : 'Error'}</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">${message}</div>
+                `;
+                container.appendChild(toastEl);
+                new bootstrap.Toast(toastEl, { delay: AUTO_HIDE_DELAY }).show();
 
-            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
-        }
-
-        window.showSmoothToast = showToast;
-
-        document.addEventListener('DOMContentLoaded', function () {
-            @if (TempData["Success"] != null)
-            {
-                <text>showToast('success', @Html.Raw(Json.Serialize(TempData["Success"].ToString())));</text>
+                toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
             }
-            @if (TempData["Error"] != null)
-            {
-                <text>showToast('error', @Html.Raw(Json.Serialize(TempData["Error"].ToString())));</text>
-            }
-        });
-    })();
-</script>
+
+            window.showSmoothToast = showToast;
+
+            document.addEventListener('DOMContentLoaded', function () {
+                @if (TempData["Success"] != null) { <text>showToast('success', @Html.Raw(Json.Serialize(TempData["Success"].ToString())));</text> }
+                @if (TempData["Error"] != null) { <text>showToast('error', @Html.Raw(Json.Serialize(TempData["Error"].ToString())));</text> }
+            });
+        })();
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -342,20 +311,3 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-<style>
-    .rt-alert-info {
-        background: #eaf4fc;
-        border-left: 4px solid #2f4a63;
-        border-radius: 8px;
-        padding: 12px 14px;
-        font-size: 13px;
-        color: #2f4a63;
-        display: flex;
-        align-items: center;
-    }
-    .rt-alert-info i {
-        font-size: 16px;
-        margin-right: 10px;
-        flex-shrink: 0;
-    }
-</style>

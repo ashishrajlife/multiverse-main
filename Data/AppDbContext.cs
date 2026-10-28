@@ -22,6 +22,7 @@ namespace ERPDemo.Data
         public DbSet<GpsLog> GpsLogs { get; set; }
         public DbSet<VehicleLocation> VehicleLocations { get; set; }
         public DbSet<Party> Parties { get; set; }
+        public DbSet<RolePermission> RolePermissions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

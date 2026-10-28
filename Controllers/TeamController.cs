@@ -64,10 +64,9 @@ namespace ERPDemo.Controllers
                 return View(vm);
             }
 
-            // Duplicate checks
+            // Duplicate checks (Username & Email)
             var dupUser = await _context.Users.AnyAsync(u => u.Username == vm.Username);
             if (dupUser) ModelState.AddModelError(nameof(vm.Username), "Username already taken");
-
             var dupEmail = await _context.Users.AnyAsync(u => u.Email == vm.Email);
             if (dupEmail) ModelState.AddModelError(nameof(vm.Email), "Email already registered");
 
@@ -78,11 +77,12 @@ namespace ERPDemo.Controllers
                 return View(vm);
             }
 
+            // 1. Create User
             var user = new User
             {
                 Username     = vm.Username,
                 Email        = vm.Email,
-                Password     = vm.Password,   // TODO: hash in production
+                Password     = vm.Password,   
                 FullName     = vm.FullName,
                 PhoneNumber  = vm.PhoneNumber,
                 RoleId       = vm.RoleId,
@@ -94,7 +94,21 @@ namespace ERPDemo.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = $"User {user.FullName} added.";
+            // 2. Save Permissions (Ye cheez add karni hai)
+            if (vm.SelectedPermissions != null && vm.SelectedPermissions.Any())
+            {
+                foreach (var module in vm.SelectedPermissions)
+                {
+                    _context.RolePermissions.Add(new RolePermission 
+                    { 
+                        RoleId = vm.RoleId, 
+                        ModuleName = module 
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            TempData["Success"] = $"User {user.FullName} created successfully.";
             return RedirectToAction(nameof(ManageAll));
         }
 
@@ -102,27 +116,34 @@ namespace ERPDemo.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var u = await _context.Users.FindAsync(id);
-            if (u == null) return NotFound();
+        var u = await _context.Users.FindAsync(id);
+        if (u == null) return NotFound();
 
-            var vm = new TeamUserFormViewModel
-            {
-                UserId       = u.UserId,
-                Username     = u.Username,
-                Email        = u.Email,
-                FullName     = u.FullName ?? "",
-                PhoneNumber  = u.PhoneNumber,
-                RoleId       = u.RoleId,
-                DepartmentId = u.DepartmentId,
-                IsActive     = u.IsActive
-            };
+        // Fetch existing permissions for this role
+        var existingPerms = await _context.RolePermissions
+            .Where(rp => rp.RoleId == u.RoleId)
+            .Select(rp => rp.ModuleName)
+            .ToListAsync();
 
-            ViewBag.Roles = await _context.Roles.ToListAsync();
-            ViewBag.Departments = await _context.Departments.ToListAsync();
-            return View(vm);
+        var vm = new TeamUserFormViewModel
+        {
+            UserId       = u.UserId,
+            Username     = u.Username,
+            Email        = u.Email,
+            FullName     = u.FullName ?? "",
+            PhoneNumber  = u.PhoneNumber,
+            RoleId       = u.RoleId,
+            DepartmentId = u.DepartmentId,
+            IsActive     = u.IsActive,
+            SelectedPermissions = existingPerms
+        };
+
+        ViewBag.Roles = await _context.Roles.ToListAsync();
+        ViewBag.Departments = await _context.Departments.ToListAsync();
+        return View(vm);
         }
 
-        // EDIT POST
+       // EDIT POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, TeamUserFormViewModel vm)
@@ -147,6 +168,24 @@ namespace ERPDemo.Controllers
 
             if (!string.IsNullOrEmpty(vm.Password))
                 u.Password = vm.Password;
+
+            // ═══ UPDATE PERMISSIONS ═══
+            // 1. Purani permissions delete karo us role ki
+            var oldPerms = await _context.RolePermissions.Where(rp => rp.RoleId == vm.RoleId).ToListAsync();
+            _context.RolePermissions.RemoveRange(oldPerms);
+
+            // 2. Nayi permissions add karo
+            if (vm.SelectedPermissions != null && vm.SelectedPermissions.Any())
+            {
+                foreach (var module in vm.SelectedPermissions)
+                {
+                    _context.RolePermissions.Add(new RolePermission 
+                    { 
+                        RoleId = vm.RoleId, 
+                        ModuleName = module 
+                    });
+                }
+            }
 
             await _context.SaveChangesAsync();
 

@@ -30,12 +30,13 @@ namespace ERPDemo.Controllers
             return role switch
             {
                 "Admin"   => RedirectToAction(nameof(AdminDashboard)),
-                "Manager" => RedirectToAction("Dashboard", "Manager"),
-                "HOD"     => RedirectToAction("Dashboard", "Hod"),
-                _         => RedirectToAction(nameof(UserDashboard))
+                "Manager" => RedirectToAction(nameof(ManagerDashboard)),
+                "HOD"     => RedirectToAction(nameof(HodDashboard)),
+                _         => RedirectToAction("Login", "Auth")
             };
         }
 
+        // ═══════════ ADMIN DASHBOARD ═══════════
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AdminDashboard()
         {
@@ -56,18 +57,10 @@ namespace ERPDemo.Controllers
                 : Math.Round((decimal)vm.ActiveVehicles * 100 / vm.TotalVehicles, 1);
 
             // ===== TRIPS =====
-            vm.TripsToday = await _context.Trips
-                .CountAsync(t => t.CreatedAt >= today && t.CreatedAt < tomorrow);
-
-            vm.TripsInProgress = await _context.Trips
-                .CountAsync(t => t.Status == "InProgress");
-
-            vm.TripsDelayed = await _context.Trips
-                .CountAsync(t => t.Status == "Delayed");
-
-            vm.TripsCompletedToday = await _context.Trips
-                .CountAsync(t => t.Status == "Completed"
-                              && t.ActualEnd >= today && t.ActualEnd < tomorrow);
+            vm.TripsToday = await _context.Trips.CountAsync(t => t.CreatedAt >= today && t.CreatedAt < tomorrow);
+            vm.TripsInProgress = await _context.Trips.CountAsync(t => t.Status == "InProgress");
+            vm.TripsDelayed = await _context.Trips.CountAsync(t => t.Status == "Delayed");
+            vm.TripsCompletedToday = await _context.Trips.CountAsync(t => t.Status == "Completed" && t.ActualEnd >= today && t.ActualEnd < tomorrow);
 
             // ===== DRIVERS =====
             vm.TotalDrivers     = await _context.Drivers.CountAsync();
@@ -75,135 +68,91 @@ namespace ERPDemo.Controllers
             vm.DriversAvailable = await _context.Drivers.CountAsync(d => d.Status == "Available");
 
             // ===== FINANCE =====
-            vm.RevenueToday = await _context.Trips
-                .Where(t => t.Status == "Completed"
-                         && t.ActualEnd >= today && t.ActualEnd < tomorrow)
-                .SumAsync(t => (decimal?)t.Revenue) ?? 0m;
-
-            vm.FuelCostToday = await _context.FuelLogs
-                .Where(f => f.FilledAt >= today && f.FilledAt < tomorrow)
-                .SumAsync(f => (decimal?)f.Amount) ?? 0m;
-
-            // Placeholder — hook into invoices module later
+            vm.RevenueToday = await _context.Trips.Where(t => t.Status == "Completed" && t.ActualEnd >= today && t.ActualEnd < tomorrow).SumAsync(t => (decimal?)t.Revenue) ?? 0m;
+            vm.FuelCostToday = await _context.FuelLogs.Where(f => f.FilledAt >= today && f.FilledAt < tomorrow).SumAsync(f => (decimal?)f.Amount) ?? 0m;
             vm.Outstanding = 0m;
 
-            // ===== COMPLIANCE (Haryana RTO) =====
-            vm.InsuranceExpiringSoon = await _context.Vehicles
-                .CountAsync(v => v.InsuranceExpiry != null
-                              && v.InsuranceExpiry >= today
-                              && v.InsuranceExpiry <= in30Days);
-
-            vm.FitnessExpiringSoon = await _context.Vehicles
-                .CountAsync(v => v.FitnessExpiry != null
-                              && v.FitnessExpiry >= today
-                              && v.FitnessExpiry <= in30Days);
-
-            vm.PermitExpiringSoon = await _context.Vehicles
-                .CountAsync(v => v.PermitExpiry != null
-                              && v.PermitExpiry >= today
-                              && v.PermitExpiry <= in30Days);
-
-            vm.PucExpiringSoon = await _context.Vehicles
-                .CountAsync(v => v.PucExpiry != null
-                              && v.PucExpiry >= today
-                              && v.PucExpiry <= in30Days);
-
-            vm.LicenseExpiringSoon = await _context.Drivers
-                .CountAsync(d => d.LicenseExpiry != null
-                              && d.LicenseExpiry >= today
-                              && d.LicenseExpiry <= in30Days);
+            // ===== COMPLIANCE =====
+            vm.InsuranceExpiringSoon = await _context.Vehicles.CountAsync(v => v.InsuranceExpiry != null && v.InsuranceExpiry >= today && v.InsuranceExpiry <= in30Days);
+            vm.FitnessExpiringSoon = await _context.Vehicles.CountAsync(v => v.FitnessExpiry != null && v.FitnessExpiry >= today && v.FitnessExpiry <= in30Days);
+            vm.PermitExpiringSoon = await _context.Vehicles.CountAsync(v => v.PermitExpiry != null && v.PermitExpiry >= today && v.PermitExpiry <= in30Days);
+            vm.PucExpiringSoon = await _context.Vehicles.CountAsync(v => v.PucExpiry != null && v.PucExpiry >= today && v.PucExpiry <= in30Days);
+            vm.LicenseExpiringSoon = await _context.Drivers.CountAsync(d => d.LicenseExpiry != null && d.LicenseExpiry >= today && d.LicenseExpiry <= in30Days);
 
             // ===== USERS =====
             vm.TotalUsers  = await _context.Users.CountAsync();
             vm.ActiveUsers = await _context.Users.CountAsync(u => u.IsActive);
 
             // ===== LISTS =====
-            vm.ActiveTrips = await _context.Trips
-                .Include(t => t.Vehicle)
-                .Include(t => t.Driver)
+            vm.ActiveTrips = await _context.Trips.Include(t => t.Vehicle).Include(t => t.Driver)
                 .Where(t => t.Status == "InProgress" || t.Status == "Delayed")
-                .OrderByDescending(t => t.PlannedStart)
-                .Take(8)
-                .Select(t => new TripRow
-                {
-                    TripNumber = t.TripNumber,
-                    VehicleReg = t.Vehicle != null ? t.Vehicle.RegistrationNumber : "—",
-                    DriverName = t.Driver != null ? t.Driver.FullName : "—",
-                    Route      = (t.OriginCity ?? "—") + " → " + (t.DestinationCity ?? "—"),
-                    Status     = t.Status,
-                    PlannedEnd = t.PlannedEnd,
-                    Revenue    = t.Revenue
-                })
+                .OrderByDescending(t => t.PlannedStart).Take(8)
+                .Select(t => new TripRow { TripNumber = t.TripNumber, VehicleReg = t.Vehicle != null ? t.Vehicle.RegistrationNumber : "—", DriverName = t.Driver != null ? t.Driver.FullName : "—", Route = (t.OriginCity ?? "—") + " → " + (t.DestinationCity ?? "—"), Status = t.Status, PlannedEnd = t.PlannedEnd, Revenue = t.Revenue })
                 .ToListAsync();
 
-            vm.VehiclesInService = await _context.MaintenanceLogs
-                .Include(m => m.Vehicle)
-                .Where(m => m.Status != "Completed")
-                .OrderByDescending(m => m.ServiceDate)
-                .Take(6)
-                .Select(m => new MaintenanceRow
-                {
-                    VehicleReg  = m.Vehicle != null ? m.Vehicle.RegistrationNumber : "—",
-                    ServiceType = m.ServiceType,
-                    ServiceDate = m.ServiceDate,
-                    Cost        = m.Cost,
-                    Status      = m.Status
-                })
+            vm.VehiclesInService = await _context.MaintenanceLogs.Include(m => m.Vehicle)
+                .Where(m => m.Status != "Completed").OrderByDescending(m => m.ServiceDate).Take(6)
+                .Select(m => new MaintenanceRow { VehicleReg = m.Vehicle != null ? m.Vehicle.RegistrationNumber : "—", ServiceType = m.ServiceType, ServiceDate = m.ServiceDate, Cost = m.Cost, Status = m.Status })
                 .ToListAsync();
 
-            vm.RecentUsers = await _context.Users
-                .Include(u => u.Role)
-                .OrderByDescending(u => u.CreatedAt)
-                .Take(5)
-                .ToListAsync();
+            vm.RecentUsers = await _context.Users.Include(u => u.Role).OrderByDescending(u => u.CreatedAt).Take(5).ToListAsync();
 
-            vm.TopDrivers = await _context.Trips
-                .Include(t => t.Driver)
-                .Where(t => t.Status == "Completed" && t.Driver != null)
+            vm.TopDrivers = await _context.Trips.Include(t => t.Driver).Where(t => t.Status == "Completed" && t.Driver != null)
                 .GroupBy(t => new { t.DriverId, t.Driver!.FullName })
-                .Select(g => new DriverPerf
-                {
-                    Name           = g.Key.FullName,
-                    TripsCompleted = g.Count(),
-                    Revenue        = g.Sum(x => (decimal?)x.Revenue) ?? 0m
-                })
-                .OrderByDescending(x => x.TripsCompleted)
-                .Take(5)
-                .ToListAsync();
+                .Select(g => new DriverPerf { Name = g.Key.FullName, TripsCompleted = g.Count(), Revenue = g.Sum(x => (decimal?)x.Revenue) ?? 0m })
+                .OrderByDescending(x => x.TripsCompleted).Take(5).ToListAsync();
 
-            vm.TopVehicles = await _context.Trips
-                .Include(t => t.Vehicle)
-                .Where(t => t.Status == "Completed" && t.Vehicle != null)
+            vm.TopVehicles = await _context.Trips.Include(t => t.Vehicle).Where(t => t.Status == "Completed" && t.Vehicle != null)
                 .GroupBy(t => new { t.VehicleId, t.Vehicle!.RegistrationNumber })
-                .Select(g => new VehiclePerf
-                {
-                    RegistrationNumber = g.Key.RegistrationNumber,
-                    TripsCompleted     = g.Count(),
-                    Revenue            = g.Sum(x => (decimal?)x.Revenue) ?? 0m
-                })
-                .OrderByDescending(x => x.Revenue)
-                .Take(5)
+                .Select(g => new VehiclePerf { RegistrationNumber = g.Key.RegistrationNumber, TripsCompleted = g.Count(), Revenue = g.Sum(x => (decimal?)x.Revenue) ?? 0m })
+                .OrderByDescending(x => x.Revenue).Take(5).ToListAsync();
+
+            return View(vm);
+        }
+
+        // ═══════════ MANAGER DASHBOARD ═══════════
+        [Authorize(Roles = "Manager,Admin")]
+        public async Task<IActionResult> ManagerDashboard()
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+
+            // Reusing AdminViewModel for now, but filtering data for Manager
+            var vm = new AdminDashboardViewModel();
+            
+            vm.TotalVehicles = await _context.Vehicles.CountAsync();
+            vm.ActiveVehicles = await _context.Vehicles.CountAsync(v => v.Status == "Active");
+            vm.TripsToday = await _context.Trips.CountAsync(t => t.CreatedAt >= today && t.CreatedAt < tomorrow);
+            vm.TripsInProgress = await _context.Trips.CountAsync(t => t.Status == "InProgress");
+            vm.RevenueToday = await _context.Trips.Where(t => t.Status == "Completed" && t.ActualEnd >= today && t.ActualEnd < tomorrow).SumAsync(t => (decimal?)t.Revenue) ?? 0m;
+
+            // Manager ke liye Active Trips list
+            vm.ActiveTrips = await _context.Trips.Include(t => t.Vehicle).Include(t => t.Driver)
+                .Where(t => t.Status == "InProgress" || t.Status == "Delayed")
+                .OrderByDescending(t => t.PlannedStart).Take(5)
+                .Select(t => new TripRow { TripNumber = t.TripNumber, VehicleReg = t.Vehicle != null ? t.Vehicle.RegistrationNumber : "—", DriverName = t.Driver != null ? t.Driver.FullName : "—", Route = (t.OriginCity ?? "—") + " → " + (t.DestinationCity ?? "—"), Status = t.Status, PlannedEnd = t.PlannedEnd, Revenue = t.Revenue })
                 .ToListAsync();
 
             return View(vm);
         }
 
-        [Authorize(Roles = "User,Manager,Admin,HOD")]
-        public async Task<IActionResult> UserDashboard()
+        // ═══════════ HOD DASHBOARD ═══════════
+        [Authorize(Roles = "HOD,Admin")]
+        public async Task<IActionResult> HodDashboard()
         {
-            var idStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!int.TryParse(idStr, out var userId))
-                return RedirectToAction("Login", "Auth");
+            var vm = new AdminDashboardViewModel();
+            
+            // HOD ko high level data dikhta hai
+            vm.TotalVehicles = await _context.Vehicles.CountAsync();
+            vm.TotalDrivers = await _context.Drivers.CountAsync();
+            
+            // Top 5 Vehicles by Revenue
+            vm.TopVehicles = await _context.Trips.Include(t => t.Vehicle).Where(t => t.Status == "Completed" && t.Vehicle != null)
+                .GroupBy(t => new { t.VehicleId, t.Vehicle!.RegistrationNumber })
+                .Select(g => new VehiclePerf { RegistrationNumber = g.Key.RegistrationNumber, TripsCompleted = g.Count(), Revenue = g.Sum(x => (decimal?)x.Revenue) ?? 0m })
+                .OrderByDescending(x => x.Revenue).Take(5).ToListAsync();
 
-            var user = await _context.Users
-                .Include(u => u.Role)
-                .Include(u => u.Department)
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null) return RedirectToAction("Login", "Auth");
-
-            ViewBag.User = user;
-            return View();
+            return View(vm);
         }
     }
 }

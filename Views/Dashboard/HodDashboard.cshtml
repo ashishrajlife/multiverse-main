@@ -1,0 +1,63 @@
+@model ERPDemo.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "HOD Dashboard";
+    Layout = "_DashboardLayout";
+}
+
+<div class="rt-page">
+    <div class="rt-head">
+        <div>
+            <h1>HOD Dashboard</h1>
+            <p>State Level Overview</p>
+        </div>
+        <span class="rt-badge"><i class="bi bi-shield"></i> HOD</span>
+    </div>
+
+    <div class="rt-stats">
+        <div class="rt-stat rt-sky">
+            <span class="rt-stat-icon"><i class="bi bi-truck"></i></span>
+            <div>
+                <span class="rt-stat-label">Total Fleet Size</span>
+                <span class="rt-stat-value">@Model.TotalVehicles</span>
+            </div>
+        </div>
+        <div class="rt-stat rt-violet">
+            <span class="rt-stat-icon"><i class="bi bi-people"></i></span>
+            <div>
+                <span class="rt-stat-label">Total Drivers</span>
+                <span class="rt-stat-value">@Model.TotalDrivers</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="rt-section-label mt-4"><i class="bi bi-trophy me-2"></i>Top Performing Vehicles (Statewide)</div>
+    <section class="rt-window">
+        <div class="rt-scroll">
+            <table class="rt-table">
+                <thead>
+                    <tr><th>#</th><th>Vehicle</th><th class="text-end">Trips</th><th class="text-end">Revenue</th></tr>
+                </thead>
+                <tbody>
+                @if (Model.TopVehicles.Any())
+                {
+                    var i = 1;
+                    foreach (var v in Model.TopVehicles)
+                    {
+                        <tr>
+                            <td><span class="rt-rank">@i</span></td>
+                            <td>@v.RegistrationNumber</td>
+                            <td class="text-end">@v.TripsCompleted</td>
+                            <td class="text-end">₹@v.Revenue.ToString("N0")</td>
+                        </tr>
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-4">No data available.</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

@@ -44,6 +44,28 @@
             </div>
         </section>
 
+<section class="rt-window mt-3">
+    <div class="rt-titlebar"><span><i class="bi bi-shield-lock me-2"></i>Module Access (Permissions)</span></div>
+    <div class="p-3 row g-3">
+        <div class="col-md-12">
+            <p class="text-muted mb-2" style="font-size:12.5px;">In modules ko tick karo jo is user ko dikhne chahiye (Admin ko hamesha sab dikhega).</p>
+            <div class="d-flex flex-wrap gap-3">
+                @{
+                    var modules = new[] { "Dashboard", "Vehicles", "Drivers", "Trips", "Parties", "FuelLogs", "Maintenance", "Reports", "Team" };
+                    foreach (var mod in modules)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="SelectedPermissions" value="@mod" id="editperm_@mod"
+                                   @(Model.SelectedPermissions.Contains(mod) ? "checked" : "") />
+                            <label class="form-check-label" for="editperm_@mod" style="font-size:14px; font-weight:600;">@mod</label>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
         <div class="mt-3 d-flex gap-2">
             <button type="submit" class="rt-btn rt-btn-primary"><i class="bi bi-check-circle me-1"></i> Save Changes</button>
             <a asp-action="ManageAll" class="rt-btn">Cancel</a>
