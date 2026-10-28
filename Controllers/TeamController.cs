@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ERPDemo.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class TeamController : Controller
     {
         private readonly AppDbContext _context;
